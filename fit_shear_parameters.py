@@ -15,6 +15,8 @@ A0 = np.array([[0.0, 0.0, 0.0],
 ar = get_equivalent_aspect_ratio(10.0)
 
 t = np.linspace(0, T, 500)
+
+# load simulation data
 data_list = []
 for i in range(10):
     data_list.append(
@@ -40,6 +42,7 @@ def W(t):
 
 
 def compute_solution(p):
+    """Compute solution of ODE given a paramter set p."""
     c = p[0]
     kappa = p[1]
     sol = odeint(rsc_ode, A0.ravel(), t, args=(ar, D, W, c, kappa))
@@ -47,26 +50,19 @@ def compute_solution(p):
 
 
 def compute_mean(t):
-    t_sim = np.mean(data[:, :, 0], axis=0)
-    N_sim = np.mean(data[:, :, 1:10], axis=0)
+    """Compute mean values of simulation result at given times t."""
+    t_sim = np.nanmean(data[:, :, 0], axis=0)
+    N_sim = np.nanmean(data[:, :, 1:10], axis=0)
     sim = interp1d(t_sim, N_sim, axis=0)
     return sim(t)
 
 
 def compute_std(t):
+    """Compute standard deviation of simulation result at given times t."""
     t_sim = np.mean(data[:, :, 0], axis=0)
     N_sim = np.std(data[:, :, 1:10], axis=0)
     sim = interp1d(t_sim, N_sim, axis=0)
     return sim(t)
-
-
-def error(p):
-    """Compute the scalar error between dataset and solution."""
-    sol = compute_solution(p)
-    sim = interp1d(data[:, :, 0], data[:, :, 1:10], axis=1)
-    print(sol.shape)
-    print(sim.shape)
-    return np.linalg.norm(sol-sim)
 
 
 def mean_error(p):
@@ -77,17 +73,30 @@ def mean_error(p):
 
 
 p0 = [0.0, 1.0]
-A = compute_solution(p0)
 mean = compute_mean(t)
 std = compute_std(t)
-# p_min = least_squares(mean_error, p0, verbose=2)
+opt = least_squares(mean_error, p0,
+                    bounds=([0.0, 0.0], [1.0, 1.0]),
+                    verbose=2,
+                    max_nfev=100)
+p_opt = opt.x
+# p_opt = [3.19108377e-05, 9.99718794e-01]  # volfrac 1
+# p_opt = [0.00176328, 0.64634806]  # volfrac 10
+# p_opt = [ 0.00309774, 1.0]  # volfrac 40
+print(p_opt)
+N = compute_solution(p_opt)
+
+# dNdt = []
+# for tt, nn in zip(t, N):
+#     dNdt.append(rsc_ode(nn, tt, ar, D, W, p_opt[0], p_opt[1]))
 
 
 labels = ["A11", "A12", "A13", "A21", "A22", "A23", "A31", "A32", "A33"]
 
+plt.figure()
 for i in range(9):
     plt.subplot("33"+str(i+1))
-    p = plt.plot(t, A[:, i], t, mean[:, i])
+    p = plt.plot(t, N[:, i], t, mean[:, i])
     color = p[1].get_color()
     plt.fill_between(t, mean[:, i] + std[:, i], mean[:, i] - std[:, i],
                      color=color, alpha=0.3)
@@ -99,5 +108,12 @@ plt.suptitle("Folgar Tucker and IBOF Closure")
 plt.tight_layout()
 plt.show()
 
-# plt.plot(t, mean_error(p0))
-# plt.show()
+plt.figure()
+plt.plot(t, std)
+plt.title("Standard deviation in simulation dataset")
+plt.show()
+
+plt.figure()
+plt.plot(t, mean_error(p_opt))
+plt.title("Error over time")
+plt.show()
