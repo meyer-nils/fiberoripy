@@ -24,14 +24,29 @@ fig = plt.figure(figsize=(12, 8))
 ax = fig.add_subplot(221, projection=Axes3D.name)
 plot_orbit2(ax, a)
 
-ax = fig.add_subplot(223)
-plot_projection2(ax, a)
+ax = fig.add_subplot(222)
+plot_projection2(ax, 'xy', a)
 
-# Fourth order tensor plot
-ax = fig.add_subplot(222, projection=Axes3D.name)
-plot_orbit4(ax, A, A_hybrid, A_lin, A_quad, A_ibof)
+ax = fig.add_subplot(223)
+plot_projection2(ax, 'xz', a)
 
 ax = fig.add_subplot(224)
-plot_projection4(ax, A, A_hybrid, A_lin, A_quad, A_ibof)
+plot_projection2(ax, 'yz', a)
+
+plt.show()
+
+fig = plt.figure(figsize=(12, 8))
+# Fourth order tensor plot
+ax = fig.add_subplot(221, projection=Axes3D.name)
+plot_orbit4(ax, A, A_hybrid, A_lin, A_quad, A_ibof)
+
+ax = fig.add_subplot(222)
+plot_projection4(ax, 'xy', A, A_hybrid, A_lin, A_quad, A_ibof)
+
+ax = fig.add_subplot(223)
+plot_projection4(ax, 'xz', A, A_hybrid, A_lin, A_quad, A_ibof)
+
+ax = fig.add_subplot(224)
+plot_projection4(ax, 'yz', A, A_hybrid, A_lin, A_quad, A_ibof)
 
 plt.show()
