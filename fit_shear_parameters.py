@@ -20,7 +20,7 @@ t = np.linspace(0, T, 500)
 data_list = []
 for i in range(10):
     data_list.append(
-        np.loadtxt("data/volfrac10/%d/N.csv" % (i+1), delimiter=','))
+        np.loadtxt("data/volfrac4/%d/N.csv" % (i+1), delimiter=','))
 
 # array with shape: N_simulation, time_step, data_index .
 # data index 0 is time, others are orientation tensor components
@@ -81,6 +81,7 @@ opt = least_squares(mean_error, p0,
                     max_nfev=100)
 p_opt = opt.x
 # p_opt = [3.19108377e-05, 9.99718794e-01]  # volfrac 1
+# p_opt = [  5.88520754e-04   1.00000000e+00] # volfrac 4
 # p_opt = [0.00176328, 0.64634806]  # volfrac 10
 # p_opt = [ 0.00309774, 1.0]  # volfrac 40
 print(p_opt)
@@ -91,7 +92,9 @@ N = compute_solution(p_opt)
 #     dNdt.append(rsc_ode(nn, tt, ar, D, W, p_opt[0], p_opt[1]))
 
 
-labels = ["A11", "A12", "A13", "A21", "A22", "A23", "A31", "A32", "A33"]
+labels = ["A_11", "A_12", "A_13",
+          "A_21", "A_22", "A_23",
+          "A_31", "A_32", "A_33"]
 
 plt.figure()
 for i in range(9):
@@ -103,8 +106,6 @@ for i in range(9):
     plt.xlabel("Time in s")
     plt.ylabel(labels[i])
     plt.ylim([-1, 1])
-
-plt.suptitle("Folgar Tucker and IBOF Closure")
 plt.tight_layout()
 plt.show()
 
