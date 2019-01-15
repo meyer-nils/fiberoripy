@@ -80,10 +80,10 @@ opt = least_squares(mean_error, p0,
                     verbose=2,
                     max_nfev=100)
 p_opt = opt.x
-# p_opt = [3.19108377e-05, 9.99718794e-01]  # volfrac 1
-# p_opt = [  5.88520754e-04   1.00000000e+00] # volfrac 4
-# p_opt = [0.00176328, 0.64634806]  # volfrac 10
-# p_opt = [ 0.00309774, 1.0]  # volfrac 40
+# p_opt = np.array([3.19108377e-05, 9.99718794e-01])  # volfrac 1
+# p_opt = np.array([5.88520754e-04, 1.0])  # volfrac 4
+# p_opt = np.array([0.00176328, 0.64634806])  # volfrac 10
+# p_opt = np.array([0.00309774, 1.0])  # volfrac 40
 print(p_opt)
 N = compute_solution(p_opt)
 
@@ -92,29 +92,34 @@ N = compute_solution(p_opt)
 #     dNdt.append(rsc_ode(nn, tt, ar, D, W, p_opt[0], p_opt[1]))
 
 
-labels = ["A_11", "A_12", "A_13",
-          "A_21", "A_22", "A_23",
-          "A_31", "A_32", "A_33"]
+labels = ["$N_{11}$", "$N_{12}$", "$N_{13}$",
+          "$N_{21}$", "$N_{22}$", "$N_{23}$",
+          "$N_{31}$", "$N_{32}$", "$N_{33}$"]
+
+subplots = [0, 1, 2, 4, 5, 8]
+
+legend_list = ["RSC model", "SPH simulation"]
 
 plt.figure()
-for i in range(9):
+for i in subplots:
     plt.subplot("33"+str(i+1))
     p = plt.plot(t, N[:, i], t, mean[:, i])
     color = p[1].get_color()
     plt.fill_between(t, mean[:, i] + std[:, i], mean[:, i] - std[:, i],
                      color=color, alpha=0.3)
-    plt.xlabel("Time in s")
+    plt.xlabel("Time $t$ in s")
     plt.ylabel(labels[i])
     plt.ylim([-1, 1])
+plt.legend(legend_list, bbox_to_anchor=(-2.0, 0.4))
 plt.tight_layout()
 plt.show()
 
-plt.figure()
-plt.plot(t, std)
-plt.title("Standard deviation in simulation dataset")
-plt.show()
-
-plt.figure()
-plt.plot(t, mean_error(p_opt))
-plt.title("Error over time")
-plt.show()
+# plt.figure()
+# plt.plot(t, std)
+# plt.title("Standard deviation in simulation dataset")
+# plt.show()
+#
+# plt.figure()
+# plt.plot(t, mean_error(p_opt))
+# plt.title("Error over time")
+# plt.show()
