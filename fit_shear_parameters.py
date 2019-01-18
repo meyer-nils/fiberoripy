@@ -20,7 +20,7 @@ t = np.linspace(0, T, 500)
 data_list = []
 for i in range(10):
     data_list.append(
-        np.loadtxt("data/volfrac4/%d/N.csv" % (i+1), delimiter=','))
+        np.loadtxt("data/volfrac10/%d/N.csv" % (i+1), delimiter=','))
 
 # array with shape: N_simulation, time_step, data_index .
 # data index 0 is time, others are orientation tensor components
