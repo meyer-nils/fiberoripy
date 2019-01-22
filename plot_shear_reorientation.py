@@ -13,7 +13,7 @@ ar = 13.0
 are = get_equivalent_aspect_ratio(ar)
 print ("Equivalent aspect ratio is %f" % are)
 # period fo rotation
-T = 0.5*np.pi/gamma * (are+1.0/are)
+T = 0.5*np.pi/gamma*(are + 1.0/are)
 print ("Period for a quarter rotation is %f" % T)
 # time steps
 t = np.linspace(0, T, 500)
