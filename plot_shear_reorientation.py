@@ -5,12 +5,20 @@ import matplotlib.pyplot as plt
 
 from fiberpy.orientation import folgar_tucker_ode, get_equivalent_aspect_ratio
 
-gamma = 25
-T = 0.25
-ar = 13
+# shear rate
+gamma = 1.0
+# aspect ratio
+ar = 13.0
+# equivalent aspect ratio
 are = get_equivalent_aspect_ratio(ar)
+print ("Equivalent aspect ratio is %f" % are)
+# period fo rotation
+T = 0.5*np.pi/gamma * (are+1.0/are)
+print ("Period for a quarter rotation is %f" % T)
+# time steps
 t = np.linspace(0, T, 500)
 
+# load simulation data
 sim_data = np.loadtxt("data/orientations.csv", delimiter=',', skiprows=1)
 
 
@@ -32,8 +40,10 @@ A0 = np.array([[0.0, 0.0, 0.0],
                [0.0, 1.0, 0.0],
                [0.0, 0.0, 0.0]])
 
+# computed solution
 N = odeint(folgar_tucker_ode, A0.ravel(), t, args=(are, D, W, 0.0))
 
+# plots
 labels = ["$N_{11}$", "$N_{12}$", "$N_{13}$",
           "$N_{21}$", "$N_{22}$", "$N_{23}$",
           "$N_{31}$", "$N_{32}$", "$N_{33}$"]
