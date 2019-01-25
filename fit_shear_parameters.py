@@ -7,6 +7,7 @@ from scipy.optimize import least_squares
 
 from fiberpy.orientation import rsc_ode, get_equivalent_aspect_ratio
 
+
 T = 19
 G = 3.3
 A0 = np.array([[0.0, 0.0, 0.0],
@@ -20,7 +21,7 @@ t = np.linspace(0, T, 500)
 data_list = []
 for i in range(10):
     data_list.append(
-        np.loadtxt("data/volfrac10/%d/N.csv" % (i+1), delimiter=','))
+        np.loadtxt("data/volfrac40/%d/N.csv" % (i+1), delimiter=','))
 
 # array with shape: N_simulation, time_step, data_index .
 # data index 0 is time, others are orientation tensor components
@@ -96,21 +97,24 @@ labels = ["$N_{11}$", "$N_{12}$", "$N_{13}$",
           "$N_{21}$", "$N_{22}$", "$N_{23}$",
           "$N_{31}$", "$N_{32}$", "$N_{33}$"]
 
-subplots = [0, 1, 2, 4, 5, 8]
+subplots = [0, 4, 8, 1]
 
 legend_list = ["RSC model", "SPH simulation"]
 
-plt.figure()
-for i in subplots:
-    plt.subplot("33"+str(i+1))
+plt.figure(figsize=(12,3))
+for j, i in enumerate(subplots):
+    plt.subplot("14"+str(j+1))
     p = plt.plot(t, N[:, i], t, mean[:, i])
     color = p[1].get_color()
     plt.fill_between(t, mean[:, i] + std[:, i], mean[:, i] - std[:, i],
                      color=color, alpha=0.3)
     plt.xlabel("Time $t$ in s")
     plt.ylabel(labels[i])
-    plt.ylim([-1, 1])
-plt.legend(legend_list, bbox_to_anchor=(-2.0, 0.4))
+    if i%2 == 0:
+        plt.ylim([0, 1])
+    else:
+        plt.ylim([-1,1])
+plt.legend(legend_list)
 plt.tight_layout()
 plt.show()
 
