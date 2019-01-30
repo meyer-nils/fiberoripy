@@ -19,7 +19,7 @@ print ("Period for a quarter rotation is %f" % T)
 t = np.linspace(0, T, 500)
 
 # load simulation data
-sim_data = np.loadtxt("data/orientations.csv", delimiter=',', skiprows=1)
+sim_data = np.loadtxt("data/orientations2.csv", delimiter=',', skiprows=1)
 
 
 def D(t):
