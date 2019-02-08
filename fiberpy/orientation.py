@@ -54,3 +54,22 @@ def folgar_tucker_ode(a, t, ar, D, W, Ci=0.0):
                    - 2*np.einsum('ijkl,kl->ij', A, D(t)))
             + 2*Ci*G*(delta-3*a))
     return dadt.ravel()
+
+
+def maier_saupe_ode(a, t, ar, D, W, Ci=0.0, U0=0.0):
+    """ODE describing Folgar-Tucker model."""
+    a = np.reshape(a, (3, 3))
+    A = generate_fourth_order_tensor(a)
+    G = np.linalg.norm(D(t), ord='fro')
+    lbd = (ar**2 - 1) / (ar**2 + 1)
+    delta = np.eye(3)
+
+    dadt = (np.einsum('ik,kj->ij', W(t), a)
+            - np.einsum('ik,kj->ij', a, W(t))
+            + lbd*(np.einsum('ik,kj->ij', D(t), a)
+                   + np.einsum('ik,kj->ij', a, D(t))
+                   - 2*np.einsum('ijkl,kl->ij', A, D(t)))
+            + 2*G*(Ci*(delta-3*a)
+                   + U0*(np.einsum('ik,kj->ij', a, a)
+                         - np.einsum('ijkl,kl->ij', A, a))))
+    return dadt.ravel()

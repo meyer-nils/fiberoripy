@@ -5,7 +5,8 @@ from scipy.integrate import odeint
 from scipy.interpolate import interp1d
 from scipy.optimize import least_squares
 
-from fiberpy.orientation import rsc_ode, get_equivalent_aspect_ratio
+from fiberpy.orientation import (rsc_ode, maier_saupe_ode,
+                                 get_equivalent_aspect_ratio)
 
 
 T = 19
@@ -21,7 +22,7 @@ t = np.linspace(0, T, 500)
 data_list = []
 for i in range(10):
     data_list.append(
-        np.loadtxt("data/volfrac40/%d/N.csv" % (i+1), delimiter=','))
+        np.loadtxt("data/volfrac4/%d/N.csv" % (i+1), delimiter=','))
 
 # array with shape: N_simulation, time_step, data_index .
 # data index 0 is time, others are orientation tensor components
@@ -42,11 +43,19 @@ def W(t):
                      [0.0, 0.0, 0.0]])
 
 
-def compute_solution(p):
+def compute_rsc_solution(p):
     """Compute solution of ODE given a paramter set p."""
     c = p[0]
     kappa = p[1]
     sol = odeint(rsc_ode, A0.ravel(), t, args=(ar, D, W, c, kappa))
+    return sol
+
+
+def compute_maiersaupe_solution(q):
+    """Compute solution of ODE given a paramter set p."""
+    c = q[0]
+    u = q[1]
+    sol = odeint(maier_saupe_ode, A0.ravel(), t, args=(ar, D, W, c, u))
     return sol
 
 
@@ -66,17 +75,25 @@ def compute_std(t):
     return sim(t)
 
 
-def mean_error(p):
+def mean_rsc_error(p):
     """Compute the error between dataset mean and solution."""
-    sol = compute_solution(p)
+    sol = compute_rsc_solution(p)
+    mean = compute_mean(t)
+    return np.linalg.norm(sol-mean, axis=1)
+
+
+def mean_maiersaupe_error(q):
+    """Compute the error between dataset mean and solution."""
+    sol = compute_maiersaupe_solution(q)
     mean = compute_mean(t)
     return np.linalg.norm(sol-mean, axis=1)
 
 
 p0 = [0.0, 1.0]
+q0 = [0.0, 0.0]
 mean = compute_mean(t)
 std = compute_std(t)
-opt = least_squares(mean_error, p0,
+opt = least_squares(mean_rsc_error, p0,
                     bounds=([0.0, 0.0], [1.0, 1.0]),
                     verbose=2,
                     max_nfev=100)
@@ -86,7 +103,15 @@ p_opt = opt.x
 # p_opt = np.array([0.00176328, 0.64634806])  # volfrac 10
 # p_opt = np.array([0.00309774, 1.0])  # volfrac 40
 print(p_opt)
-N = compute_solution(p_opt)
+
+# opt = least_squares(mean_maiersaupe_error, q0,
+#                     bounds=([0.0, 0.0], [1.0, 1.0]),
+#                     verbose=2,
+#                     max_nfev=100)
+# q_opt = opt.x
+# print(q_opt)
+N_rsc = compute_rsc_solution(p_opt)
+#N_maiersaupe = compute_maiersaupe_solution(q_opt)
 
 # dNdt = []
 # for tt, nn in zip(t, N):
@@ -101,19 +126,19 @@ subplots = [0, 4, 8, 1]
 
 legend_list = ["RSC model", "SPH simulation"]
 
-plt.figure(figsize=(12,3))
+plt.figure(figsize=(12, 3))
 for j, i in enumerate(subplots):
     plt.subplot("14"+str(j+1))
-    p = plt.plot(t, N[:, i], t, mean[:, i])
-    color = p[1].get_color()
+    p = plt.plot(t, N_rsc[:, i], t, mean[:, i])
+    color = p[2].get_color()
     plt.fill_between(t, mean[:, i] + std[:, i], mean[:, i] - std[:, i],
                      color=color, alpha=0.3)
     plt.xlabel("Time $t$ in s")
     plt.ylabel(labels[i])
-    if i%2 == 0:
+    if i % 2 == 0:
         plt.ylim([0, 1])
     else:
-        plt.ylim([-1,1])
+        plt.ylim([-1, 1])
 plt.legend(legend_list)
 plt.tight_layout()
 plt.show()
