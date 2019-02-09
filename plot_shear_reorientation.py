@@ -12,6 +12,7 @@ ar = 13.0
 # equivalent aspect ratio
 are = get_equivalent_aspect_ratio(ar)
 print ("Equivalent aspect ratio is %f" % are)
+xi = (are**2 - 1) / (are**2 + 1)
 # period fo rotation
 T = 0.5*np.pi/gamma*(are + 1.0/are)
 print ("Period for a quarter rotation is %f" % T)
@@ -19,20 +20,13 @@ print ("Period for a quarter rotation is %f" % T)
 t = np.linspace(0, T, 500)
 
 # load simulation data
-sim_data = np.loadtxt("data/orientations2.csv", delimiter=',', skiprows=1)
+sim_data = np.loadtxt("data/orientations.csv", delimiter=',', skiprows=1)
 
 
-def D(t):
-    """Symmetric strain rate tensor."""
-    return np.array([[0.0, gamma/2.0, 0.0],
-                     [gamma/2.0, 0.0, 0.0],
-                     [0.0, 0.0, 0.0]])
-
-
-def W(t):
-    """Skew-symmetric strain rate tensor."""
-    return np.array([[0.0, gamma/2.0, 0.0],
-                     [-gamma/2.0, 0.0, 0.0],
+def L(t):
+    """Velocity gradient."""
+    return np.array([[0.0, gamma, 0.0],
+                     [0.0, 0.0, 0.0],
                      [0.0, 0.0, 0.0]])
 
 
@@ -41,7 +35,7 @@ A0 = np.array([[0.0, 0.0, 0.0],
                [0.0, 0.0, 0.0]])
 
 # computed solution
-N = odeint(folgar_tucker_ode, A0.ravel(), t, args=(are, D, W, 0.0))
+N = odeint(folgar_tucker_ode, A0.ravel(), t, args=(xi, L, 0.0))
 
 # plots
 labels = ["$N_{11}$", "$N_{12}$", "$N_{13}$",

@@ -7,10 +7,10 @@ from fiberpy.tensorplot import (plot_orbit2, plot_orbit4, plot_projection2,
                                 plot_projection4)
 from fiberpy.tensoroperations import (hybrid_closure, linear_closure,
                                       quadratic_closure, IBOF_closure,
-                                      generate_fourth_order_tensor)
+                                      compute_closure)
 
 a = 1.0/3.0*np.eye(3)
-A = generate_fourth_order_tensor(a, 'RANDOM', N=100)
+A = compute_closure(a, 'RANDOM', N=100)
 
 A_hybrid = hybrid_closure(a)
 A_ibof = IBOF_closure(a)

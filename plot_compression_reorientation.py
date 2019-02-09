@@ -1,4 +1,4 @@
-"""Testing re-orientation in shearflow."""
+"""Testing re-orientation in compression flow."""
 import numpy as np
 from scipy.integrate import odeint
 import matplotlib.pyplot as plt
@@ -10,74 +10,41 @@ h0 = 0.0062
 hf = 0.002
 v = 0.001
 Ci = 0.0001
+ar = 25.0
+xi = (ar**2 - 1) / (ar**2 + 1)
 
 T = (h0 - hf) / v
 t = np.linspace(0, T, 500)
 
 
-def D(t):
-    """Symmetric strain rate tensor."""
+def L(t):
+    """Velocity gradient."""
     return np.array([[v / (h0 - v * t), 0, 0],
                      [0, 0, 0],
                      [0, 0, -v / (h0 - v * t)]])
-
-
-def W(t):
-    """Skew-symmetric strain rate tensor."""
-    return np.zeros((3, 3))
 
 
 A0 = np.array([[0.5, 0.0, 0.0],
                [0.0, 0.5, 0.0],
                [0.0, 0.0, 0.0]])
 
-A = odeint(folgar_tucker_ode, A0.ravel(), t, args=(25.0, D, W, Ci))
+A = odeint(folgar_tucker_ode, A0.ravel(), t, args=(xi, L, Ci))
+# plots
+labels = ["$A_{11}$", "$A_{12}$", "$A_{13}$",
+          "$A_{21}$", "$A_{22}$", "$A_{23}$",
+          "$A_{31}$", "$A_{32}$", "$A_{33}$"]
 
-plt.subplot(331)
-plt.plot(t, A[:, 0])
-plt.xlabel("Time in s")
-plt.ylabel("A11")
+subplots = [0, 1, 2, 4, 5, 8]
 
-plt.subplot(332)
-plt.plot(t, A[:, 1])
-plt.xlabel("Time in s")
-plt.ylabel("A12")
+legend_list = ["Folgar-Tucker with IBOF"]
 
-plt.subplot(333)
-plt.plot(t, A[:, 2])
-plt.xlabel("Time in s")
-plt.ylabel("A13")
-
-plt.subplot(334)
-plt.plot(t, A[:, 3])
-plt.xlabel("Time in s")
-plt.ylabel("A21")
-
-plt.subplot(335)
-plt.plot(t, A[:, 4])
-plt.xlabel("Time in s")
-plt.ylabel("A22")
-
-plt.subplot(336)
-plt.plot(t, A[:, 5])
-plt.xlabel("Time in s")
-plt.ylabel("A23")
-
-plt.subplot(337)
-plt.plot(t, A[:, 6])
-plt.xlabel("Time in s")
-plt.ylabel("A31")
-
-plt.subplot(338)
-plt.plot(t, A[:, 7])
-plt.xlabel("Time in s")
-plt.ylabel("A32")
-
-plt.subplot(339)
-plt.plot(t, A[:, 8])
-plt.xlabel("Time in s")
-plt.ylabel("A33")
-
-
-plt.suptitle("Folgar Tucker and IBOF Closure")
+plt.figure()
+for i in subplots:
+    plt.subplot("33"+str(i+1))
+    p = plt.plot(t, A[:, i])
+    plt.xlabel("Time $t$ in s")
+    plt.ylabel(labels[i])
+    plt.ylim([-1, 1])
+plt.legend(legend_list, bbox_to_anchor=(-2.0, 0.4))
+plt.tight_layout()
 plt.show()

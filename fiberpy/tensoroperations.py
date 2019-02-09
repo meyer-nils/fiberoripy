@@ -2,7 +2,7 @@
 import numpy as np
 
 
-def generate_fourth_order_tensor(a, closure='IBOF', N=1000):
+def compute_closure(a, closure='IBOF', N=1000):
     """Create a fourth order tensor from a second order tensor."""
     # assertation
     assert(closure in ('IBOF', 'LINEAR', 'HYBRID', 'QUADRATIC', 'RANDOM'))

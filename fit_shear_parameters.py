@@ -15,6 +15,7 @@ A0 = np.array([[0.0, 0.0, 0.0],
                [0.0, 1.0, 0.0],
                [0.0, 0.0, 0.0]])
 ar = get_equivalent_aspect_ratio(10.0)
+xi = (ar**2 - 1)/(ar**2 + 1)
 
 t = np.linspace(0, T, 500)
 
@@ -22,24 +23,17 @@ t = np.linspace(0, T, 500)
 data_list = []
 for i in range(10):
     data_list.append(
-        np.loadtxt("data/volfrac4/%d/N.csv" % (i+1), delimiter=','))
+        np.loadtxt("data/volfrac10/%d/N.csv" % (i+1), delimiter=','))
 
 # array with shape: N_simulation, time_step, data_index .
 # data index 0 is time, others are orientation tensor components
 data = np.array(data_list)
 
 
-def D(t):
-    """Symmetric strain rate tensor."""
-    return np.array([[0.0, G/2, 0.0],
-                     [G/2, 0.0, 0.0],
-                     [0.0, 0.0, 0.0]])
-
-
-def W(t):
-    """Skew-symmetric strain rate tensor."""
-    return np.array([[0.0, G/2, 0.0],
-                     [-G/2, 0.0, 0.0],
+def L(t):
+    """Velocity gradient."""
+    return np.array([[0.0, G, 0.0],
+                     [0.0, 0.0, 0.0],
                      [0.0, 0.0, 0.0]])
 
 
@@ -47,15 +41,7 @@ def compute_rsc_solution(p):
     """Compute solution of ODE given a paramter set p."""
     c = p[0]
     kappa = p[1]
-    sol = odeint(rsc_ode, A0.ravel(), t, args=(ar, D, W, c, kappa))
-    return sol
-
-
-def compute_maiersaupe_solution(q):
-    """Compute solution of ODE given a paramter set p."""
-    c = q[0]
-    u = q[1]
-    sol = odeint(maier_saupe_ode, A0.ravel(), t, args=(ar, D, W, c, u))
+    sol = odeint(rsc_ode, A0.ravel(), t, args=(xi, L, c, kappa))
     return sol
 
 
@@ -82,15 +68,7 @@ def mean_rsc_error(p):
     return np.linalg.norm(sol-mean, axis=1)
 
 
-def mean_maiersaupe_error(q):
-    """Compute the error between dataset mean and solution."""
-    sol = compute_maiersaupe_solution(q)
-    mean = compute_mean(t)
-    return np.linalg.norm(sol-mean, axis=1)
-
-
 p0 = [0.0, 1.0]
-q0 = [0.0, 0.0]
 mean = compute_mean(t)
 std = compute_std(t)
 opt = least_squares(mean_rsc_error, p0,
@@ -98,24 +76,13 @@ opt = least_squares(mean_rsc_error, p0,
                     verbose=2,
                     max_nfev=100)
 p_opt = opt.x
-# p_opt = np.array([3.19108377e-05, 9.99718794e-01])  # volfrac 1
-# p_opt = np.array([5.88520754e-04, 1.0])  # volfrac 4
-# p_opt = np.array([0.00176328, 0.64634806])  # volfrac 10
-# p_opt = np.array([0.00309774, 1.0])  # volfrac 40
+# p_opt = np.array([[3.19232144e-05 9.99691868e-01])  # volfrac 1
+# p_opt = np.array([5.96691495e-04 1.00000000e+00])  # volfrac 4
+# p_opt = np.array([0.00268519 0.65202155])  # volfrac 10
+# p_opt = np.array([0.00309768 0.99992701])  # volfrac 40
 print(p_opt)
 
-# opt = least_squares(mean_maiersaupe_error, q0,
-#                     bounds=([0.0, 0.0], [1.0, 1.0]),
-#                     verbose=2,
-#                     max_nfev=100)
-# q_opt = opt.x
-# print(q_opt)
 N_rsc = compute_rsc_solution(p_opt)
-#N_maiersaupe = compute_maiersaupe_solution(q_opt)
-
-# dNdt = []
-# for tt, nn in zip(t, N):
-#     dNdt.append(rsc_ode(nn, tt, ar, D, W, p_opt[0], p_opt[1]))
 
 
 labels = ["$N_{11}$", "$N_{12}$", "$N_{13}$",
@@ -130,7 +97,7 @@ plt.figure(figsize=(12, 3))
 for j, i in enumerate(subplots):
     plt.subplot("14"+str(j+1))
     p = plt.plot(t, N_rsc[:, i], t, mean[:, i])
-    color = p[2].get_color()
+    color = p[1].get_color()
     plt.fill_between(t, mean[:, i] + std[:, i], mean[:, i] - std[:, i],
                      color=color, alpha=0.3)
     plt.xlabel("Time $t$ in s")

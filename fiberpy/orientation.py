@@ -1,23 +1,156 @@
 """Orientation models."""
 import numpy as np
 
-from tensoroperations import generate_fourth_order_tensor
+from tensoroperations import compute_closure
 
 
 def get_equivalent_aspect_ratio(aspect_ratio):
     """Get Jeffrey's equivalent aspect ratio.
 
-    Compare Cox et al.
+    Reference:
+    R.G. Cox, 'The motion of long slender bodies in a viscous fluid. Part 2.
+    Shear flow', Journal of Fluid Mechanics 45, 625-675, 1971.
+    https://doi.org/10.1017/S0022112071000259
     """
     return 1.24 * aspect_ratio / np.sqrt(np.log(aspect_ratio))
 
 
-def rsc_ode(a, t, ar, D, W, Ci=0.0, kappa=1.0):
-    """ODE describing RSC model."""
+def jeffery_ode(a, t, xi, L):
+    """ODE describing Jeffery's model.
+
+    Arguments
+    ---------
+        a (9x1 doubles): Flattened fiber orientation tensor
+
+        t (double): time of evaluation
+
+        xi (double): Shape factor computed from aspect ratio
+
+        L (function handle): function to compute velocity gradient at time t
+
+    Reference:
+    G.B. Jeffery, 'The motion of ellipsoidal particles immersed
+    in a viscous fluid', Proceedings of the Royal Society A, 1922.
+    https://doi.org/10.1098/rspa.1922.0078
+    """
     a = np.reshape(a, (3, 3))
-    A = generate_fourth_order_tensor(a)
-    G = np.linalg.norm(D(t), ord='fro')
-    lbd = (ar**2 - 1) / (ar**2 + 1)
+    A = compute_closure(a)
+    D = 0.5*(L(t)+np.transpose(L(t)))
+    W = 0.5*(L(t)-np.transpose(L(t)))
+
+    dadt = (np.einsum('ik,kj->ij', W, a)
+            - np.einsum('ik,kj->ij', a, W)
+            + xi*(np.einsum('ik,kj->ij', D, a)
+                  + np.einsum('ik,kj->ij', a, D)
+                  - 2*np.einsum('ijkl,kl->ij', A, D)))
+    return dadt.ravel()
+
+
+def folgar_tucker_ode(a, t, xi, L, Ci=0.0):
+    """ODE describing the Folgar-Tucker model.
+
+    Arguments
+    ---------
+        a (9x1 doubles): Flattened fiber orientation tensor
+
+        t (double): time of evaluation
+
+        xi (double): Shape factor computed from aspect ratio
+
+        L (function handle): function to compute velocity gradient at time t
+
+        Ci (double): Fiber interaction constant
+
+    Reference:
+    F. Folgar, C.L. Tucker III, 'Orientation behavior of fibers in concentrated
+    suspensions', Journal of Reinforced Plastic Composites 3, 98-119, 1984.
+    https://doi.org/10.1177%2F073168448400300201
+    """
+    a = np.reshape(a, (3, 3))
+    A = compute_closure(a)
+    D = 0.5*(L(t)+np.transpose(L(t)))
+    W = 0.5*(L(t)-np.transpose(L(t)))
+    G = np.linalg.norm(D, ord='fro')
+    delta = np.eye(3)
+
+    dadt = (np.einsum('ik,kj->ij', W, a)
+            - np.einsum('ik,kj->ij', a, W)
+            + xi*(np.einsum('ik,kj->ij', D, a)
+                  + np.einsum('ik,kj->ij', a, D)
+                  - 2*np.einsum('ijkl,kl->ij', A, D))
+            + 2*Ci*G*(delta-3*a))
+    return dadt.ravel()
+
+
+def maier_saupe_ode(a, t, xi, L, Ci=0.0, U0=0.0):
+    """ODE using Folgar-Tucker constant and Maier-Saupe potential.
+
+    Arguments
+    ---------
+        a (9x1 doubles): Flattened fiber orientation tensor
+
+        t (double): time of evaluation
+
+        xi (double): Shape factor computed from aspect ratio
+
+        L (function handle): function to compute velocity gradient at time t
+
+        Ci (double): Fiber interaction constant
+
+        U0 (double): Maier-Saupe Potential
+
+    Reference:
+    Arnulf Latz, Uldis Strautins, Dariusz Niedziela, 'Comparative numerical
+    study of two concentrated fiber suspension models', Journal of
+    Non-Newtonian Fluid Mechanics 165, 764-781, 2010.
+    https://doi.org/10.1016/j.jnnfm.2010.04.001
+    """
+    a = np.reshape(a, (3, 3))
+    A = compute_closure(a)
+    D = 0.5*(L(t)+np.transpose(L(t)))
+    W = 0.5*(L(t)-np.transpose(L(t)))
+    G = np.linalg.norm(D, ord='fro')
+    delta = np.eye(3)
+
+    dadt = (np.einsum('ik,kj->ij', W, a)
+            - np.einsum('ik,kj->ij', a, W)
+            + xi*(np.einsum('ik,kj->ij', D, a)
+                  + np.einsum('ik,kj->ij', a, D)
+                  - 2*np.einsum('ijkl,kl->ij', A, D))
+            + 2*G*(Ci*(delta-3*a)
+                   + U0*(np.einsum('ik,kj->ij', a, a)
+                         - np.einsum('ijkl,kl->ij', A, a))))
+    return dadt.ravel()
+
+
+def rsc_ode(a, t, xi, L, Ci=0.0, kappa=1.0):
+    """ODE describing RSC model.
+
+    Arguments
+    ---------
+        a (9x1 doubles): Flattened fiber orientation tensor
+
+        t (double): time of evaluation
+
+        xi (double): Shape factor computed from aspect ratio
+
+        L (function handle): function to compute velocity gradient at time t
+
+        Ci (double): Fiber interaction constant
+
+        kappa (double): strain reduction factor
+
+    Reference:
+    Jin Wang, John F. O'Gara, and Charles L. Tucker, 'An objective model
+    for slow orientation kinetics in concentrated fiber suspensions:
+    Theory and rheological evidence', Journal of Rheology 52, 1179, 2008.
+    https://doi.org/10.1122/1.2946437
+    """
+    a = np.reshape(a, (3, 3))
+    A = compute_closure(a)
+    D = 0.5*(L(t)+np.transpose(L(t)))
+    W = 0.5*(L(t)-np.transpose(L(t)))
+    G = np.linalg.norm(D, ord='fro')
     delta = np.eye(3)
 
     w, v = np.linalg.eig(a)
@@ -30,46 +163,10 @@ def rsc_ode(a, t, ar, D, W, Ci=0.0, kappa=1.0):
 
     closure = A + (1.0-kappa)*(L-np.einsum('ijmn,mnkl->ijkl', M, A))
 
-    dadt = (np.einsum('ik,kj->ij', W(t), a)
-            - np.einsum('ik,kj->ij', a, W(t))
-            + lbd*(np.einsum('ik,kj->ij', D(t), a)
-                   + np.einsum('ik,kj->ij', a, D(t))
-                   - 2*np.einsum('ijkl,kl->ij', closure, D(t)))
-            + 2*Ci*G*(delta-3*a))
-    return dadt.ravel()
-
-
-def folgar_tucker_ode(a, t, ar, D, W, Ci=0.0):
-    """ODE describing Folgar-Tucker model."""
-    a = np.reshape(a, (3, 3))
-    A = generate_fourth_order_tensor(a)
-    G = np.linalg.norm(D(t), ord='fro')
-    lbd = (ar**2 - 1) / (ar**2 + 1)
-    delta = np.eye(3)
-
-    dadt = (np.einsum('ik,kj->ij', W(t), a)
-            - np.einsum('ik,kj->ij', a, W(t))
-            + lbd*(np.einsum('ik,kj->ij', D(t), a)
-                   + np.einsum('ik,kj->ij', a, D(t))
-                   - 2*np.einsum('ijkl,kl->ij', A, D(t)))
-            + 2*Ci*G*(delta-3*a))
-    return dadt.ravel()
-
-
-def maier_saupe_ode(a, t, ar, D, W, Ci=0.0, U0=0.0):
-    """ODE describing Folgar-Tucker model."""
-    a = np.reshape(a, (3, 3))
-    A = generate_fourth_order_tensor(a)
-    G = np.linalg.norm(D(t), ord='fro')
-    lbd = (ar**2 - 1) / (ar**2 + 1)
-    delta = np.eye(3)
-
-    dadt = (np.einsum('ik,kj->ij', W(t), a)
-            - np.einsum('ik,kj->ij', a, W(t))
-            + lbd*(np.einsum('ik,kj->ij', D(t), a)
-                   + np.einsum('ik,kj->ij', a, D(t))
-                   - 2*np.einsum('ijkl,kl->ij', A, D(t)))
-            + 2*G*(Ci*(delta-3*a)
-                   + U0*(np.einsum('ik,kj->ij', a, a)
-                         - np.einsum('ijkl,kl->ij', A, a))))
+    dadt = (np.einsum('ik,kj->ij', W, a)
+            - np.einsum('ik,kj->ij', a, W)
+            + xi*(np.einsum('ik,kj->ij', D, a)
+                  + np.einsum('ik,kj->ij', a, D)
+                  - 2*np.einsum('ijkl,kl->ij', closure, D))
+            + 2*kappa*Ci*G*(delta-3*a))
     return dadt.ravel()
