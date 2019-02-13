@@ -18,7 +18,8 @@ xi = (are**2 - 1)/(are**2 + 1)
 t = np.linspace(0, 50, 500)
 
 # load simulation data
-sim_data = np.loadtxt("data/N.csv", delimiter=',', skiprows=1)
+sim_developed = np.loadtxt("data/N_developed.csv", delimiter=',', skiprows=1)
+sim_rest = np.loadtxt("data/N_rest.csv", delimiter=',', skiprows=1)
 
 
 def L(t):
@@ -28,18 +29,24 @@ def L(t):
                      [0.0, 0.0, 0.0]])
 
 
-A0 = sim_data[0, 1:10]
+A0 = sim_developed[0, 1:10]
 # computed solution
 N = odeint(folgar_tucker_ode, A0.ravel(), t, args=(xi, L, Ci))
 
 
-plt.plot(sim_data[:, 0], sim_data[:, 1], '-r', label='A11 SPH')
+plt.plot(sim_developed[:, 0], sim_developed[:, 1], '-r',
+         label='A11 SPH (developed)')
+plt.plot(sim_rest[:, 0], sim_rest[:, 1], ':r', label='A11 SPH (rest)')
 plt.plot(t, N[:, 0], '--r', label='A11 Folgar-Tucker with $C_i$=%.4f' % Ci)
 
-plt.plot(sim_data[:, 0], sim_data[:, 5], '-b', label='A12 SPH')
+plt.plot(sim_developed[:, 0], sim_developed[:, 5], '-b',
+         label='A12 SPH (developed)')
+plt.plot(sim_rest[:, 0], sim_rest[:, 5], ':b', label='A12 SPH (rest)')
 plt.plot(t, N[:, 4], '--b', label='A12 Folgar-Tucker with $C_i$=%.4f' % Ci)
 
-plt.plot(sim_data[:, 0], sim_data[:, 9], '-g', label='A33 SPH')
+plt.plot(sim_developed[:, 0], sim_developed[:, 9], '-g',
+         label='A33 SPH (developed)')
+plt.plot(sim_rest[:, 0], sim_rest[:, 9], ':g', label='A22 SPH (rest)')
 plt.plot(t, N[:, 8], '--g', label='A33 Folgar-Tucker with $C_i$=%.4f' % Ci)
 plt.xlabel("Time $t$ in s")
 plt.ylim([0, 1])
