@@ -5,8 +5,7 @@ from scipy.integrate import odeint
 from scipy.interpolate import interp1d
 from scipy.optimize import least_squares
 
-from fiberpy.orientation import (rsc_ode, maier_saupe_ode,
-                                 get_equivalent_aspect_ratio)
+from fiberpy.orientation import rsc_ode, get_equivalent_aspect_ratio
 
 
 T = 19

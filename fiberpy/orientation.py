@@ -59,7 +59,7 @@ def folgar_tucker_ode(a, t, xi, L, Ci=0.0):
 
         L (function handle): function to compute velocity gradient at time t
 
-        Ci (double): Fiber interaction constant
+        Ci (double): Fiber interaction constant (typically 0 < Ci < 0.1)
 
     Reference:
     F. Folgar, C.L. Tucker III, 'Orientation behavior of fibers in concentrated
@@ -95,7 +95,7 @@ def maier_saupe_ode(a, t, xi, L, Ci=0.0, U0=0.0):
 
         L (function handle): function to compute velocity gradient at time t
 
-        Ci (double): Fiber interaction constant
+        Ci (double): Fiber interaction constant (typically 0 < Ci < 0.1)
 
         U0 (double): Maier-Saupe Potential
 
@@ -136,9 +136,9 @@ def rsc_ode(a, t, xi, L, Ci=0.0, kappa=1.0):
 
         L (function handle): function to compute velocity gradient at time t
 
-        Ci (double): Fiber interaction constant
+        Ci (double): Fiber interaction constant (typically 0 < Ci < 0.1)
 
-        kappa (double): strain reduction factor
+        kappa (double): strain reduction factor (0 < kappa < 1)
 
     Reference:
     Jin Wang, John F. O'Gara, and Charles L. Tucker, 'An objective model
@@ -161,12 +161,74 @@ def rsc_ode(a, t, xi, L, Ci=0.0, kappa=1.0):
          + np.einsum('i,j,k,l->ijkl', v[:, 1], v[:, 1], v[:, 1], v[:, 1])
          + np.einsum('i,j,k,l->ijkl', v[:, 2], v[:, 2], v[:, 2], v[:, 2]))
 
-    closure = A + (1.0-kappa)*(L-np.einsum('ijmn,mnkl->ijkl', M, A))
+    tensor4 = A + (1.0-kappa)*(L-np.einsum('ijmn,mnkl->ijkl', M, A))
 
     dadt = (np.einsum('ik,kj->ij', W, a)
             - np.einsum('ik,kj->ij', a, W)
             + xi*(np.einsum('ik,kj->ij', D, a)
                   + np.einsum('ik,kj->ij', a, D)
-                  - 2*np.einsum('ijkl,kl->ij', closure, D))
+                  - 2*np.einsum('ijkl,kl->ij', tensor4, D))
             + 2*kappa*Ci*G*(delta-3*a))
+    return dadt.ravel()
+
+
+def ard_rsc_ode(a, t, xi, L, b1=0.0, kappa=1.0, b2=0, b3=0, b4=0, b5=0):
+    """ODE describing ARD-RSC model.
+
+    Arguments
+    ---------
+        a (9x1 doubles): Flattened fiber orientation tensor
+
+        t (double): time of evaluation
+
+        xi (double): Shape factor computed from aspect ratio
+
+        L (function handle): function to compute velocity gradient at time t
+
+        b1 (double): First parameter of rotary diffusion tensor (0 < b1 < 0.1)
+
+        kappa (double): strain reduction factor (0 < kappa < 1)
+
+        b2 (double): Second parameter of rotary diffusion tensor
+
+        b3 (double): Third parameter of rotary diffusion tensor
+
+        b4 (double): Fourth parameter of rotary diffusion tensor
+
+        b5 (double): Fifth parameter of rotary diffusion tensor
+
+    Reference:
+    J. H. Phelps,  C. L. Tucker, 'An anisotropic rotary diffusion model for
+    fiber orientation in short- and long-fiber thermoplastics', Journal of
+    Non-Newtonian Fluid Mechanics 156, 165-176, 2009.
+    https://doi.org/10.1016/j.jnnfm.2008.08.002
+    """
+    a = np.reshape(a, (3, 3))
+    A = compute_closure(a)
+    D = 0.5*(L(t)+np.transpose(L(t)))
+    W = 0.5*(L(t)-np.transpose(L(t)))
+    G = np.linalg.norm(D, ord='fro')
+    delta = np.eye(3)
+
+    w, v = np.linalg.eig(a)
+    L = (w[0]*np.einsum('i,j,k,l->ijkl', v[:, 0], v[:, 0], v[:, 0], v[:, 0])
+         + w[1]*np.einsum('i,j,k,l->ijkl', v[:, 1], v[:, 1], v[:, 1], v[:, 1])
+         + w[2]*np.einsum('i,j,k,l->ijkl', v[:, 2], v[:, 2], v[:, 2], v[:, 2]))
+    M = (np.einsum('i,j,k,l->ijkl', v[:, 0], v[:, 0], v[:, 0], v[:, 0])
+         + np.einsum('i,j,k,l->ijkl', v[:, 1], v[:, 1], v[:, 1], v[:, 1])
+         + np.einsum('i,j,k,l->ijkl', v[:, 2], v[:, 2], v[:, 2], v[:, 2]))
+    C = b1*delta + b2*a + b3*a*a + b4*D/G + b5*D*D/(G*G)
+
+    tensor4 = A + (1.0-kappa)*(L-np.einsum('ijmn,mnkl->ijkl', M, A))
+
+    dadt = (np.einsum('ik,kj->ij', W, a)
+            - np.einsum('ik,kj->ij', a, W)
+            + xi*(np.einsum('ik,kj->ij', D, a)
+                  + np.einsum('ik,kj->ij', a, D)
+                  - 2*np.einsum('ijkl,kl->ij', tensor4, D))
+            + G*(2*(C-(1-kappa)*np.einsum('ijkl,kl->ij', M, C))
+                 - 2*kappa*np.trace(C)*a
+                 - 5*(np.einsum('ik,kj->ij', C, a)
+                      + np.einsum('ik,kj->ij', a, C))
+                 + 10*np.einsum('ijkl,kl->ij', tensor4, C)))
     return dadt.ravel()
