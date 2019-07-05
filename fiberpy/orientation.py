@@ -4,15 +4,32 @@ import numpy as np
 from tensoroperations import compute_closure
 
 
-def get_equivalent_aspect_ratio(aspect_ratio):
-    """Get Jeffrey's equivalent aspect ratio.
+def get_cox_aspect_ratio(aspect_ratio):
+    u"""Jeffrey's equivalent aspect ratio.
 
-    Reference:
-    R.G. Cox, 'The motion of long slender bodies in a viscous fluid. Part 2.
-    Shear flow', Journal of Fluid Mechanics 45, 625-675, 1971.
-    https://doi.org/10.1017/S0022112071000259
+    Approximation from
+    Cox et al.
     """
     return 1.24 * aspect_ratio / np.sqrt(np.log(aspect_ratio))
+
+
+def get_zhang_aspect_ratio(aspect_ratio):
+    """Jeffery's equivalent aspect ratio.
+
+    Approximation from
+    Zhang et al. 2011
+    """
+    return (0.000035*aspect_ratio**3 - 0.00467*aspect_ratio**2 +
+            0.764*aspect_ratio + 0.404)
+
+
+def get_gm_aspect_ratio(aspect_ratio):
+    """Jeffery's equivalent aspect ratio.
+
+    Approximation from
+    Goldsmith and Mason
+    """
+    return 0.742*aspect_ratio-0.0017*aspect_ratio**2
 
 
 def jeffery_ode(a, t, xi, L):
@@ -97,7 +114,7 @@ def maier_saupe_ode(a, t, xi, L, Ci=0.0, U0=0.0):
 
         Ci (double): Fiber interaction constant (typically 0 < Ci < 0.1)
 
-        U0 (double): Maier-Saupe Potential
+        U0 (double): Maier-Saupe Potential (in 3D stable for y U0 < 8 Ci)
 
     Reference:
     Arnulf Latz, Uldis Strautins, Dariusz Niedziela, 'Comparative numerical
@@ -120,6 +137,55 @@ def maier_saupe_ode(a, t, xi, L, Ci=0.0, U0=0.0):
             + 2*G*(Ci*(delta-3*a)
                    + U0*(np.einsum('ik,kj->ij', a, a)
                          - np.einsum('ijkl,kl->ij', A, a))))
+    return dadt.ravel()
+
+
+def iard_ode(a, t, xi, L, Ci=0.0, Cm=0.0):
+    """ODE describing iARD model.
+
+    Arguments
+    ---------
+        a (9x1 doubles): Flattened fiber orientation tensor
+
+        t (double): time of evaluation
+
+        xi (double): Shape factor computed from aspect ratio
+
+        L (function handle): function to compute velocity gradient at time t
+
+        Ci (double): Fiber interaction constant (typically 0 < Ci < 0.05)
+
+        Cm (double): anisotropy factor (0 < Cm < 1)
+
+    Reference:
+    Tseng, Huan-Chang; Chang, Rong-Yeu; Hsu, Chia-Hsiang, 'An objective tensor
+    to predict anisotropic fiber orientation in concentrated suspensions',
+    Journal of Rheology 60, 215, 2016.
+    https://doi.org/10.1122/1.4939098
+    """
+    a = np.reshape(a, (3, 3))
+    A = compute_closure(a)
+    D = 0.5*(L(t)+np.transpose(L(t)))
+    W = 0.5*(L(t)-np.transpose(L(t)))
+    G = np.linalg.norm(D, ord='fro')
+    delta = np.eye(3)
+
+    D2 = np.einsum('ik,kj->ij', D, D)
+
+    Dr = Ci*(delta-Cm*D2/np.linalg.norm(D2, ord='fro'))
+
+    dadt_HD = (np.einsum('ik,kj->ij', W, a)
+               - np.einsum('ik,kj->ij', a, W)
+               + xi*(np.einsum('ik,kj->ij', D, a)
+                     + np.einsum('ik,kj->ij', a, D)
+                     - 2*np.einsum('ijkl,kl->ij', A, D)))
+
+    dadt_iard = G*(2*Dr-2*np.trace(Dr)*a
+                   - 5*np.einsum('ik,kj->ij', Dr, a)
+                   - 5*np.einsum('ik,kj->ij', a, Dr)
+                   + 10*np.einsum('ijkl,kl->ij', A, Dr))
+
+    dadt = dadt_HD + dadt_iard
     return dadt.ravel()
 
 
