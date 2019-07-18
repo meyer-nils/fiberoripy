@@ -29,6 +29,7 @@ def fit_optimal_params(t, reference, ode, xi, L, params, bounds):
                         bounds=bounds,
                         verbose=2,
                         max_nfev=500,
+                        x_scale='jac',
                         ftol=1e-10,
                         xtol=1e-10,
                         args=[t, reference, ode, xi, L])

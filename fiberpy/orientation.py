@@ -189,6 +189,86 @@ def iard_ode(a, t, xi, L, Ci=0.0, Cm=0.0):
     return dadt.ravel()
 
 
+def iardrpr_ode(a, t, xi, L, Ci=0.0, Cm=0.0, alpha=0.0, beta=0.0):
+    """ODE describing iARD-RPR model.
+
+    Arguments
+    ---------
+        a (9x1 doubles): Flattened fiber orientation tensor
+
+        t (double): time of evaluation
+
+        xi (double): Shape factor computed from aspect ratio
+
+        L (function handle): function to compute velocity gradient at time t
+
+        Ci (double): Fiber interaction constant (typically 0 < Ci < 0.05)
+
+        Cm (double): anisotropy factor (0 < Cm < 1)
+
+        alpha (double): retardance rate (0 < alpha < 1)
+
+        beta (double):  retardance tuning factor (0< beta < 1)
+
+    Reference:
+    Tseng, Huan-Chang; Chang, Rong-Yeu; Hsu, Chia-Hsiang, 'An objective tensor
+    to predict anisotropic fiber orientation in concentrated suspensions',
+    Journal of Rheology 60, 215, 2016.
+    https://doi.org/10.1122/1.4939098
+    """
+    a = np.reshape(a, (3, 3))
+    A = compute_closure(a)
+    D = 0.5*(L(t)+np.transpose(L(t)))
+    W = 0.5*(L(t)-np.transpose(L(t)))
+    G = np.linalg.norm(D, ord='fro')
+    delta = np.eye(3)
+
+    D2 = np.einsum('ik,kj->ij', D, D)
+
+    Dr = Ci*(delta-Cm*D2/np.linalg.norm(D2, ord='fro'))
+
+    dadt_HD = (np.einsum('ik,kj->ij', W, a)
+               - np.einsum('ik,kj->ij', a, W)
+               + xi*(np.einsum('ik,kj->ij', D, a)
+                     + np.einsum('ik,kj->ij', a, D)
+                     - 2*np.einsum('ijkl,kl->ij', A, D)))
+
+    dadt_iard = G*(2*Dr-2*np.trace(Dr)*a
+                   - 5*np.einsum('ik,kj->ij', Dr, a)
+                   - 5*np.einsum('ik,kj->ij', a, Dr)
+                   + 10*np.einsum('ijkl,kl->ij', A, Dr))
+
+    dadt_temp = dadt_HD + dadt_iard
+
+    # eigenValues, eigenVectors = np.linalg.eig(a)
+    # idx = eigenValues.argsort()[::-1]
+    # eigenValues = eigenValues[idx]
+    # R = eigenVectors[:, idx]
+
+    eigenValues, eigenVectors = np.linalg.eig(dadt_temp)
+    idx = eigenValues.argsort()[::-1]
+    w = eigenValues[idx]
+    R = eigenVectors[:, idx]
+
+    # print(a)
+    # hat = np.zeros((3, 3))
+    # hat[0, 0] = eigenValues[0]
+    # hat[1, 1] = eigenValues[1]
+    # hat[2, 2] = eigenValues[2]
+    # print(np.einsum('ik, kl, lj->ij', R, hat, np.transpose(R)))
+    # print("#############################")
+
+    IOK = np.zeros((3, 3))
+    IOK[0, 0] = alpha*(w[0]-beta*(w[0]**2+2*w[1]*w[2]))
+    IOK[1, 1] = alpha*(w[1]-beta*(w[1]**2+2*w[0]*w[2]))
+    IOK[2, 2] = alpha*(w[2]-beta*(w[2]**2+2*w[0]*w[1]))
+
+    dadt_rpr = -np.einsum('ik, kl, lj->ij', R, IOK, np.transpose(R))
+
+    dadt = dadt_temp + dadt_rpr
+    return dadt.ravel()
+
+
 def rsc_ode(a, t, xi, L, Ci=0.0, kappa=1.0):
     """ODE describing RSC model.
 

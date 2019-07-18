@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 from matplotlib2tikz import save as tikz_save
 
-from fiberpy.orientation import (rsc_ode, iard_ode, maier_saupe_ode,
+from fiberpy.orientation import (rsc_ode, iardrpr_ode, maier_saupe_ode,
                                  folgar_tucker_ode,
                                  get_zhang_aspect_ratio)
 from fiberpy.fit import fit_optimal_params
@@ -56,13 +56,13 @@ print("Optimal parameters for RSC: " + str(p_opt))
 # 10% -> 0.00515386  0.76019708
 # 30% -> 0.01103383  0.58449658
 
-# p0 = [0.0, 0.0]
-# p_opt, N_iard = fit_optimal_params(t, mean, iard_ode, xi, L,
-#                                    p0, ([0.0, 0.0], [0.1, 1.0]))
-# print("Optimal parameters for iARD: " + str(p_opt))
-# # 1% -> 1.97419337e-03   9.98953936e-11
-# # 10% -> 3.37341057e-03   9.98750917e-11
-# # 30% -> 6.64142473e-03   9.95918971e-11
+p0 = [0.01, 0.0, 0.1]
+p_opt, N_iard = fit_optimal_params(t, mean, iardrpr_ode, xi, L,
+                                   p0, ([0.0, 0.0, 0.0], [0.1, 1.0, 1.0]))
+print("Optimal parameters for iARD-RPR: " + str(p_opt))
+# 1% -> 1.97419337e-03   9.98953936e-11
+# 10% -> 3.37341057e-03   9.98750917e-11
+# 30% -> 6.64142473e-03   9.95918971e-11
 
 # p0 = [0.0, 0.0]
 # p_opt, N_ms = fit_optimal_params(t, mean, maier_saupe_ode, xi, L,
@@ -79,6 +79,7 @@ labels = ["$A_{11}$", "$A_{12}$", "$A_{13}$",
 subplots = [0, 4, 8, 1]
 
 legend_list = ["RSC",
+               "iARD-RPR",
                "SPH simulation"]
 
 plt.figure(figsize=(12, 3))
@@ -87,10 +88,10 @@ for j, i in enumerate(subplots):
     p = plt.plot(
                  # t, N_ft[:, i],
                  t, N_rsc[:, i],
-                 # t, N_iard[:, i],
+                 t, N_iard[:, i],
                  # t, N_ms[:, i],
                  t, mean[:, i])
-    color = p[1].get_color()
+    color = p[2].get_color()
     # for d in range(len(data_list)):
     #     p = plt.plot(t, data[d, :, i+1], "k")
     plt.fill_between(t, mean[:, i] + std[:, i], mean[:, i] - std[:, i],
