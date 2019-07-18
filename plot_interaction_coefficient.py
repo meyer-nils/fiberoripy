@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib2tikz import save as tikz_save
 
 
 def fit_bay(phir):
@@ -33,11 +34,23 @@ def fit_phan_tien(phir):
     return Ci
 
 
-phir = np.linspace(0, 4, 100)
+phir = np.linspace(0, 3, 100)
 
-sph_phir = 10*np.array([0.01, 0.04, 0.10, 0.40])
-sph_fits = np.array([3.19108377e-05, 5.88520754e-04, 0.00176328,  0.00309774])
+sph_phir = 5*np.array([0.01, 0.10, 0.30])
+ft_phir = np.array([0.16, 1.28, 2.56, 0.0332, 0.249, 0.498, 1.079])
+sph_fits = np.array([0.00262122, 0.00515386, 0.01103383])
+ft_fit = np.array([0.0038, 0.0081, 0.0165, 0.0032, 0.0035, 0.0042, 0.0044])
 
-plt.plot(phir, fit_bay(phir), phir, fit_phan_tien(phir),
-         sph_phir, sph_fits, '*')
+plt.plot(phir, fit_phan_tien(phir), 'k',
+         ft_phir, ft_fit, '+k',
+         sph_phir, sph_fits, '.k')
+plt.yscale('log')
+plt.xlabel(r"$\phi r_p$")
+plt.ylabel("Interaction coefficient $C_i$")
+plt.legend(["Phan-Tien et al.", "Folgar & Tucker", "SPH Simulation"],
+           loc="lower right")
+plt.tight_layout()
+
+# save tikz figure (width means individual subplot width!)
+tikz_save('ci_comparison.tex', figurewidth='10cm')
 plt.show()

@@ -4,22 +4,24 @@ from scipy.integrate import odeint
 import matplotlib.pyplot as plt
 
 from fiberpy.orientation import (ard_rsc_ode, rsc_ode, jeffery_ode,
-                                 folgar_tucker_ode, iard_ode, maier_saupe_ode)
+                                 folgar_tucker_ode, iard_ode, maier_saupe_ode,
+                                 get_zhang_aspect_ratio, get_cox_aspect_ratio)
 
-xi = 1.0
+ar = 5.0
+xi = (ar**2 - 1)/(ar**2 + 1)
 # time steps
-t = np.linspace(0, 100, 500)
+t = np.linspace(0, 10, 500)
 
 
 def L(t):
     """Velocity gradient."""
-    return np.array([[0.0, 3.3, 0.0],
-                     [0.0, 0.0, 0.0],
+    return np.array([[0.0, 0.0, 0.0],
+                     [3.3, 0.0, 0.0],
                      [0.0, 0.0, 0.0]])
 
 
-A0 = np.array([[0.0, 0.0, 0.0],
-               [0.0, 1.0, 0.0],
+A0 = np.array([[1.0, 0.0, 0.0],
+               [0.0, 0.0, 0.0],
                [0.0, 0.0, 0.0]])
 
 # computed solution

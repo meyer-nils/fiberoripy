@@ -1,0 +1,1 @@
+{"cpu_time": 11383.838879823685, "completed": true, "args": ["--volfrac", "0.01", "--openmp"], "output_dir": "/home/ubuntu-vm/rve_output", "fname": "rve"}
