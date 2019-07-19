@@ -240,28 +240,21 @@ def iardrpr_ode(a, t, xi, L, Ci=0.0, Cm=0.0, alpha=0.0, beta=0.0):
 
     dadt_temp = dadt_HD + dadt_iard
 
-    # eigenValues, eigenVectors = np.linalg.eig(a)
-    # idx = eigenValues.argsort()[::-1]
-    # eigenValues = eigenValues[idx]
-    # R = eigenVectors[:, idx]
-
-    eigenValues, eigenVectors = np.linalg.eig(dadt_temp)
+    eigenValues, eigenVectors = np.linalg.eig(a)
     idx = eigenValues.argsort()[::-1]
-    w = eigenValues[idx]
+    eigenValues = eigenValues[idx]
     R = eigenVectors[:, idx]
 
-    # print(a)
-    # hat = np.zeros((3, 3))
-    # hat[0, 0] = eigenValues[0]
-    # hat[1, 1] = eigenValues[1]
-    # hat[2, 2] = eigenValues[2]
-    # print(np.einsum('ik, kl, lj->ij', R, hat, np.transpose(R)))
-    # print("#############################")
+    dadt_diag = np.einsum('ik, kl, lj->ij', np.transpose(R), dadt_temp, R)
+
+    lbd0 = dadt_diag[0, 0]
+    lbd1 = dadt_diag[1, 1]
+    lbd2 = dadt_diag[2, 2]
 
     IOK = np.zeros((3, 3))
-    IOK[0, 0] = alpha*(w[0]-beta*(w[0]**2+2*w[1]*w[2]))
-    IOK[1, 1] = alpha*(w[1]-beta*(w[1]**2+2*w[0]*w[2]))
-    IOK[2, 2] = alpha*(w[2]-beta*(w[2]**2+2*w[0]*w[1]))
+    IOK[0, 0] = alpha*(lbd0-beta*(lbd0**2+2*lbd1*lbd2))
+    IOK[1, 1] = alpha*(lbd1-beta*(lbd1**2+2*lbd0*lbd2))
+    IOK[2, 2] = alpha*(lbd2-beta*(lbd2**2+2*lbd0*lbd1))
 
     dadt_rpr = -np.einsum('ik, kl, lj->ij', R, IOK, np.transpose(R))
 
