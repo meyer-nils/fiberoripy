@@ -49,4 +49,6 @@ plot_projection4(ax, 'xz', A, A_hybrid, A_lin, A_quad, A_ibof)
 ax = fig.add_subplot(224)
 plot_projection4(ax, 'yz', A, A_hybrid, A_lin, A_quad, A_ibof)
 
+plt.legend(["Original", "Hybrid", "Linear", "Quadratic", "IBOF"])
+
 plt.show()
