@@ -1,0 +1,1 @@
+{"cpu_time": 27540.558086156845, "completed": true, "args": ["--openmp", "--rot", "5", "--continue", "rve_output/rve_13478.hdf5", "--volfrac", "0.3"], "output_dir": "/home/ubuntu-vm/rve_output", "fname": "rve"}
