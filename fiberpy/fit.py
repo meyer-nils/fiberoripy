@@ -8,9 +8,7 @@ def compute_error(params, t, reference, ode, xi, L):
     """Compute the error between dataset mean and solution."""
     A0 = reference[0, :]
     sol = odeint(ode, A0, t, args=(xi, L) + tuple(params))
-    # return np.linalg.norm(sol-reference, axis=1)
-    return (np.linalg.norm(sol[:, 0]-reference[:, 0])
-            + np.linalg.norm(sol[:, 8]-reference[:, 8]))
+    return np.linalg.norm(sol-reference, axis=1)
 
 
 def fit_optimal_params(t, reference, ode, xi, L, params, bounds):
