@@ -45,6 +45,6 @@ for i in subplots:
     plt.xlabel("Time $t$ in s")
     plt.ylabel(labels[i])
     plt.ylim([-1, 1])
-plt.legend(legend_list, bbox_to_anchor=(-2.0, 0.4))
+plt.legend(legend_list)
 plt.tight_layout()
 plt.show()

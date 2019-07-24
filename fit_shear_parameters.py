@@ -3,9 +3,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 # import tikzplotlib
 
-from fiberpy.orientation import (rsc_ode, iardrpr_ode, maier_saupe_ode,
-                                 folgar_tucker_ode,
-                                 get_zhang_aspect_ratio)
+from fiberpy.orientation import (rsc_ode,
+                                 # iardrpr_ode,
+                                 # maier_saupe_ode,
+                                 # folgar_tucker_ode,
+                                 )
 from fiberpy.fit import fit_optimal_params
 
 
@@ -45,7 +47,7 @@ std = np.std(data[:, :, 1:10], axis=0)
 # # 10% -> 0.00337344
 # # 30% -> 0.00664119
 
-p0 = [0.01, 0.5]
+p0 = [0.005, 0.7]
 p_opt, N_rsc = fit_optimal_params(t, mean, rsc_ode, xi, L,
                                   p0, ([0.0, 0.0], [0.1, 1.0]))
 print("Optimal parameters for RSC: " + str(p_opt))
@@ -88,8 +90,8 @@ for j, i in enumerate(subplots):
                  # t, N_ms[:, i],
                  t, mean[:, i])
     color = p[1].get_color()
-    # for d in range(len(data_list)):
-    #     p = plt.plot(t, data[d, :, i+1], "k")
+    for d in range(len(data_list)):
+        p = plt.plot(t, data[d, :, i+1], "k")
     plt.fill_between(t, mean[:, i] + std[:, i], mean[:, i] - std[:, i],
                      color=color, alpha=0.3)
     plt.xlabel("Time $t$ in s")

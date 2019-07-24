@@ -8,5 +8,5 @@ setup(
     author_email="nils.meyer@kit.edu",
     packages=['fiberpy', ],
     license='Creative Commons Attribution-Noncommercial-Share Alike license',
-    long_description=open('README.txt').read(),
+    long_description=open('README.rst').read(),
     )
