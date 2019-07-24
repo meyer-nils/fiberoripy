@@ -1,17 +1,15 @@
 """Testing re-orientation in shearflow."""
 import numpy as np
 import matplotlib.pyplot as plt
-import tikzplotlib
+# import tikzplotlib
 
 from fiberpy.orientation import (rsc_ode, iardrpr_ode, maier_saupe_ode,
                                  folgar_tucker_ode,
                                  get_zhang_aspect_ratio)
 from fiberpy.fit import fit_optimal_params
 
-from scipy.integrate import odeint
 
-
-volfrac = "30"
+volfrac = "10"
 ar = 5.0
 xi = (ar**2 - 1)/(ar**2 + 1)
 
@@ -104,5 +102,5 @@ plt.legend(legend_list)
 plt.tight_layout()
 
 # save tikz figure (width means individual subplot width!)
-tikzplotlib.save('volfrac%s.tex' % volfrac, figurewidth='5cm')
+# tikzplotlib.save('volfrac%s.tex' % volfrac, figurewidth='5cm')
 plt.show()
