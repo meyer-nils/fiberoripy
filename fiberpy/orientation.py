@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Orientation models."""
 import numpy as np
 
@@ -19,8 +20,12 @@ def get_zhang_aspect_ratio(aspect_ratio):
     Approximation from
     Zhang et al. 2011
     """
-    return (0.000035*aspect_ratio**3 - 0.00467*aspect_ratio**2 +
-            0.764*aspect_ratio + 0.404)
+    return (
+        0.000035 * aspect_ratio ** 3
+        - 0.00467 * aspect_ratio ** 2
+        + 0.764 * aspect_ratio
+        + 0.404
+    )
 
 
 def get_gm_aspect_ratio(aspect_ratio):
@@ -29,7 +34,7 @@ def get_gm_aspect_ratio(aspect_ratio):
     Approximation from
     Goldsmith and Mason
     """
-    return 0.742*aspect_ratio-0.0017*aspect_ratio**2
+    return 0.742 * aspect_ratio - 0.0017 * aspect_ratio ** 2
 
 
 def jeffery_ode(a, t, xi, L):
@@ -52,14 +57,19 @@ def jeffery_ode(a, t, xi, L):
     """
     a = np.reshape(a, (3, 3))
     A = compute_closure(a)
-    D = 0.5*(L(t)+np.transpose(L(t)))
-    W = 0.5*(L(t)-np.transpose(L(t)))
+    D = 0.5 * (L(t) + np.transpose(L(t)))
+    W = 0.5 * (L(t) - np.transpose(L(t)))
 
-    dadt = (np.einsum('ik,kj->ij', W, a)
-            - np.einsum('ik,kj->ij', a, W)
-            + xi*(np.einsum('ik,kj->ij', D, a)
-                  + np.einsum('ik,kj->ij', a, D)
-                  - 2*np.einsum('ijkl,kl->ij', A, D)))
+    dadt = (
+        np.einsum("ik,kj->ij", W, a)
+        - np.einsum("ik,kj->ij", a, W)
+        + xi
+        * (
+            np.einsum("ik,kj->ij", D, a)
+            + np.einsum("ik,kj->ij", a, D)
+            - 2 * np.einsum("ijkl,kl->ij", A, D)
+        )
+    )
     return dadt.ravel()
 
 
@@ -85,17 +95,22 @@ def folgar_tucker_ode(a, t, xi, L, Ci=0.0):
     """
     a = np.reshape(a, (3, 3))
     A = compute_closure(a)
-    D = 0.5*(L(t)+np.transpose(L(t)))
-    W = 0.5*(L(t)-np.transpose(L(t)))
-    G = np.linalg.norm(D, ord='fro')
+    D = 0.5 * (L(t) + np.transpose(L(t)))
+    W = 0.5 * (L(t) - np.transpose(L(t)))
+    G = np.linalg.norm(D, ord="fro")
     delta = np.eye(3)
 
-    dadt = (np.einsum('ik,kj->ij', W, a)
-            - np.einsum('ik,kj->ij', a, W)
-            + xi*(np.einsum('ik,kj->ij', D, a)
-                  + np.einsum('ik,kj->ij', a, D)
-                  - 2*np.einsum('ijkl,kl->ij', A, D))
-            + 2*Ci*G*(delta-3*a))
+    dadt = (
+        np.einsum("ik,kj->ij", W, a)
+        - np.einsum("ik,kj->ij", a, W)
+        + xi
+        * (
+            np.einsum("ik,kj->ij", D, a)
+            + np.einsum("ik,kj->ij", a, D)
+            - 2 * np.einsum("ijkl,kl->ij", A, D)
+        )
+        + 2 * Ci * G * (delta - 3 * a)
+    )
     return dadt.ravel()
 
 
@@ -124,19 +139,28 @@ def maier_saupe_ode(a, t, xi, L, Ci=0.0, U0=0.0):
     """
     a = np.reshape(a, (3, 3))
     A = compute_closure(a)
-    D = 0.5*(L(t)+np.transpose(L(t)))
-    W = 0.5*(L(t)-np.transpose(L(t)))
-    G = np.linalg.norm(D, ord='fro')
+    D = 0.5 * (L(t) + np.transpose(L(t)))
+    W = 0.5 * (L(t) - np.transpose(L(t)))
+    G = np.linalg.norm(D, ord="fro")
     delta = np.eye(3)
 
-    dadt = (np.einsum('ik,kj->ij', W, a)
-            - np.einsum('ik,kj->ij', a, W)
-            + xi*(np.einsum('ik,kj->ij', D, a)
-                  + np.einsum('ik,kj->ij', a, D)
-                  - 2*np.einsum('ijkl,kl->ij', A, D))
-            + 2*G*(Ci*(delta-3*a)
-                   + U0*(np.einsum('ik,kj->ij', a, a)
-                         - np.einsum('ijkl,kl->ij', A, a))))
+    dadt = (
+        np.einsum("ik,kj->ij", W, a)
+        - np.einsum("ik,kj->ij", a, W)
+        + xi
+        * (
+            np.einsum("ik,kj->ij", D, a)
+            + np.einsum("ik,kj->ij", a, D)
+            - 2 * np.einsum("ijkl,kl->ij", A, D)
+        )
+        + 2
+        * G
+        * (
+            Ci * (delta - 3 * a)
+            + U0
+            * (np.einsum("ik,kj->ij", a, a) - np.einsum("ijkl,kl->ij", A, a))
+        )
+    )
     return dadt.ravel()
 
 
@@ -165,25 +189,33 @@ def iard_ode(a, t, xi, L, Ci=0.0, Cm=0.0):
     """
     a = np.reshape(a, (3, 3))
     A = compute_closure(a)
-    D = 0.5*(L(t)+np.transpose(L(t)))
-    W = 0.5*(L(t)-np.transpose(L(t)))
-    G = np.linalg.norm(D, ord='fro')
+    D = 0.5 * (L(t) + np.transpose(L(t)))
+    W = 0.5 * (L(t) - np.transpose(L(t)))
+    G = np.linalg.norm(D, ord="fro")
     delta = np.eye(3)
 
-    D2 = np.einsum('ik,kj->ij', D, D)
+    D2 = np.einsum("ik,kj->ij", D, D)
 
-    Dr = Ci*(delta-Cm*D2/np.linalg.norm(D2, ord='fro'))
+    Dr = Ci * (delta - Cm * D2 / np.linalg.norm(D2, ord="fro"))
 
-    dadt_HD = (np.einsum('ik,kj->ij', W, a)
-               - np.einsum('ik,kj->ij', a, W)
-               + xi*(np.einsum('ik,kj->ij', D, a)
-                     + np.einsum('ik,kj->ij', a, D)
-                     - 2*np.einsum('ijkl,kl->ij', A, D)))
+    dadt_HD = (
+        np.einsum("ik,kj->ij", W, a)
+        - np.einsum("ik,kj->ij", a, W)
+        + xi
+        * (
+            np.einsum("ik,kj->ij", D, a)
+            + np.einsum("ik,kj->ij", a, D)
+            - 2 * np.einsum("ijkl,kl->ij", A, D)
+        )
+    )
 
-    dadt_iard = G*(2*Dr-2*np.trace(Dr)*a
-                   - 5*np.einsum('ik,kj->ij', Dr, a)
-                   - 5*np.einsum('ik,kj->ij', a, Dr)
-                   + 10*np.einsum('ijkl,kl->ij', A, Dr))
+    dadt_iard = G * (
+        2 * Dr
+        - 2 * np.trace(Dr) * a
+        - 5 * np.einsum("ik,kj->ij", Dr, a)
+        - 5 * np.einsum("ik,kj->ij", a, Dr)
+        + 10 * np.einsum("ijkl,kl->ij", A, Dr)
+    )
 
     dadt = dadt_HD + dadt_iard
     return dadt.ravel()
@@ -218,25 +250,33 @@ def iardrpr_ode(a, t, xi, L, Ci=0.0, Cm=0.0, alpha=0.0, beta=0.0):
     """
     a = np.reshape(a, (3, 3))
     A = compute_closure(a)
-    D = 0.5*(L(t)+np.transpose(L(t)))
-    W = 0.5*(L(t)-np.transpose(L(t)))
-    G = np.linalg.norm(D, ord='fro')
+    D = 0.5 * (L(t) + np.transpose(L(t)))
+    W = 0.5 * (L(t) - np.transpose(L(t)))
+    G = np.linalg.norm(D, ord="fro")
     delta = np.eye(3)
 
-    D2 = np.einsum('ik,kj->ij', D, D)
+    D2 = np.einsum("ik,kj->ij", D, D)
 
-    Dr = Ci*(delta-Cm*D2/np.linalg.norm(D2, ord='fro'))
+    Dr = Ci * (delta - Cm * D2 / np.linalg.norm(D2, ord="fro"))
 
-    dadt_HD = (np.einsum('ik,kj->ij', W, a)
-               - np.einsum('ik,kj->ij', a, W)
-               + xi*(np.einsum('ik,kj->ij', D, a)
-                     + np.einsum('ik,kj->ij', a, D)
-                     - 2*np.einsum('ijkl,kl->ij', A, D)))
+    dadt_HD = (
+        np.einsum("ik,kj->ij", W, a)
+        - np.einsum("ik,kj->ij", a, W)
+        + xi
+        * (
+            np.einsum("ik,kj->ij", D, a)
+            + np.einsum("ik,kj->ij", a, D)
+            - 2 * np.einsum("ijkl,kl->ij", A, D)
+        )
+    )
 
-    dadt_iard = G*(2*Dr-2*np.trace(Dr)*a
-                   - 5*np.einsum('ik,kj->ij', Dr, a)
-                   - 5*np.einsum('ik,kj->ij', a, Dr)
-                   + 10*np.einsum('ijkl,kl->ij', A, Dr))
+    dadt_iard = G * (
+        2 * Dr
+        - 2 * np.trace(Dr) * a
+        - 5 * np.einsum("ik,kj->ij", Dr, a)
+        - 5 * np.einsum("ik,kj->ij", a, Dr)
+        + 10 * np.einsum("ijkl,kl->ij", A, Dr)
+    )
 
     dadt_temp = dadt_HD + dadt_iard
 
@@ -247,7 +287,7 @@ def iardrpr_ode(a, t, xi, L, Ci=0.0, Cm=0.0, alpha=0.0, beta=0.0):
     R = eigenVectors[:, idx]
 
     # Estimation of eigenvalue rates (rotated back)
-    dadt_diag = np.einsum('ik, kl, lj->ij', np.transpose(R), dadt_temp, R)
+    dadt_diag = np.einsum("ik, kl, lj->ij", np.transpose(R), dadt_temp, R)
 
     lbd0 = dadt_diag[0, 0]
     lbd1 = dadt_diag[1, 1]
@@ -255,11 +295,11 @@ def iardrpr_ode(a, t, xi, L, Ci=0.0, Cm=0.0, alpha=0.0, beta=0.0):
 
     # Computation of IOK tensor by rotation
     IOK = np.zeros((3, 3))
-    IOK[0, 0] = alpha*(lbd0-beta*(lbd0**2+2*lbd1*lbd2))
-    IOK[1, 1] = alpha*(lbd1-beta*(lbd1**2+2*lbd0*lbd2))
-    IOK[2, 2] = alpha*(lbd2-beta*(lbd2**2+2*lbd0*lbd1))
+    IOK[0, 0] = alpha * (lbd0 - beta * (lbd0 ** 2 + 2 * lbd1 * lbd2))
+    IOK[1, 1] = alpha * (lbd1 - beta * (lbd1 ** 2 + 2 * lbd0 * lbd2))
+    IOK[2, 2] = alpha * (lbd2 - beta * (lbd2 ** 2 + 2 * lbd0 * lbd1))
 
-    dadt_rpr = -np.einsum('ik, kl, lj->ij', R, IOK, np.transpose(R))
+    dadt_rpr = -np.einsum("ik, kl, lj->ij", R, IOK, np.transpose(R))
 
     dadt = dadt_temp + dadt_rpr
     return dadt.ravel()
@@ -290,27 +330,36 @@ def rsc_ode(a, t, xi, L, Ci=0.0, kappa=1.0):
     """
     a = np.reshape(a, (3, 3))
     A = compute_closure(a)
-    D = 0.5*(L(t)+np.transpose(L(t)))
-    W = 0.5*(L(t)-np.transpose(L(t)))
-    G = np.linalg.norm(D, ord='fro')
+    D = 0.5 * (L(t) + np.transpose(L(t)))
+    W = 0.5 * (L(t) - np.transpose(L(t)))
+    G = np.linalg.norm(D, ord="fro")
     delta = np.eye(3)
 
     w, v = np.linalg.eig(a)
-    L = (w[0]*np.einsum('i,j,k,l->ijkl', v[:, 0], v[:, 0], v[:, 0], v[:, 0])
-         + w[1]*np.einsum('i,j,k,l->ijkl', v[:, 1], v[:, 1], v[:, 1], v[:, 1])
-         + w[2]*np.einsum('i,j,k,l->ijkl', v[:, 2], v[:, 2], v[:, 2], v[:, 2]))
-    M = (np.einsum('i,j,k,l->ijkl', v[:, 0], v[:, 0], v[:, 0], v[:, 0])
-         + np.einsum('i,j,k,l->ijkl', v[:, 1], v[:, 1], v[:, 1], v[:, 1])
-         + np.einsum('i,j,k,l->ijkl', v[:, 2], v[:, 2], v[:, 2], v[:, 2]))
+    L = (
+        w[0] * np.einsum("i,j,k,l->ijkl", v[:, 0], v[:, 0], v[:, 0], v[:, 0])
+        + w[1] * np.einsum("i,j,k,l->ijkl", v[:, 1], v[:, 1], v[:, 1], v[:, 1])
+        + w[2] * np.einsum("i,j,k,l->ijkl", v[:, 2], v[:, 2], v[:, 2], v[:, 2])
+    )
+    M = (
+        np.einsum("i,j,k,l->ijkl", v[:, 0], v[:, 0], v[:, 0], v[:, 0])
+        + np.einsum("i,j,k,l->ijkl", v[:, 1], v[:, 1], v[:, 1], v[:, 1])
+        + np.einsum("i,j,k,l->ijkl", v[:, 2], v[:, 2], v[:, 2], v[:, 2])
+    )
 
-    tensor4 = A + (1.0-kappa)*(L-np.einsum('ijmn,mnkl->ijkl', M, A))
+    tensor4 = A + (1.0 - kappa) * (L - np.einsum("ijmn,mnkl->ijkl", M, A))
 
-    dadt = (np.einsum('ik,kj->ij', W, a)
-            - np.einsum('ik,kj->ij', a, W)
-            + xi*(np.einsum('ik,kj->ij', D, a)
-                  + np.einsum('ik,kj->ij', a, D)
-                  - 2*np.einsum('ijkl,kl->ij', tensor4, D))
-            + 2*kappa*Ci*G*(delta-3*a))
+    dadt = (
+        np.einsum("ik,kj->ij", W, a)
+        - np.einsum("ik,kj->ij", a, W)
+        + xi
+        * (
+            np.einsum("ik,kj->ij", D, a)
+            + np.einsum("ik,kj->ij", a, D)
+            - 2 * np.einsum("ijkl,kl->ij", tensor4, D)
+        )
+        + 2 * kappa * Ci * G * (delta - 3 * a)
+    )
     return dadt.ravel()
 
 
@@ -347,30 +396,41 @@ def ard_rsc_ode(a, t, xi, L, b1=0.0, kappa=1.0, b2=0, b3=0, b4=0, b5=0):
     """
     a = np.reshape(a, (3, 3))
     A = compute_closure(a)
-    D = 0.5*(L(t)+np.transpose(L(t)))
-    W = 0.5*(L(t)-np.transpose(L(t)))
-    G = np.linalg.norm(D, ord='fro')
+    D = 0.5 * (L(t) + np.transpose(L(t)))
+    W = 0.5 * (L(t) - np.transpose(L(t)))
+    G = np.linalg.norm(D, ord="fro")
     delta = np.eye(3)
 
     w, v = np.linalg.eig(a)
-    L = (w[0]*np.einsum('i,j,k,l->ijkl', v[:, 0], v[:, 0], v[:, 0], v[:, 0])
-         + w[1]*np.einsum('i,j,k,l->ijkl', v[:, 1], v[:, 1], v[:, 1], v[:, 1])
-         + w[2]*np.einsum('i,j,k,l->ijkl', v[:, 2], v[:, 2], v[:, 2], v[:, 2]))
-    M = (np.einsum('i,j,k,l->ijkl', v[:, 0], v[:, 0], v[:, 0], v[:, 0])
-         + np.einsum('i,j,k,l->ijkl', v[:, 1], v[:, 1], v[:, 1], v[:, 1])
-         + np.einsum('i,j,k,l->ijkl', v[:, 2], v[:, 2], v[:, 2], v[:, 2]))
-    C = b1*delta + b2*a + b3*a*a + b4*D/G + b5*D*D/(G*G)
+    L = (
+        w[0] * np.einsum("i,j,k,l->ijkl", v[:, 0], v[:, 0], v[:, 0], v[:, 0])
+        + w[1] * np.einsum("i,j,k,l->ijkl", v[:, 1], v[:, 1], v[:, 1], v[:, 1])
+        + w[2] * np.einsum("i,j,k,l->ijkl", v[:, 2], v[:, 2], v[:, 2], v[:, 2])
+    )
+    M = (
+        np.einsum("i,j,k,l->ijkl", v[:, 0], v[:, 0], v[:, 0], v[:, 0])
+        + np.einsum("i,j,k,l->ijkl", v[:, 1], v[:, 1], v[:, 1], v[:, 1])
+        + np.einsum("i,j,k,l->ijkl", v[:, 2], v[:, 2], v[:, 2], v[:, 2])
+    )
+    C = b1 * delta + b2 * a + b3 * a * a + b4 * D / G + b5 * D * D / (G * G)
 
-    tensor4 = A + (1.0-kappa)*(L-np.einsum('ijmn,mnkl->ijkl', M, A))
+    tensor4 = A + (1.0 - kappa) * (L - np.einsum("ijmn,mnkl->ijkl", M, A))
 
-    dadt = (np.einsum('ik,kj->ij', W, a)
-            - np.einsum('ik,kj->ij', a, W)
-            + xi*(np.einsum('ik,kj->ij', D, a)
-                  + np.einsum('ik,kj->ij', a, D)
-                  - 2*np.einsum('ijkl,kl->ij', tensor4, D))
-            + G*(2*(C-(1-kappa)*np.einsum('ijkl,kl->ij', M, C))
-                 - 2*kappa*np.trace(C)*a
-                 - 5*(np.einsum('ik,kj->ij', C, a)
-                      + np.einsum('ik,kj->ij', a, C))
-                 + 10*np.einsum('ijkl,kl->ij', tensor4, C)))
+    dadt = (
+        np.einsum("ik,kj->ij", W, a)
+        - np.einsum("ik,kj->ij", a, W)
+        + xi
+        * (
+            np.einsum("ik,kj->ij", D, a)
+            + np.einsum("ik,kj->ij", a, D)
+            - 2 * np.einsum("ijkl,kl->ij", tensor4, D)
+        )
+        + G
+        * (
+            2 * (C - (1 - kappa) * np.einsum("ijkl,kl->ij", M, C))
+            - 2 * kappa * np.trace(C) * a
+            - 5 * (np.einsum("ik,kj->ij", C, a) + np.einsum("ik,kj->ij", a, C))
+            + 10 * np.einsum("ijkl,kl->ij", tensor4, C)
+        )
+    )
     return dadt.ravel()
