@@ -1,34 +1,33 @@
+# -*- coding: utf-8 -*-
 """Testing re-orientation in shearflow."""
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+from fiberpy.fit import fit_optimal_params
+from fiberpy.orientation import get_zhang_aspect_ratio, rsc_ode
+
 # import tikzplotlib
 
-from fiberpy.orientation import (rsc_ode,
-                                 # iardrpr_ode,
-                                 # maier_saupe_ode,
-                                 # folgar_tucker_ode,
-                                 )
-from fiberpy.fit import fit_optimal_params
 
-
-volfrac = "10"
-ar = 5.0
-xi = (ar**2 - 1)/(ar**2 + 1)
+volfrac = "30"
+ar = get_zhang_aspect_ratio(5)
+xi = (ar ** 2 - 1) / (ar ** 2 + 1)
+G = 1.0
 
 
 def L(t):
     """Velocity gradient."""
-    return np.array([[0.0, 0.0, 0.0],
-                     [3.3, 0.0, 0.0],
-                     [0.0, 0.0, 0.0]])
+    return np.array([[0.0, 0.0, 0.0], [G, 0.0, 0.0], [0.0, 0.0, 0.0]])
 
 
 # load simulation data
 data_list = []
-for i in range(5):
+for i in range(1):
     data_list.append(
-        np.loadtxt("data/volfrac%s/%d/rve_output/N.csv" % (volfrac, i+1),
-                   delimiter=','))
+        np.loadtxt(
+            "data/volfrac%s/%d/rve_output/N.csv" % (volfrac, i + 1),
+            delimiter=",",
+        )
+    )
 
 # array with shape: N_simulation, time_step, data_index .
 # data index 0 is time, others are orientation tensor components
@@ -48,8 +47,9 @@ std = np.std(data[:, :, 1:10], axis=0)
 # # 30% -> 0.00664119
 
 p0 = [0.005, 0.7]
-p_opt, N_rsc = fit_optimal_params(t, mean, rsc_ode, xi, L,
-                                  p0, ([0.0, 0.0], [0.1, 1.0]))
+p_opt, N_rsc = fit_optimal_params(
+    t, mean, rsc_ode, xi, L, p0, ([0.0, 0.0], [0.1, 1.0])
+)
 print("Optimal parameters for RSC: " + str(p_opt))
 # 1% ->  0.00262122  0.85292257
 # 10% -> 0.00515386  0.76019708
@@ -71,30 +71,45 @@ print("Optimal parameters for RSC: " + str(p_opt))
 # # 10% -> 0.00409046  0.03973743
 # # 30% -> 0.01098597  0.15316572
 
-labels = ["$A_{11}$", "$A_{12}$", "$A_{13}$",
-          "$A_{21}$", "$A_{22}$", "$A_{23}$",
-          "$A_{31}$", "$A_{32}$", "$A_{33}$"]
+labels = [
+    "$A_{11}$",
+    "$A_{12}$",
+    "$A_{13}$",
+    "$A_{21}$",
+    "$A_{22}$",
+    "$A_{23}$",
+    "$A_{31}$",
+    "$A_{32}$",
+    "$A_{33}$",
+]
 
 subplots = [0, 4, 8, 1]
 
-legend_list = ["RSC",
-               "SPH simulation"]
+legend_list = ["RSC", "SPH simulation"]
 
 plt.figure(figsize=(12, 3))
 for j, i in enumerate(subplots):
-    plt.subplot("14"+str(j+1))
+    plt.subplot("14" + str(j + 1))
     p = plt.plot(
-                 # t, N_ft[:, i],
-                 t, N_rsc[:, i],
-                 # t, N_iard[:, i],
-                 # t, N_ms[:, i],
-                 t, mean[:, i])
+        # t, N_ft[:, i],
+        G * t,
+        N_rsc[:, i],
+        # t, N_iard[:, i],
+        # t, N_ms[:, i],
+        G * t,
+        mean[:, i],
+    )
     color = p[1].get_color()
     for d in range(len(data_list)):
-        p = plt.plot(t, data[d, :, i+1], "k")
-    plt.fill_between(t, mean[:, i] + std[:, i], mean[:, i] - std[:, i],
-                     color=color, alpha=0.3)
-    plt.xlabel("Time $t$ in s")
+        p = plt.plot(G * t, data[d, :, i + 1], "k")
+    plt.fill_between(
+        G * t,
+        mean[:, i] + std[:, i],
+        mean[:, i] - std[:, i],
+        color=color,
+        alpha=0.3,
+    )
+    plt.xlabel("Strains")
     plt.title(labels[i])
     if i % 2 == 0:
         plt.ylim([0, 1])
