@@ -1,74 +1,53 @@
 # -*- coding: utf-8 -*-
-"""Testing re-orientation in shearflow."""
-import matplotlib.pyplot as plt
+"""Testing re-orientation in shearflow.
+
+You may want to compare this to Fig 5 in
+Jin Wang, John F. O'Gara, and Charles L. Tucker, 'An objective model
+for slow orientation kinetics in concentrated fiber suspensions:
+Theory and rheological evidence', Journal of Rheology 52, 1179, 2008.
+https://doi.org/10.1122/1.2946437
+"""
 import numpy as np
-from fiberpy.orientation import (
-    ard_rsc_ode,
-    folgar_tucker_ode,
-    iard_ode,
-    iardrpr_ode,
-    jeffery_ode,
-    maier_saupe_ode,
-    rsc_ode,
-)
+
+import matplotlib.pyplot as plt
+from fiberpy.constants import COMPS
+from fiberpy.orientation import (ard_rsc_ode, folgar_tucker_ode, iard_ode,
+                                 iardrpr_ode, jeffery_ode, maier_saupe_ode,
+                                 rsc_ode)
+from matplotlib import cm
 from scipy.integrate import odeint
 
-ar = 5.0
-xi = (ar ** 2 - 1) / (ar ** 2 + 1)
+dark2 = cm.get_cmap("Dark2", 9)
+
+# shape factor
+xi = 1.0
 # time steps
-t = np.linspace(0, 10, 500)
+t = np.linspace(0, 400, 1000)
+# strain rate
+G = 1.0
+E = 0.1
 
 
 def L(t):
     """Velocity gradient."""
-    return np.array([[0.0, 0.0, 0.0], [3.3, 0.0, 0.0], [0.0, 0.0, 0.0]])
+    return np.array([[-E, 0.0, G], [0.0, E, 0.0], [0.0, 0.0, 0.0]])
 
 
-A0 = np.array([[1.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
+A0 = 1.0 / 3.0 * np.eye(3)
 
-# computed solution
-N_jef = odeint(jeffery_ode, A0.ravel(), t, args=(xi, L))
-N_ft = odeint(folgar_tucker_ode, A0.ravel(), t, args=(xi, L, 0.01))
-N_rsc = odeint(rsc_ode, A0.ravel(), t, args=(xi, L, 0.01))
-N_ard_rsc = odeint(ard_rsc_ode, A0.ravel(), t, args=(xi, L, 0.01))
-N_iard = odeint(iard_ode, A0.ravel(), t, args=(xi, L, 0.01))
-N_iardrpr = odeint(iardrpr_ode, A0.ravel(), t, args=(xi, L, 0.01))
-N_ms = odeint(maier_saupe_ode, A0.ravel(), t, args=(xi, L, 0.01))
+models = [folgar_tucker_ode, rsc_ode]
+labels = ["Folgar-Tucker", "RSC"]
+symbols = ["--", ":"]
+args = {"Ci": 0.01, "kappa": 0.1}
+components = ["A11", "A22", "A13"]
 
+for ode, lbl, smb in zip(models, labels, symbols):
+    N = odeint(lambda a, t: ode(a, t, xi, L, **args), A0.ravel(), t)
+    for c in components:
+        i = COMPS[c]
+        plt.plot(t, N[:, i], smb, color=dark2(i), label="%s %s" % (c, lbl))
 
-plt.plot(t, N_jef[:, 0], "-k", label="N11 Jeffery")
-plt.plot(t, N_ft[:, 0], "--k", label="N11 Folgar-Tucker")
-plt.plot(t, N_rsc[:, 0], ":k", label="N11 RSC")
-plt.plot(t, N_ard_rsc[:, 0], "-.k", label="N11 ARD-RSC")
-plt.plot(t, N_iard[:, 0], "*k", label="N11 iARD")
-plt.plot(t, N_iardrpr[:, 0], ".k", label="N11 iARD-RPR")
-plt.plot(t, N_ms[:, 0], "+k", label="N11 Maier-Saupe")
-
-# plt.plot(t, N_jef[:, 1], '-b', label='N12 Jeffery')
-# plt.plot(t, N_ft[:, 1], '--b', label='N12 Folgar-Tucker')
-# plt.plot(t, N_rsc[:, 1], ':b', label='N12 RSC')
-# plt.plot(t, N_ard_rsc[:, 1], '-.b', label='N12 ARD-RSC')
-# plt.plot(t, N_iard[:, 1], '*b', label='N12 iARD')
-# plt.plot(t, N_iardrpr[:, 1], '.b', label='N12 iARD-RPR')
-# plt.plot(t, N_ms[:, 1], '+b', label='N12 Maier-Saupe')
-
-# plt.plot(t, N_jef[:, 8], '-r', label='N33 Jeffery')
-# plt.plot(t, N_ft[:, 8], '--r', label='N33 Folgar-Tucker')
-# plt.plot(t, N_rsc[:, 8], ':r', label='N33 RSC')
-# plt.plot(t, N_ard_rsc[:, 8], '-.r', label='N33 ARD-RSC')
-# plt.plot(t, N_iard[:, 8], '*r', label='N33 iARD')
-# plt.plot(t, N_iardrpr[:, 8], '.r', label='N33 iARD-RPR')
-# plt.plot(t, N_ms[:, 8], '+r', label='N33 Maier-Saupe')
-
-# plt.plot(t, N_jef[:, 4], '-g', label='N22 Jeffery')
-# plt.plot(t, N_ft[:, 4], '--g', label='N22 Folgar-Tucker')
-# plt.plot(t, N_rsc[:, 4], ':g', label='N22 RSC')
-# plt.plot(t, N_ard_rsc[:, 4], '-.g', label='N22 ARD-RSC')
-# plt.plot(t, N_iard[:, 4], '*g', label='N22 iARD')
-# plt.plot(t, N_iardrpr[:, 4], '.g', label='N22 iARD-RPR')
-# plt.plot(t, N_ms[:, 4], '+g', label='N12 Maier-Saupe')
-
-plt.xlabel("Time $t$ in s")
+plt.xlabel("Strains")
 plt.ylim([0, 1])
 plt.grid()
 plt.legend()

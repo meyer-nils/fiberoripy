@@ -1,5 +1,7 @@
+"""Evaluate long range interaction term utilizing IBOF closure."""
 # -*- coding: utf-8 -*-
 import numpy as np
+
 from fiberpy.tensoroperations import IBOF_closure
 
 h0 = 0.005

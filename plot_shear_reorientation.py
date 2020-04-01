@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """Testing re-orientation in shearflow."""
-import matplotlib.pyplot as plt
 import numpy as np
+
+import matplotlib.pyplot as plt
+from fiberpy.constants import COMPS
 from fiberpy.orientation import folgar_tucker_ode, get_zhang_aspect_ratio
 from scipy.integrate import odeint
 
@@ -30,30 +32,14 @@ A0 = np.array([[1.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
 # computed solution
 N = odeint(folgar_tucker_ode, A0.ravel(), t, args=(xi, L, 0.0))
 
-# plots
-labels = [
-    "$N_{11}$",
-    "$N_{12}$",
-    "$N_{13}$",
-    "$N_{21}$",
-    "$N_{22}$",
-    "$N_{23}$",
-    "$N_{31}$",
-    "$N_{32}$",
-    "$N_{33}$",
-]
-
-subplots = [0, 1, 2, 4, 5, 8]
-
-legend_list = ["Jeffery"]
 
 plt.figure()
-for i in subplots:
+for c in ["A11", "A12", "A13", "A22", "A23", "A33"]:
+    i = COMPS[c]
     plt.subplot("33" + str(i + 1))
     p = plt.plot(t, N[:, i])
     plt.xlabel("Time $t$ in s")
-    plt.ylabel(labels[i])
+    plt.ylabel(c)
     plt.ylim([-1, 1])
-plt.legend(legend_list)
 plt.tight_layout()
 plt.show()

@@ -37,7 +37,7 @@ def get_gm_aspect_ratio(aspect_ratio):
     return 0.742 * aspect_ratio - 0.0017 * aspect_ratio ** 2
 
 
-def jeffery_ode(a, t, xi, L):
+def jeffery_ode(a, t, xi, L, **kwargs):
     """ODE describing Jeffery's model.
 
     Arguments
@@ -73,7 +73,7 @@ def jeffery_ode(a, t, xi, L):
     return dadt.ravel()
 
 
-def folgar_tucker_ode(a, t, xi, L, Ci=0.0):
+def folgar_tucker_ode(a, t, xi, L, Ci=0.0, **kwargs):
     """ODE describing the Folgar-Tucker model.
 
     Arguments
@@ -114,7 +114,7 @@ def folgar_tucker_ode(a, t, xi, L, Ci=0.0):
     return dadt.ravel()
 
 
-def maier_saupe_ode(a, t, xi, L, Ci=0.0, U0=0.0):
+def maier_saupe_ode(a, t, xi, L, Ci=0.0, U0=0.0, **kwargs):
     """ODE using Folgar-Tucker constant and Maier-Saupe potential.
 
     Arguments
@@ -164,7 +164,7 @@ def maier_saupe_ode(a, t, xi, L, Ci=0.0, U0=0.0):
     return dadt.ravel()
 
 
-def iard_ode(a, t, xi, L, Ci=0.0, Cm=0.0):
+def iard_ode(a, t, xi, L, Ci=0.0, Cm=0.0, **kwargs):
     """ODE describing iARD model.
 
     Arguments
@@ -221,7 +221,7 @@ def iard_ode(a, t, xi, L, Ci=0.0, Cm=0.0):
     return dadt.ravel()
 
 
-def iardrpr_ode(a, t, xi, L, Ci=0.0, Cm=0.0, alpha=0.0, beta=0.0):
+def iardrpr_ode(a, t, xi, L, Ci=0.0, Cm=0.0, alpha=0.0, beta=0.0, **kwargs):
     """ODE describing iARD-RPR model.
 
     Arguments
@@ -305,7 +305,7 @@ def iardrpr_ode(a, t, xi, L, Ci=0.0, Cm=0.0, alpha=0.0, beta=0.0):
     return dadt.ravel()
 
 
-def rsc_ode(a, t, xi, L, Ci=0.0, kappa=1.0):
+def rsc_ode(a, t, xi, L, Ci=0.0, kappa=1.0, **kwargs):
     """ODE describing RSC model.
 
     Arguments
@@ -363,7 +363,9 @@ def rsc_ode(a, t, xi, L, Ci=0.0, kappa=1.0):
     return dadt.ravel()
 
 
-def ard_rsc_ode(a, t, xi, L, b1=0.0, kappa=1.0, b2=0, b3=0, b4=0, b5=0):
+def ard_rsc_ode(
+    a, t, xi, L, b1=0.0, kappa=1.0, b2=0, b3=0, b4=0, b5=0, **kwargs
+):
     """ODE describing ARD-RSC model.
 
     Arguments

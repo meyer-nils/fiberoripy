@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 """Testing re-orientation in shearflow."""
-import matplotlib.pyplot as plt
 import numpy as np
+
+import matplotlib.pyplot as plt
+from fiberpy.constants import COMPS
 from fiberpy.fit import fit_optimal_params
 from fiberpy.orientation import get_zhang_aspect_ratio, rsc_ode
+from matplotlib import cm
 
 # import tikzplotlib
 
+dark2 = cm.get_cmap("Dark2", 3)
 
 volfrac = "30"
 ar = get_zhang_aspect_ratio(5)
@@ -71,50 +75,29 @@ print("Optimal parameters for RSC: " + str(p_opt))
 # # 10% -> 0.00409046  0.03973743
 # # 30% -> 0.01098597  0.15316572
 
-labels = [
-    "$A_{11}$",
-    "$A_{12}$",
-    "$A_{13}$",
-    "$A_{21}$",
-    "$A_{22}$",
-    "$A_{23}$",
-    "$A_{31}$",
-    "$A_{32}$",
-    "$A_{33}$",
-]
-
-subplots = [0, 4, 8, 1]
+subplots = ["A11", "A22", "A33", "A12"]
 
 legend_list = ["RSC", "SPH simulation"]
 
 plt.figure(figsize=(12, 3))
-for j, i in enumerate(subplots):
+for j, c in enumerate(subplots):
+    i = COMPS[c]
     plt.subplot("14" + str(j + 1))
-    p = plt.plot(
-        # t, N_ft[:, i],
-        G * t,
-        N_rsc[:, i],
-        # t, N_iard[:, i],
-        # t, N_ms[:, i],
-        G * t,
-        mean[:, i],
-    )
-    color = p[1].get_color()
-    for d in range(len(data_list)):
-        p = plt.plot(G * t, data[d, :, i + 1], "k")
+    plt.plot(G * t, N_rsc[:, i], color=dark2(0))
+    plt.plot(G * t, mean[:, i], color=dark2(1))
+    # for d in range(len(data_list)):
+    #    p = plt.plot(G * t, data[d, :, i + 1], "k")
     plt.fill_between(
         G * t,
         mean[:, i] + std[:, i],
         mean[:, i] - std[:, i],
-        color=color,
+        color=dark2(1),
         alpha=0.3,
     )
     plt.xlabel("Strains")
-    plt.title(labels[i])
-    if i % 2 == 0:
-        plt.ylim([0, 1])
-    else:
-        plt.ylim([-1, 1])
+    plt.title(c)
+    plt.ylim([-(i % 2), 1])
+
 plt.legend(legend_list)
 plt.tight_layout()
 
