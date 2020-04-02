@@ -25,7 +25,7 @@ xi = 1.0
 t = np.linspace(0, 400, 1000)
 # strain rate
 G = 1.0
-E = 0.1
+E = 0.12
 
 
 def L(t):
@@ -47,7 +47,7 @@ for ode, lbl, smb in zip(models, labels, symbols):
         i = COMPS[c]
         plt.plot(t, N[:, i], smb, color=dark2(i), label="%s %s" % (c, lbl))
 
-plt.xlabel("Strains")
+plt.xlabel("Time t ")
 plt.ylim([0, 1])
 plt.grid()
 plt.legend()
