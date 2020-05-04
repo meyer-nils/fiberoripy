@@ -12,7 +12,7 @@ from scipy.integrate import odeint
 
 # import tikzplotlib
 
-dark2 = cm.get_cmap("Dark2", 3)
+dark2 = cm.get_cmap("Dark2", 2)
 
 ar = get_zhang_aspect_ratio(4.431135)
 xi = (ar ** 2 - 1) / (ar ** 2 + 1)
@@ -26,7 +26,7 @@ def L(t):
 
 # load simulation data
 data_list = []
-rootdir = "data/volfrac30"
+rootdir = "data/volfrac1"
 for subdir, dirs, files in os.walk(rootdir):
     for file in files:
         if file == "A.csv":
@@ -47,9 +47,9 @@ plt.figure(figsize=(12, 3))
 for j, c in enumerate(subplots):
     i = COMPS[c]
     plt.subplot("14" + str(j + 1))
-    plt.plot(G * t, A_ref[:, i], color=dark2(0))
     for d in range(len(data_list)):
-        plt.plot(G * t, data[d, :, i + 1], color=dark2(1))
+        plt.plot(G * t, data[d, :, i + 1], color=dark2(0))
+    plt.plot(G * t, A_ref[:, i], color=dark2(1))
     plt.xlabel("Strains")
     plt.title(c)
     plt.ylim([-(i % 2), 1])
