@@ -1,0 +1,1 @@
+{"args": ["--volfrac", "0.01", "--openmp", "--rot", "4"], "completed": true, "cpu_time": 3200.0656747817993, "output_dir": "/home/ol4022/rve_output", "fname": "rve"}
