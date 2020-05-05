@@ -10,10 +10,11 @@ from fiberpy.constants import COMPS
 from fiberpy.fit import fit_optimal_params
 from fiberpy.orientation import get_zhang_aspect_ratio, rsc_ode
 from matplotlib import cm
+from scipy.integrate import odeint
 
 dark2 = cm.get_cmap("Dark2", 2)
 
-ar = get_zhang_aspect_ratio(5)
+ar = get_zhang_aspect_ratio(4.431135)
 xi = (ar ** 2 - 1) / (ar ** 2 + 1)
 G = 1.0
 
@@ -25,7 +26,7 @@ def L(t):
 
 # load simulation data
 data_list = []
-rootdir = "data/volfrac30"
+rootdir = "data/volfrac10"
 file_name = os.path.join(rootdir, "README.md")
 pic_name = os.path.join(rootdir, "plot.png")
 for subdir, dirs, files in os.walk(rootdir):
@@ -40,6 +41,7 @@ data = np.array(data_list)
 data = np.array(data_list)
 
 # Compute mean values of simulation result at given times t.
+N0 = data[0, 0, 1:10]
 t = np.nanmean(data[:, :, 0], axis=0)
 mean = np.nanmean(data[:, :, 1:10], axis=0)
 std = np.std(data[:, :, 1:10], axis=0)
@@ -47,7 +49,10 @@ std = np.std(data[:, :, 1:10], axis=0)
 with open(file_name, "w") as f:
     f.write("# Fitting Results #\n")
 
-p0 = [0.005, 0.7]
+p0 = [0.001, 1.0]
+# p_opt = [0.001, 1.0]
+# N_rsc = odeint(rsc_ode, N0.ravel(), t, args=(xi, L, p_opt[0], p_opt[1]))
+# msg = "Manual fit"
 p_opt, N_rsc, msg = fit_optimal_params(
     t, mean, rsc_ode, xi, L, p0, ([0.0, 0.0], [0.1, 1.0])
 )
@@ -59,13 +64,13 @@ with open(file_name, "a") as f:
 
 subplots = ["A11", "A22", "A33", "A12"]
 
-legend_list = ["SPH simulation", "RSC"]
+legend_list = ["SPH", "RSC"]
 
 plt.figure(figsize=(12, 3))
 for j, c in enumerate(subplots):
     i = COMPS[c]
     plt.subplot("14" + str(j + 1))
-    plt.plot(G * t, mean[:, i], color=dark2(0))
+    plt.plot(G * t, mean[:, i], color=dark2(0), linewidth=2)
     plt.fill_between(
         G * t,
         mean[:, i] + std[:, i],
@@ -76,12 +81,15 @@ for j, c in enumerate(subplots):
     plt.xlabel("Strains")
     plt.title(c)
     plt.ylim([-(i % 2), 1])
-    plt.plot(G * t, N_rsc[:, i], color=dark2(1))
+    plt.xlim([0, 150])
+    plt.plot(G * t, N_rsc[:, i], color=dark2(1), linewidth=2)
 
-plt.legend(legend_list)
+    if j == 2:
+        plt.legend(legend_list)
+
 plt.tight_layout()
 plt.savefig(pic_name)
 
 # save tikz figure (width means individual subplot width!)
-tikzplotlib.save(pic_name.replace(".png", ".tex"), figurewidth='4.5cm')
+tikzplotlib.save(pic_name.replace(".png", ".tex"), figurewidth=r'\textwidth/4')
 plt.show()

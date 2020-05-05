@@ -1,1 +1,1 @@
-{"cpu_time": 3809.6611483097076, "output_dir": "/home/ol4022/rve_output", "args": ["--volfrac", "0.1", "--openmp", "--rot", "4"], "fname": "rve", "completed": true}
+{"output_dir": "/home/ol4022/rve_output", "cpu_time": 9590.19427394867, "fname": "rve", "args": ["--volfrac", "0.1", "--openmp", "--rot", "10"], "completed": true}

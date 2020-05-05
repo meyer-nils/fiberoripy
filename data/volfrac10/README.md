@@ -1,5 +1,5 @@
 # Fitting Results #
 ## RSC Model ##
-`ftol` termination condition is satisfied.
-C_i:   0.003268
-Kappa: 1.000000
+`xtol` termination condition is satisfied.
+C_i:   0.004632
+Kappa: 0.817659
