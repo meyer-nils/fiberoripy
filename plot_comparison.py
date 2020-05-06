@@ -10,8 +10,6 @@ from fiberpy.orientation import get_zhang_aspect_ratio, rsc_ode
 from matplotlib import cm
 from scipy.integrate import odeint
 
-# import tikzplotlib
-
 dark2 = cm.get_cmap("Dark2", 7)
 
 ar = get_zhang_aspect_ratio(4.431135)
@@ -66,7 +64,4 @@ for j, c in enumerate(subplots):
         plt.legend(legend_list)
 
 plt.tight_layout()
-
-# save tikz figure (width means individual subplot width!)
-# tikzplotlib.save('volfrac%s.tex' % volfrac, figurewidth='5cm')
 plt.show()

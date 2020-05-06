@@ -26,9 +26,10 @@ def L(t):
 
 # load simulation data
 data_list = []
-rootdir = "data/volfrac10"
+volfrac = "10"
+rootdir = "data/volfrac%s" % volfrac
 file_name = os.path.join(rootdir, "README.md")
-pic_name = os.path.join(rootdir, "plot.png")
+pic_name = os.path.join(rootdir, "volfrac%s.png" % volfrac)
 for subdir, dirs, files in os.walk(rootdir):
     for file in files:
         if file == "A.csv":
@@ -50,9 +51,6 @@ with open(file_name, "w") as f:
     f.write("# Fitting Results #\n")
 
 p0 = [0.001, 1.0]
-# p_opt = [0.001, 1.0]
-# N_rsc = odeint(rsc_ode, N0.ravel(), t, args=(xi, L, p_opt[0], p_opt[1]))
-# msg = "Manual fit"
 p_opt, N_rsc, msg = fit_optimal_params(
     t, mean, rsc_ode, xi, L, p0, ([0.0, 0.0], [0.1, 1.0])
 )
@@ -79,7 +77,7 @@ for j, c in enumerate(subplots):
         alpha=0.3,
     )
     plt.xlabel("Strains")
-    plt.title(c)
+    plt.title("$%s_{%s}$" % (c[0], c[1:]))
     plt.ylim([-(i % 2), 1])
     plt.xlim([0, 150])
     plt.plot(G * t, N_rsc[:, i], color=dark2(1), linewidth=2)
@@ -88,8 +86,7 @@ for j, c in enumerate(subplots):
         plt.legend(legend_list)
 
 plt.tight_layout()
-plt.savefig(pic_name)
-
 # save tikz figure (width means individual subplot width!)
-tikzplotlib.save(pic_name.replace(".png", ".tex"), figurewidth=r'\textwidth/4')
+tikzplotlib.save(pic_name.replace(".png", ".tex"), figurewidth=r"\textwidth/4")
+plt.savefig(pic_name)
 plt.show()
