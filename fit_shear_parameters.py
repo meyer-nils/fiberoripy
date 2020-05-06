@@ -26,7 +26,7 @@ def L(t):
 
 # load simulation data
 data_list = []
-volfrac = "10"
+volfrac = "30"
 rootdir = "data/volfrac%s" % volfrac
 file_name = os.path.join(rootdir, "README.md")
 pic_name = os.path.join(rootdir, "volfrac%s.png" % volfrac)
