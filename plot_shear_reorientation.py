@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 """Testing re-orientation in shearflow."""
+import os
+import sys
+
 import numpy as np
 
 import matplotlib.pyplot as plt
@@ -10,7 +13,7 @@ from scipy.integrate import odeint
 # shear rate
 gamma = 1.0
 # aspect ratio
-ar = 5
+ar = 9.75
 # equivalent aspect ratio
 are = get_zhang_aspect_ratio(ar)
 print("Equivalent aspect ratio is %f" % are)
@@ -22,9 +25,17 @@ print("Period for a quarter rotation is %f" % T)
 t = np.linspace(0, T, 500)
 
 
+if len(sys.argv) == 2:
+    path = os.path.abspath(sys.argv[1])
+    print("Comparing results to %s" % path)
+    A_comp = np.loadtxt(path, delimiter=",")
+else:
+    A_comp = np.array([0])
+
+
 def L(t):
     """Velocity gradient."""
-    return np.array([[0.0, 0.0, 0.0], [gamma, 0.0, 0.0], [0.0, 0.0, 0.0]])
+    return np.array([[0.0, gamma, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
 
 
 A0 = np.array([[1.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
@@ -37,7 +48,9 @@ plt.figure()
 for c in ["A11", "A12", "A13", "A22", "A23", "A33"]:
     i = COMPS[c]
     plt.subplot("33" + str(i + 1))
-    p = plt.plot(t, N[:, i])
+    plt.plot(t, N[:, i])
+    if A_comp.size > 1:
+        plt.plot(A_comp[:, 0], A_comp[:, i + 1])
     plt.xlabel("Time $t$ in s")
     plt.ylabel(c)
     plt.ylim([-1, 1])
