@@ -1,4 +1,5 @@
 build
 *.pyc
+*.egg-info
 
 fetch_data.sh
