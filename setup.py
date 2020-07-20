@@ -1,13 +1,19 @@
 # -*- coding: utf-8 -*-
 """Setup file."""
-from distutils.core import setup
+import setuptools
 
-setup(
+setuptools.setup(
     name="fiberpy",
-    version="0.1dev",
+    version="0.0.1",
     author="Nils Meyer",
     author_email="nils.meyer@kit.edu",
-    packages=["fiberpy",],
-    license="Creative Commons Attribution-Noncommercial-Share Alike license",
-    long_description=open("README.rst").read(),
+    description="Fiber orientation models and closures",
+    long_description=open("README.md").read(),
+    packages=["fiberpy"],
+    package_dir={"fiberpy": "fiberpy"},
+    install_requires=["numpy", "matplotlib"],
+    classifiers=[
+        "Programming Language :: Python :: 3",
+        "Operating System :: OS Independent",
+    ],
 )
