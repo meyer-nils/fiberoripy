@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
-"""Testing re-orientation in shearflow."""
+"""Fit parameters of orientation models to micro-simulation data.
+
+This result should match Figure 7 in:
+Meyer, N., Saburow, O., Hohberg, M., Hrymak, A., Henning, F., Kärger, L.:
+"Parameter Identification of Fiber Orientation Models Based on Direct Fiber
+Simulation with Smoothed Particle Hydrodynamics."
+Journal of Composites Science 4 (2020)
+DOI: 10.3390/jcs4020077
+"""
 import os
 
 import numpy as np
@@ -10,7 +18,6 @@ from fiberpy.constants import COMPS
 from fiberpy.fit import fit_optimal_params
 from fiberpy.orientation import get_zhang_aspect_ratio, rsc_ode
 from matplotlib import cm
-from scipy.integrate import odeint
 
 dark2 = cm.get_cmap("Dark2", 2)
 
