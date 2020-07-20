@@ -4,7 +4,7 @@
 The result should match Figure 5 in
 Wang, Jin, O’Gara, John F., Tucker, Charles L: "An objective model for slow
 orientation kinetics in concentrated fiber suspensions: Theory and rheological
-evidence", Journal of Rheology, Journal of Rheology 52, 1179, 2008:
+evidence", Journal of Rheology, 52, 1179, 2008:
 DOI: 10.1122/1.2946437.
 """
 import matplotlib.pyplot as plt
@@ -17,7 +17,7 @@ xi = 1.0
 t = np.linspace(0, 400, 500)
 
 
-A0 = np.array([[0.333, 0.0, 0.0], [0.0, 0.333, 0.0], [0.0, 0.0, 0.333]])
+A0 = 1.0 / 3.0 * np.eye(3)
 
 
 fig, axes = plt.subplots(3, 1, figsize=(4, 6))
@@ -31,11 +31,11 @@ for ax, ratio in zip(axes, [0.1, 0.12, 0.2]):
         )
 
     # computed solution
-    N_rsc = odeint(rsc_ode, A0.ravel(), t, args=(xi, L, 0.01, 0.1))
+    A = odeint(rsc_ode, A0.ravel(), t, args=(xi, L, 0.01, 0.1))
 
-    ax.plot(t, N_rsc[:, 0], label="N11 RSC")
-    ax.plot(t, N_rsc[:, 4], label="N22 RSC")
-    ax.plot(t, N_rsc[:, 2], label="N13 RSC")
+    ax.plot(t, A[:, 0], label="A11")
+    ax.plot(t, A[:, 4], label="A22")
+    ax.plot(t, A[:, 2], label="A13")
 
     ax.set_xlabel("Time $t$ in s")
     ax.set_ylim([0, 1])
