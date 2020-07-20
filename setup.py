@@ -11,7 +11,7 @@ setuptools.setup(
     long_description=open("README.md").read(),
     packages=["fiberpy"],
     package_dir={"fiberpy": "fiberpy"},
-    install_requires=["numpy", "matplotlib"],
+    install_requires=["numpy", "matplotlib", "scipy"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
