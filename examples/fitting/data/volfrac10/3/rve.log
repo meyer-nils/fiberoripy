@@ -25,12 +25,12 @@ INFO|2020-05-05 07:15:59,405|pysph.solver.application|Using equations:
 ----------------------------------------------------------------------
 [
 Group(equations=[
-    SummationDensity(dest='fluid', sources=['fluid', 'fibers']), 
+    SummationDensity(dest='fluid', sources=['fluid', 'fibers']),
     EBGVelocityReset(dest='fibers', sources=None)
 ],
     real=False, update_nnps=False, iterate=False, max_iterations=1, min_iterations=0, pre=None, post=None),
 Group(equations=[
-    StateEquation(dest='fluid', sources=None, p0=25.0, rho0=444444.44444444444, b=1.0), 
+    StateEquation(dest='fluid', sources=None, p0=25.0, rho0=444444.44444444444, b=1.0),
     SetWallVelocity(dest='fibers', sources=['fluid'])
 ],
     real=False, update_nnps=False, iterate=False, max_iterations=1, min_iterations=0, pre=None, post=None),
@@ -39,20 +39,20 @@ Group(equations=[
 ],
     real=False, update_nnps=False, iterate=False, max_iterations=1, min_iterations=0, pre=None, post=None),
 Group(equations=[
-    ComputeDistance(dest='fibers', sources=['fibers']), 
+    ComputeDistance(dest='fibers', sources=['fibers']),
     VelocityGradient(dest='fibers', sources=['fluid', 'fibers'])
 ],
     real=True, update_nnps=False, iterate=False, max_iterations=1, min_iterations=0, pre=None, post=None),
 Group(equations=[
-    MomentumEquationPressureGradient(dest='fluid', sources=['fluid', 'fibers'], pb=25.0, gx=0.0, gy=0.0, gz=0.0, tdamp=0.0), 
-    MomentumEquationViscosity(dest='fluid', sources=['fluid'], nu=2.25e-06), 
-    SolidWallNoSlipBC(dest='fluid', sources=['fibers'], nu=2.25e-06), 
-    MomentumEquationArtificialStress(dest='fluid', sources=['fluid']), 
-    MomentumEquationPressureGradient(dest='fibers', sources=['fluid', 'fibers'], pb=0.0, gx=0.0, gy=0.0, gz=0.0, tdamp=0.0), 
-    FiberViscousTraction(dest='fibers', sources=['fluid'], nu=2.25e-06), 
-    Tension(dest='fibers', sources=None, ea=5.641895835477564e-06), 
-    Bending(dest='fibers', sources=None, ei=4.489678053129166e-15), 
-    Contact(dest='fibers', sources=['fibers'], E=564.1895835477562, d=0.00011283791670955128, dim=3, pois=0.3, k=0.0, lim=0.5, eta0=1.0, dt=0.0005555555555555556), 
+    MomentumEquationPressureGradient(dest='fluid', sources=['fluid', 'fibers'], pb=25.0, gx=0.0, gy=0.0, gz=0.0, tdamp=0.0),
+    MomentumEquationViscosity(dest='fluid', sources=['fluid'], nu=2.25e-06),
+    SolidWallNoSlipBC(dest='fluid', sources=['fibers'], nu=2.25e-06),
+    MomentumEquationArtificialStress(dest='fluid', sources=['fluid']),
+    MomentumEquationPressureGradient(dest='fibers', sources=['fluid', 'fibers'], pb=0.0, gx=0.0, gy=0.0, gz=0.0, tdamp=0.0),
+    FiberViscousTraction(dest='fibers', sources=['fluid'], nu=2.25e-06),
+    Tension(dest='fibers', sources=None, ea=5.641895835477564e-06),
+    Bending(dest='fibers', sources=None, ei=4.489678053129166e-15),
+    Contact(dest='fibers', sources=['fibers'], E=564.1895835477562, d=0.00011283791670955128, dim=3, pois=0.3, k=0.0, lim=0.5, eta0=1.0, dt=0.0005555555555555556),
     Friction(dest='fibers', sources=None, J=1.1061032953945975e-14, dx=0.0001, mu=1.0, d=0.00011283791670955128)
 ],
     real=True, update_nnps=False, iterate=False, max_iterations=1, min_iterations=0, pre=None, post=None),
