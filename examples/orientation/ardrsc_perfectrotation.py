@@ -3,8 +3,9 @@
 
 The result should be a sine shape.
 """
-import matplotlib.pyplot as plt
 import numpy as np
+
+import matplotlib.pyplot as plt
 from fiberpy.orientation import ard_rsc_ode
 from scipy.integrate import odeint
 
