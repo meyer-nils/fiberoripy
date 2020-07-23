@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Collection of tools to handle fiber orientation tensors."""
+"""Collection of closure approximations."""
 import numpy as np
 
 

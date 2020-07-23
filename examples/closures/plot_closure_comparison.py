@@ -3,9 +3,8 @@
 import numpy as np
 
 import matplotlib.pyplot as plt
-from fiberpy.tensoroperations import (IBOF_closure, compute_closure,
-                                      hybrid_closure, linear_closure,
-                                      quadratic_closure)
+from fiberpy.closures import (IBOF_closure, compute_closure, hybrid_closure,
+                              linear_closure, quadratic_closure)
 from fiberpy.tensorplot import (plot_orbit2, plot_orbit4, plot_projection2,
                                 plot_projection4)
 from mpl_toolkits.mplot3d import Axes3D

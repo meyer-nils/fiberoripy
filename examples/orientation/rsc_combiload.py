@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Testing re-orientation in shearflow + elongation.
+u"""Testing re-orientation in shearflow + elongation.
 
 The result should match Figure 5 in
 Wang, Jin, O’Gara, John F., Tucker, Charles L: "An objective model for slow
@@ -7,8 +7,9 @@ orientation kinetics in concentrated fiber suspensions: Theory and rheological
 evidence", Journal of Rheology, 52, 1179, 2008:
 DOI: 10.1122/1.2946437.
 """
-import matplotlib.pyplot as plt
 import numpy as np
+
+import matplotlib.pyplot as plt
 from fiberpy.orientation import rsc_ode
 from scipy.integrate import odeint
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Fit parameters of orientation models to micro-simulation data.
+u"""Fit parameters of orientation models to micro-simulation data.
 
 This result should match Figure 7 in:
 Meyer, N., Saburow, O., Hohberg, M., Hrymak, A., Henning, F., Kärger, L.:
@@ -14,9 +14,10 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 import tikzplotlib
+from fiberpy.aspect_ratios import get_zhang_aspect_ratio
 from fiberpy.constants import COMPS
 from fiberpy.fit import fit_optimal_params
-from fiberpy.orientation import get_zhang_aspect_ratio, rsc_ode
+from fiberpy.orientation import rsc_ode
 from matplotlib import cm
 
 dark2 = cm.get_cmap("Dark2", 2)
