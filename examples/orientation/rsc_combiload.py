@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Testing re-orientation in shearflow.
+"""Testing re-orientation in shearflow + elongation.
 
 The result should match Figure 5 in
 Wang, Jin, O’Gara, John F., Tucker, Charles L: "An objective model for slow
