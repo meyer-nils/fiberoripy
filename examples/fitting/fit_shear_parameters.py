@@ -34,7 +34,11 @@ def L(t):
 # load simulation data
 data_list = []
 volfrac = "30"
-rootdir = "data/volfrac%s" % volfrac
+full_path = os.path.realpath(__file__)
+rootdir = os.path.join(
+    os.path.dirname(full_path), "data", "volfrac%s" % volfrac
+)
+print(rootdir)
 file_name = os.path.join(rootdir, "README.md")
 pic_name = os.path.join(rootdir, "volfrac%s.png" % volfrac)
 for subdir, dirs, files in os.walk(rootdir):
