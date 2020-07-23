@@ -52,7 +52,7 @@ def plot_orbit2(ax, *tensors):
         ax.set_ylabel("$x_2$")
         ax.set_zlabel("$x_3$")
         ax.set_title("Second Order Orientation Tensor")
-        ax.set_aspect(1.0)
+        # ax.set_aspect(1.0)
 
 
 def plot_orbit4(ax, *tensors):
@@ -77,7 +77,7 @@ def plot_orbit4(ax, *tensors):
         ax.set_ylabel("$x_2$")
         ax.set_zlabel("$x_3$")
         ax.set_title("Fourth Order Orientation Tensor")
-        ax.set_aspect(1.0)
+        # ax.set_aspect(1.0)
 
 
 def plot_projection2(ax, plane, *tensors):
