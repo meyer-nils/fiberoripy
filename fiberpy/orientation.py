@@ -414,7 +414,16 @@ def ard_rsc_ode(
         + np.einsum("i,j,k,l->ijkl", v[:, 1], v[:, 1], v[:, 1], v[:, 1])
         + np.einsum("i,j,k,l->ijkl", v[:, 2], v[:, 2], v[:, 2], v[:, 2])
     )
-    C = b1 * delta + b2 * a + b3 * a * a + b4 * D / G + b5 * D * D / (G * G)
+    if G > 0.0:
+        C = (
+            b1 * delta
+            + b2 * a
+            + b3 * a * a
+            + b4 * D / G
+            + b5 * D * D / (G * G)
+        )
+    else:
+        C = np.eye(3)
 
     tensor4 = A + (1.0 - kappa) * (L - np.einsum("ijmn,mnkl->ijkl", M, A))
 
