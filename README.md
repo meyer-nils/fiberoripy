@@ -8,7 +8,9 @@ This python package provides basic functionality and tools for fiber orientation
 closure models.
 
 For example,
+
     example/orientation/comparison_perfectshear.py
+
 should reproduce Figure 2 in *Favaloro, A.J., Tucker III, C.L., Composites Part A, 126 (2019)*:
 
   ![example_image](/docs/images/example.png)
