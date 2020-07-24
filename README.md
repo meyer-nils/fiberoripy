@@ -1,5 +1,5 @@
 [![LICENSE Badge](https://black.readthedocs.io/en/stable/_static/license.svg)](https://raw.github.com/nilsmeyerkit/fiberoripy/master/LICENSE)
-[![Black Badge](https://img.shields.io/badge/code%20style-black-000000.svg)][black]
+![Black Badge](https://img.shields.io/badge/code%20style-black-000000.svg)
 
 # Fiberoripy
 This python package provides basic functionality and tools for fiber orientations and
