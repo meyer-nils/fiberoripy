@@ -1,7 +1,5 @@
-<p align="center">
-<a href="https://github.com/psf/black/blob/master/LICENSE"><img alt="License: MIT" src="https://black.readthedocs.io/en/stable/_static/license.svg"></a>
-<a href="https://github.com/psf/black"><img alt="Code style: black" src="https://img.shields.io/badge/code%20style-black-000000.svg"></a>
-</p>
+[![LICENSE Badge](https://black.readthedocs.io/en/stable/_static/license.svg)](https://raw.github.com/nilsmeyerkit/fiberoripy/master/LICENSE)
+[![Black Badge](https://img.shields.io/badge/code%20style-black-000000.svg)][black]
 
 # Fiberoripy
 This python package provides basic functionality and tools for fiber orientations and
@@ -13,7 +11,7 @@ For example,
 
 should reproduce Figure 2 in *Favaloro, A.J., Tucker III, C.L., Composites Part A, 126 (2019)*:
 
-  ![example_image](/docs/images/example.png)
+  ![example_image](https://raw.github.com/nilsmeyerkit/fiberoripy/master/docs/images/example.png)
 
 
 ## Orientation models
