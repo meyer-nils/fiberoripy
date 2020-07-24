@@ -7,6 +7,13 @@
 This python package provides basic functionality and tools for fiber orientations and
 closure models.
 
+For example,
+    example/orientation/comparison_perfectshear.py
+should reproduce Figure 2 in *Favaloro, A.J., Tucker III, C.L., Composites Part A, 126 (2019)*:
+
+  ![example_image](/docs/images/example.png)
+
+
 ## Orientation models
 Following models have been implemented:
 
@@ -29,4 +36,3 @@ Following models have been implemented:
  * __Cox__: Cox, R.G. The motion of long slender bodies in a viscous fluid. Part 2. Shear flow. J. Fluid Mech. 1971, 45, 625–657.(http://doi.org/10.1017/S0022112071000259)
  * __Zhang__: Zhang, D.; Smith, D.E.; Jack, D.A.; Montgomery-Smith, S. Numerical Evaluation of Single Fiber Motion for Short-Fiber-Reinforced Composite Materials Processing. J. Manuf. Sci. Eng. 2011, 133, 51002.(http://doi.org/10.1115/1.4004831)
  * __Goldsmith-Mason__: Forgacs, O.; Mason, S. Particle motions in sheared suspensions. J. Colloid Sci. 1959, 14, 457–472.(http://doi.org/10.1016/0095-8522(59)90012-1)
- 
