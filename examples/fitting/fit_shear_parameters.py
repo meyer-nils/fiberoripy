@@ -14,10 +14,10 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 import tikzplotlib
-from fiberpy.aspect_ratios import get_zhang_aspect_ratio
-from fiberpy.constants import COMPS
-from fiberpy.fit import fit_optimal_params
-from fiberpy.orientation import rsc_ode
+from fiberoripy.aspect_ratios import get_zhang_aspect_ratio
+from fiberoripy.constants import COMPS
+from fiberoripy.fit import fit_optimal_params
+from fiberoripy.orientation import rsc_ode
 from matplotlib import cm
 
 dark2 = cm.get_cmap("Dark2", 2)

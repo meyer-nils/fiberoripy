@@ -10,7 +10,7 @@ DOI: 10.1122/1.4939098
 import numpy as np
 
 import matplotlib.pyplot as plt
-from fiberpy.orientation import ard_rsc_ode, iardrpr_ode
+from fiberoripy.orientation import ard_rsc_ode, iardrpr_ode
 from scipy.integrate import odeint
 
 xi = 1.0

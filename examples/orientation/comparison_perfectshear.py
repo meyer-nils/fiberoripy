@@ -9,8 +9,8 @@ DOI: 10.1016/j.compositea.2019.105605
 import numpy as np
 
 import matplotlib.pyplot as plt
-from fiberpy.orientation import (ard_rsc_ode, folgar_tucker_ode, iard_ode,
-                                 mrd_ode, pard_ode)
+from fiberoripy.orientation import (ard_rsc_ode, folgar_tucker_ode, iard_ode,
+                                    mrd_ode, pard_ode)
 from scipy.integrate import odeint
 
 xi = 1.0

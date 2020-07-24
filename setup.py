@@ -3,14 +3,14 @@
 import setuptools
 
 setuptools.setup(
-    name="fiberpy",
-    version="0.0.1",
+    name="fiberoripy",
+    version="1.0.0",
     author="Nils Meyer",
     author_email="nils.meyer@kit.edu",
     description="Fiber orientation models and closures",
     long_description=open("README.md").read(),
-    packages=["fiberpy"],
-    package_dir={"fiberpy": "fiberpy"},
+    packages=["fiberoripy"],
+    package_dir={"fiberoripy": "fiberoripy"},
     install_requires=["numpy", "matplotlib", "scipy"],
     classifiers=[
         "Programming Language :: Python :: 3",

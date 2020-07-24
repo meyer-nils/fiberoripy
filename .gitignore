@@ -1,5 +1,5 @@
 build
-fiberpy.egg-info
+fiberoripy.egg-info
 *.pyc
 *.egg-info
 
