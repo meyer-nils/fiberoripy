@@ -65,7 +65,7 @@ def folgar_tucker_ode(a, t, xi, L, Ci=0.0, **kwargs):
     A = compute_closure(a)
     D = 0.5 * (L(t) + np.transpose(L(t)))
     W = 0.5 * (L(t) - np.transpose(L(t)))
-    G = np.linalg.norm(D, ord="fro")
+    G = np.sqrt(2.0 * np.einsum("ij,ij", D, D))
     delta = np.eye(3)
 
     dadt = (
@@ -109,7 +109,7 @@ def maier_saupe_ode(a, t, xi, L, Ci=0.0, U0=0.0, **kwargs):
     A = compute_closure(a)
     D = 0.5 * (L(t) + np.transpose(L(t)))
     W = 0.5 * (L(t) - np.transpose(L(t)))
-    G = np.linalg.norm(D, ord="fro")
+    G = np.sqrt(2.0 * np.einsum("ij,ij", D, D))
     delta = np.eye(3)
 
     dadt = (
@@ -159,12 +159,13 @@ def iard_ode(a, t, xi, L, Ci=0.0, Cm=0.0, **kwargs):
     A = compute_closure(a)
     D = 0.5 * (L(t) + np.transpose(L(t)))
     W = 0.5 * (L(t) - np.transpose(L(t)))
-    G = np.linalg.norm(D, ord="fro")
+    G = np.sqrt(2.0 * np.einsum("ij,ij", D, D))
     delta = np.eye(3)
 
     D2 = np.einsum("ik,kj->ij", D, D)
+    D2_norm = np.sqrt(1.0 / 2.0 * np.einsum("ij,ij", D2, D2))
 
-    Dr = Ci * (delta - Cm * D2 / np.linalg.norm(D2, ord="fro"))
+    Dr = Ci * (delta - Cm * D2 / D2_norm)
 
     dadt_HD = (
         np.einsum("ik,kj->ij", W, a)
@@ -220,12 +221,13 @@ def iardrpr_ode(a, t, xi, L, Ci=0.0, Cm=0.0, alpha=0.0, beta=0.0, **kwargs):
     A = compute_closure(a)
     D = 0.5 * (L(t) + np.transpose(L(t)))
     W = 0.5 * (L(t) - np.transpose(L(t)))
-    G = np.linalg.norm(D, ord="fro")
+    G = np.sqrt(2.0 * np.einsum("ij,ij", D, D))
     delta = np.eye(3)
 
     D2 = np.einsum("ik,kj->ij", D, D)
+    D2_norm = np.sqrt(1.0 / 2.0 * np.einsum("ij,ij", D2, D2))
 
-    Dr = Ci * (delta - Cm * D2 / np.linalg.norm(D2, ord="fro"))
+    Dr = Ci * (delta - Cm * D2 / D2_norm)
 
     dadt_HD = (
         np.einsum("ik,kj->ij", W, a)
@@ -300,7 +302,7 @@ def rsc_ode(a, t, xi, L, Ci=0.0, kappa=1.0, **kwargs):
     A = compute_closure(a)
     D = 0.5 * (L(t) + np.transpose(L(t)))
     W = 0.5 * (L(t) - np.transpose(L(t)))
-    G = np.linalg.norm(D, ord="fro")
+    G = np.sqrt(2.0 * np.einsum("ij,ij", D, D))
     delta = np.eye(3)
 
     w, v = np.linalg.eig(a)
@@ -368,7 +370,7 @@ def ard_rsc_ode(
     A = compute_closure(a)
     D = 0.5 * (L(t) + np.transpose(L(t)))
     W = 0.5 * (L(t) - np.transpose(L(t)))
-    G = np.linalg.norm(D, ord="fro")
+    G = np.sqrt(2.0 * np.einsum("ij,ij", D, D))
     delta = np.eye(3)
 
     w, v = np.linalg.eig(a)
