@@ -1,6 +1,14 @@
 [project]
-name = "Fiber Bundle Simulation"
+name = "fiberoripy"
+version = "1.0.2"
+description = "Fiber orientation models and closures"
 authors = ["Nils Meyer <nils.meyer@kit.edu>"]
+license = "MIT"
+readme = "README.md"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
 
 [tool.isort]
 line_length = 79
