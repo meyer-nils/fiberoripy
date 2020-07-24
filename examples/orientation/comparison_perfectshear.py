@@ -2,9 +2,9 @@
 """Testing re-orientation in shearflow.
 
 The result should match Figure 2 in
-Favaloro, A.J., Tucker, C.L.: "Analysis of anisotropic diffusion models for fiber
+Favaloro, A.J., Tucker III, C.L.: "Analysis of anisotropic diffusion models for fiber
 orientation", Composites Part A, 126 (2019):
-DOI: 10.1016/j.compositea.2019.105605
+DOI: 10.1016/j.compositesa.2019.105605
 """
 import numpy as np
 
