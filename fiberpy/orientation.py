@@ -386,9 +386,9 @@ def ard_rsc_ode(
         C = (
             b1 * delta
             + b2 * a
-            + b3 * a * a
+            + b3 * np.einsum("ik,kj->ij", a, a)
             + b4 * D / G
-            + b5 * D * D / (G * G)
+            + b5 * np.einsum("ik,kj->ij", D, D) / (G * G)
         )
     else:
         C = np.eye(3)
