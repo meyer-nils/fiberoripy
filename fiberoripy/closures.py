@@ -102,9 +102,10 @@ def IBOF_closure(A):
 
     This function utilizes a invariant based optimal fitting closure to
     generate a fourth order tensor from a second order tensor.
-    Reference: Chung & Kwon paper about 'Invariant-based optimal fitting
+    Reference: Du Hwan ChungTai, Hun Kwon: 'Invariant-based optimal fitting
     closure approximation for the numerical prediction of flow-induced fiber
-    orientation
+    orientation', Journal of Rheology 46(1):169-194,
+    DOI: 10.1122/1.1423312
 
     Input:
     A : 3x3 fiber orientation tensor
