@@ -236,38 +236,31 @@ def iardrpr_ode(a, t, xi, L, Ci=0.0, Cm=0.0, alpha=0.0, beta=0.0, **kwargs):
         * (
             np.einsum("ik,kj->ij", D, a)
             + np.einsum("ik,kj->ij", a, D)
-            - 2 * np.einsum("ijkl,kl->ij", A, D)
+            - 2.0 * np.einsum("ijkl,kl->ij", A, D)
         )
     )
 
     dadt_iard = G * (
-        2 * Dr
-        - 2 * np.trace(Dr) * a
-        - 5 * np.einsum("ik,kj->ij", Dr, a)
-        - 5 * np.einsum("ik,kj->ij", a, Dr)
-        + 10 * np.einsum("ijkl,kl->ij", A, Dr)
+        2.0 * Dr
+        - 2.0 * np.trace(Dr) * a
+        - 5.0 * np.einsum("ik,kj->ij", Dr, a)
+        - 5.0 * np.einsum("ik,kj->ij", a, Dr)
+        + 10.0 * np.einsum("ijkl,kl->ij", A, Dr)
     )
 
     dadt_temp = dadt_HD + dadt_iard
 
     # Spectral Decomposition
-    eigenValues, eigenVectors = np.linalg.eig(a)
+    eigenValues, eigenVectors = np.linalg.eig(dadt_temp)
     idx = eigenValues.argsort()[::-1]
-    eigenValues = eigenValues[idx]
+    lbd0, lbd1, lbd2 = eigenValues[idx]
     R = eigenVectors[:, idx]
-
-    # Estimation of eigenvalue rates (rotated back)
-    dadt_diag = np.einsum("ik, kl, lj->ij", np.transpose(R), dadt_temp, R)
-
-    lbd0 = dadt_diag[0, 0]
-    lbd1 = dadt_diag[1, 1]
-    lbd2 = dadt_diag[2, 2]
 
     # Computation of IOK tensor by rotation
     IOK = np.zeros((3, 3))
-    IOK[0, 0] = alpha * (lbd0 - beta * (lbd0 ** 2 + 2 * lbd1 * lbd2))
-    IOK[1, 1] = alpha * (lbd1 - beta * (lbd1 ** 2 + 2 * lbd0 * lbd2))
-    IOK[2, 2] = alpha * (lbd2 - beta * (lbd2 ** 2 + 2 * lbd0 * lbd1))
+    IOK[0, 0] = alpha * (lbd0 - beta * (lbd0 ** 2.0 + 2.0 * lbd1 * lbd2))
+    IOK[1, 1] = alpha * (lbd1 - beta * (lbd1 ** 2.0 + 2.0 * lbd0 * lbd2))
+    IOK[2, 2] = alpha * (lbd2 - beta * (lbd2 ** 2.0 + 2.0 * lbd0 * lbd1))
 
     dadt_rpr = -np.einsum("ik, kl, lj->ij", R, IOK, np.transpose(R))
 
