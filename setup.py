@@ -10,7 +10,7 @@ with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
 
 setuptools.setup(
     name="fiberoripy",
-    version="1.0.2",
+    version="1.0.3",
     author="Nils Meyer",
     author_email="nils.meyer@kit.edu",
     description="Fiber orientation models and closures",
