@@ -7,11 +7,11 @@ anisotropic fiber orientation in concentrated suspensions",
 Journal of Rheology 60, 215 (2016):
 DOI: 10.1122/1.4939098
 """
-import numpy as np
-
 import matplotlib.pyplot as plt
-from fiberoripy.orientation import ard_rsc_ode, iardrpr_ode
+import numpy as np
 from scipy.integrate import odeint
+
+from fiberoripy.orientation import ard_rsc_ode, iardrpr_ode
 
 xi = 1.0
 # time steps

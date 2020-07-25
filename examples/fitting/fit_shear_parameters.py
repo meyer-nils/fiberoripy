@@ -10,15 +10,15 @@ DOI: 10.3390/jcs4020077
 """
 import os
 
-import numpy as np
-
 import matplotlib.pyplot as plt
+import numpy as np
 import tikzplotlib
+from matplotlib import cm
+
 from fiberoripy.aspect_ratios import get_zhang_aspect_ratio
 from fiberoripy.constants import COMPS
 from fiberoripy.fit import fit_optimal_params
 from fiberoripy.orientation import rsc_ode
-from matplotlib import cm
 
 dark2 = cm.get_cmap("Dark2", 2)
 

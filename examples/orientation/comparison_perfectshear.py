@@ -6,12 +6,17 @@ Favaloro, A.J., Tucker III, C.L.: "Analysis of anisotropic diffusion models for 
 orientation", Composites Part A, 126 (2019):
 DOI: 10.1016/j.compositesa.2019.105605
 """
-import numpy as np
-
 import matplotlib.pyplot as plt
-from fiberoripy.orientation import (ard_rsc_ode, folgar_tucker_ode, iard_ode,
-                                    mrd_ode, pard_ode)
+import numpy as np
 from scipy.integrate import odeint
+
+from fiberoripy.orientation import (
+    ard_rsc_ode,
+    folgar_tucker_ode,
+    iard_ode,
+    mrd_ode,
+    pard_ode,
+)
 
 xi = 1.0
 # time steps

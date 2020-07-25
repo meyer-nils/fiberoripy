@@ -1,13 +1,22 @@
 # -*- coding: utf-8 -*-
 """Plotting fiber orientation tensors and closure."""
-import numpy as np
-
 import matplotlib.pyplot as plt
-from fiberoripy.closures import (IBOF_closure, compute_closure, hybrid_closure,
-                              linear_closure, quadratic_closure)
-from fiberoripy.tensorplot import (plot_orbit2, plot_orbit4, plot_projection2,
-                                plot_projection4)
+import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
+
+from fiberoripy.closures import (
+    IBOF_closure,
+    compute_closure,
+    hybrid_closure,
+    linear_closure,
+    quadratic_closure,
+)
+from fiberoripy.tensorplot import (
+    plot_orbit2,
+    plot_orbit4,
+    plot_projection2,
+    plot_projection4,
+)
 
 a = 1.0 / 3.0 * np.eye(3)
 A = compute_closure(a, "RANDOM", N=100)

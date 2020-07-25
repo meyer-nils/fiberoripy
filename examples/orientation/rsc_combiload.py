@@ -7,11 +7,11 @@ orientation kinetics in concentrated fiber suspensions: Theory and rheological
 evidence", Journal of Rheology, 52, 1179, 2008:
 DOI: 10.1122/1.2946437.
 """
-import numpy as np
-
 import matplotlib.pyplot as plt
-from fiberoripy.orientation import rsc_ode
+import numpy as np
 from scipy.integrate import odeint
+
+from fiberoripy.orientation import rsc_ode
 
 xi = 1.0
 # time steps

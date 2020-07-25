@@ -7,11 +7,11 @@ model for fiber orientation in short- and long-fiber thermoplastics",
 Journal of Non-Newtonian Fluid Mechanics, 156, 3, 2009:
 DOI: 10.1016/j.jnnfm.2008.08.002.
 """
-import numpy as np
-
 import matplotlib.pyplot as plt
-from fiberoripy.orientation import ard_rsc_ode
+import numpy as np
 from scipy.integrate import odeint
+
+from fiberoripy.orientation import ard_rsc_ode
 
 xi = 1.0
 # time steps

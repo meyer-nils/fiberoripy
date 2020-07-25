@@ -3,11 +3,11 @@
 
 The result should be a sine shape.
 """
-import numpy as np
-
 import matplotlib.pyplot as plt
-from fiberoripy.orientation import ard_rsc_ode
+import numpy as np
 from scipy.integrate import odeint
+
+from fiberoripy.orientation import ard_rsc_ode
 
 xi = 1.0
 # time steps
