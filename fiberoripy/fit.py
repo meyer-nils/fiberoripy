@@ -18,15 +18,27 @@ def compute_error(params, t, reference, ode, xi, L):
 def fit_optimal_params(t, reference, ode, xi, L, params, bounds):
     """Apply least-squares optimization to find optimal parameters.
 
-    Args
-    ----
-        reference: Reference solution for each time step to be fitted.
+    Parameters
+    ----------
+    t : numpy array
+        Desired output times.
+    reference : numpy array
+        Reference solution for each time step to be fitted.
+    ode : function handle
+        function that describes the fiber orientation model, e.g. 'folgar_tucker_ode'.
+    xi : float
+        shape_factor
+    L : function hanlde
+        Velocity gradient as function of time.
+    params : list of float
+        parameters passed for optimization.
+    bounds : tuple of list of floats
+        Upper and lower bounds of the parameters for optimization.
 
-        ode: function that describes the fiber orientation model
-
-        xi (double): shape factor
-
-        L: function that describes the velocity gradient
+    Returns
+    -------
+    list
+        Optimal parameter set, resulting fiber orientation evolution, optimization message.
 
     """
     opt = least_squares(
@@ -38,5 +50,5 @@ def fit_optimal_params(t, reference, ode, xi, L, params, bounds):
     )
 
     A0 = reference[0, :]
-    N = odeint(ode, A0, t, args=(xi, L) + tuple(opt.x))
-    return [opt.x, N, opt.message]
+    A = odeint(ode, A0, t, args=(xi, L) + tuple(opt.x))
+    return [opt.x, A, opt.message]

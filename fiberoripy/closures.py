@@ -4,7 +4,21 @@ import numpy as np
 
 
 def compute_closure(a, closure="IBOF", N=1000):
-    """Create a fourth order tensor from a second order tensor."""
+    """Create a fourth order tensor from a second order tensor.
+
+    This is essentially a wrapper around all closures.
+
+    Parameters
+    ----------
+    A : 3x3 numpy array
+        Second order fiber orientation tensor.
+
+    Returns
+    -------
+    3x3x3x3 numpy array
+        Fourth order fiber orientation tensor.
+
+    """
     # assertation
     assert closure in ("IBOF", "LINEAR", "HYBRID", "QUADRATIC", "RANDOM")
     if closure == "IBOF":
@@ -20,7 +34,14 @@ def compute_closure(a, closure="IBOF", N=1000):
 
 
 def assert_fot_properties(A):
-    """Assert fiber properties."""
+    """Assert properties of second order input tensor.
+
+    Parameters
+    ----------
+    A : 3x3 numpy array
+        Second order fiber orientation tensor.
+
+    """
     # assert symmetry and shape
     assert np.shape(A) == (3, 3)
     # assert(A[0, 1] == A[1, 0])
@@ -29,7 +50,19 @@ def assert_fot_properties(A):
 
 
 def random_closure(a, N=1000):
-    """Sample a random fiber orientaion given a."""
+    """Sample a random fiber orientation and compute fourth order tensor.
+
+    Parameters
+    ----------
+    A : 3x3 numpy array
+        Second order fiber orientation tensor.
+
+    Returns
+    -------
+    3x3x3x3 numpy array
+        Fourth order fiber orientation tensor.
+
+    """
     orientations = []
     for i in range(N):
         phi = np.random.uniform(0, np.pi * 2)
@@ -54,9 +87,25 @@ def random_closure(a, N=1000):
 def linear_closure(A):
     """Generate a linear closure.
 
-    This is appropiate for UD directed fibers. See 'Modified hybrid closure
-    approximation for prediction of flow-induced fiber orientation'
-    - Kyeong-Hee Han and Yong-Taek Im
+    Parameters
+    ----------
+    A : 3x3 numpy array
+        Second order fiber orientation tensor.
+
+    Returns
+    -------
+    3x3x3x3 numpy array
+        Fourth order fiber orientation tensor.
+
+
+    References
+    ----------
+    .. [1] Kyeong-Hee Han and Yong-Taek Im,
+       'Modified hybrid closure approximation for prediction of flow-induced
+       fiber orientation'
+       Journal of Rheology 43, 569 (1999)
+       https://doi.org/10.1122/1.551002
+
     """
     assert_fot_properties(A)
 
@@ -76,11 +125,27 @@ def linear_closure(A):
 
 
 def quadratic_closure(A):
-    """Generate a linear closure.
+    """Generate a quadratic closure.
 
-    This is appropiate for isotropic orientation states. See 'Modified hybrid
-    closure approximation for prediction of flow-induced fiber orientation'
-    ~ Kyeong-Hee Han and Yong-Taek Im
+    Parameters
+    ----------
+    A : 3x3 numpy array
+        Second order fiber orientation tensor.
+
+    Returns
+    -------
+    3x3x3x3 numpy array
+        Fourth order fiber orientation tensor.
+
+
+    References
+    ----------
+    .. [1] Kyeong-Hee Han and Yong-Taek Im,
+       'Modified hybrid closure approximation for prediction of flow-induced
+       fiber orientation'
+       Journal of Rheology 43, 569 (1999)
+       https://doi.org/10.1122/1.551002
+
     """
     assert_fot_properties(A)
     return np.einsum("ij,kl->ijkl", A, A)
@@ -89,8 +154,25 @@ def quadratic_closure(A):
 def hybrid_closure(A):
     """Generate a hybrid closure.
 
-    See 'Modified hybrid closure approximation for prediction of flow-induced
-    fiber orientation' - Kyeong-Hee Han and Yong-Taek Im
+    Parameters
+    ----------
+    A : 3x3 numpy array
+        Second order fiber orientation tensor.
+
+    Returns
+    -------
+    3x3x3x3 numpy array
+        Fourth order fiber orientation tensor.
+
+
+    References
+    ----------
+    .. [1] Kyeong-Hee Han and Yong-Taek Im,
+       'Modified hybrid closure approximation for prediction of flow-induced
+       fiber orientation'
+       Journal of Rheology 43, 569 (1999)
+       https://doi.org/10.1122/1.551002
+
     """
     assert_fot_properties(A)
     f = 1.0 - 27.0 * np.linalg.det(A)
@@ -100,15 +182,25 @@ def hybrid_closure(A):
 def IBOF_closure(A):
     """Generate IBOF closure.
 
-    This function utilizes a invariant based optimal fitting closure to
-    generate a fourth order tensor from a second order tensor.
-    Reference: Du Hwan ChungTai, Hun Kwon: 'Invariant-based optimal fitting
-    closure approximation for the numerical prediction of flow-induced fiber
-    orientation', Journal of Rheology 46(1):169-194,
-    DOI: 10.1122/1.1423312
+    Parameters
+    ----------
+    A : 3x3 numpy array
+        Second order fiber orientation tensor.
 
-    Input:
-    A : 3x3 fiber orientation tensor
+    Returns
+    -------
+    3x3x3x3 numpy array
+        Fourth order fiber orientation tensor.
+
+
+    References
+    ----------
+    .. [1] Du Hwan Chung and Tai Hun Kwon,
+       'Invariant-based optimal fitting closure approximation for the numerical prediction
+       of flow-induced fiber orientation',
+       Journal of Rheology 46(1):169-194,
+       https://doi.org/10.1122/1.1423312
+
     """
     assert_fot_properties(A)
 
