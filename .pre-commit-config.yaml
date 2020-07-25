@@ -17,7 +17,7 @@ repos:
       - id: black
 # isort import sorting
 -   repo: https://github.com/timothycrosley/isort
-    rev: ''
+    rev: '5.1.4'
     hooks:
       - id: isort
         additional_dependencies: ["toml"]
