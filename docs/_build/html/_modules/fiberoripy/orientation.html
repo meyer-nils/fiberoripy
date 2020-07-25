@@ -1,0 +1,723 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fiberoripy.orientation &#8212; fiberoripy  documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for fiberoripy.orientation</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Orientation models.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">.closures</span> <span class="kn">import</span> <span class="n">compute_closure</span>
+
+
+<div class="viewcode-block" id="jeffery_ode"><a class="viewcode-back" href="../../reference.html#fiberoripy.orientation.jeffery_ode">[docs]</a><span class="k">def</span> <span class="nf">jeffery_ode</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;ODE describing Jeffery&#39;s model.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">        a (9x1 doubles): Flattened fiber orientation tensor</span>
+
+<span class="sd">        t (double): time of evaluation</span>
+
+<span class="sd">        xi (double): Shape factor computed from aspect ratio</span>
+
+<span class="sd">        L (function handle): function to compute velocity gradient at time t</span>
+
+<span class="sd">    Reference:</span>
+<span class="sd">    G.B. Jeffery, &#39;The motion of ellipsoidal particles immersed</span>
+<span class="sd">    in a viscous fluid&#39;, Proceedings of the Royal Society A, 1922.</span>
+<span class="sd">    https://doi.org/10.1098/rspa.1922.0078</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">compute_closure</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span>
+    <span class="n">W</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span>
+
+    <span class="n">dadt</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+        <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">W</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">xi</span>
+        <span class="o">*</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+            <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ijkl,kl-&gt;ij&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">dadt</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="folgar_tucker_ode"><a class="viewcode-back" href="../../reference.html#fiberoripy.orientation.folgar_tucker_ode">[docs]</a><span class="k">def</span> <span class="nf">folgar_tucker_ode</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Ci</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;ODE describing the Folgar-Tucker model.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">        a (9x1 doubles): Flattened fiber orientation tensor</span>
+
+<span class="sd">        t (double): time of evaluation</span>
+
+<span class="sd">        xi (double): Shape factor computed from aspect ratio</span>
+
+<span class="sd">        L (function handle): function to compute velocity gradient at time t</span>
+
+<span class="sd">        Ci (double): Fiber interaction constant (typically 0 &lt; Ci &lt; 0.1)</span>
+
+<span class="sd">    Reference:</span>
+<span class="sd">    F. Folgar, C.L. Tucker III, &#39;Orientation behavior of fibers in concentrated</span>
+<span class="sd">    suspensions&#39;, Journal of Reinforced Plastic Composites 3, 98-119, 1984.</span>
+<span class="sd">    https://doi.org/10.1177%2F073168448400300201</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">compute_closure</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span>
+    <span class="n">W</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij,ij&quot;</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">D</span><span class="p">))</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="n">dadt</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+        <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">W</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">xi</span>
+        <span class="o">*</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+            <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ijkl,kl-&gt;ij&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">Ci</span> <span class="o">*</span> <span class="n">G</span> <span class="o">*</span> <span class="p">(</span><span class="n">delta</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">dadt</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="maier_saupe_ode"><a class="viewcode-back" href="../../reference.html#fiberoripy.orientation.maier_saupe_ode">[docs]</a><span class="k">def</span> <span class="nf">maier_saupe_ode</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Ci</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">U0</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;ODE using Folgar-Tucker constant and Maier-Saupe potential.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">        a (9x1 doubles): Flattened fiber orientation tensor</span>
+
+<span class="sd">        t (double): time of evaluation</span>
+
+<span class="sd">        xi (double): Shape factor computed from aspect ratio</span>
+
+<span class="sd">        L (function handle): function to compute velocity gradient at time t</span>
+
+<span class="sd">        Ci (double): Fiber interaction constant (typically 0 &lt; Ci &lt; 0.1)</span>
+
+<span class="sd">        U0 (double): Maier-Saupe Potential (in 3D stable for y U0 &lt; 8 Ci)</span>
+
+<span class="sd">    Reference:</span>
+<span class="sd">    Arnulf Latz, Uldis Strautins, Dariusz Niedziela, &#39;Comparative numerical</span>
+<span class="sd">    study of two concentrated fiber suspension models&#39;, Journal of</span>
+<span class="sd">    Non-Newtonian Fluid Mechanics 165, 764-781, 2010.</span>
+<span class="sd">    https://doi.org/10.1016/j.jnnfm.2010.04.001</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">compute_closure</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span>
+    <span class="n">W</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij,ij&quot;</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">D</span><span class="p">))</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="n">dadt</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+        <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">W</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">xi</span>
+        <span class="o">*</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+            <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ijkl,kl-&gt;ij&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="o">+</span> <span class="mi">2</span>
+        <span class="o">*</span> <span class="n">G</span>
+        <span class="o">*</span> <span class="p">(</span>
+            <span class="n">Ci</span> <span class="o">*</span> <span class="p">(</span><span class="n">delta</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">U0</span>
+            <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ijkl,kl-&gt;ij&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">a</span><span class="p">))</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">dadt</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="iard_ode"><a class="viewcode-back" href="../../reference.html#fiberoripy.orientation.iard_ode">[docs]</a><span class="k">def</span> <span class="nf">iard_ode</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Ci</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">Cm</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;ODE describing iARD model.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">        a (9x1 doubles): Flattened fiber orientation tensor</span>
+
+<span class="sd">        t (double): time of evaluation</span>
+
+<span class="sd">        xi (double): Shape factor computed from aspect ratio</span>
+
+<span class="sd">        L (function handle): function to compute velocity gradient at time t</span>
+
+<span class="sd">        Ci (double): Fiber interaction constant (typically 0 &lt; Ci &lt; 0.05)</span>
+
+<span class="sd">        Cm (double): anisotropy factor (0 &lt; Cm &lt; 1)</span>
+
+<span class="sd">    Reference:</span>
+<span class="sd">    Tseng, Huan-Chang; Chang, Rong-Yeu; Hsu, Chia-Hsiang, &#39;An objective tensor</span>
+<span class="sd">    to predict anisotropic fiber orientation in concentrated suspensions&#39;,</span>
+<span class="sd">    Journal of Rheology 60, 215, 2016.</span>
+<span class="sd">    https://doi.org/10.1122/1.4939098</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">compute_closure</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span>
+    <span class="n">W</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij,ij&quot;</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">D</span><span class="p">))</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="n">D2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+    <span class="n">D2_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij,ij&quot;</span><span class="p">,</span> <span class="n">D2</span><span class="p">,</span> <span class="n">D2</span><span class="p">))</span>
+
+    <span class="n">Dr</span> <span class="o">=</span> <span class="n">Ci</span> <span class="o">*</span> <span class="p">(</span><span class="n">delta</span> <span class="o">-</span> <span class="n">Cm</span> <span class="o">*</span> <span class="n">D2</span> <span class="o">/</span> <span class="n">D2_norm</span><span class="p">)</span>
+
+    <span class="n">dadt_HD</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+        <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">W</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">xi</span>
+        <span class="o">*</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+            <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ijkl,kl-&gt;ij&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">dadt_iard</span> <span class="o">=</span> <span class="n">G</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="mi">2</span> <span class="o">*</span> <span class="n">Dr</span>
+        <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">Dr</span><span class="p">)</span> <span class="o">*</span> <span class="n">a</span>
+        <span class="o">-</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">Dr</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+        <span class="o">-</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">Dr</span><span class="p">)</span>
+        <span class="o">+</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ijkl,kl-&gt;ij&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">Dr</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">dadt</span> <span class="o">=</span> <span class="n">dadt_HD</span> <span class="o">+</span> <span class="n">dadt_iard</span>
+    <span class="k">return</span> <span class="n">dadt</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="iardrpr_ode"><a class="viewcode-back" href="../../reference.html#fiberoripy.orientation.iardrpr_ode">[docs]</a><span class="k">def</span> <span class="nf">iardrpr_ode</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Ci</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">Cm</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">beta</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;ODE describing iARD-RPR model.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">        a (9x1 doubles): Flattened fiber orientation tensor</span>
+
+<span class="sd">        t (double): time of evaluation</span>
+
+<span class="sd">        xi (double): Shape factor computed from aspect ratio</span>
+
+<span class="sd">        L (function handle): function to compute velocity gradient at time t</span>
+
+<span class="sd">        Ci (double): Fiber interaction constant (typically 0 &lt; Ci &lt; 0.05)</span>
+
+<span class="sd">        Cm (double): anisotropy factor (0 &lt; Cm &lt; 1)</span>
+
+<span class="sd">        alpha (double): retardance rate (0 &lt; alpha &lt; 1)</span>
+
+<span class="sd">        beta (double):  retardance tuning factor (0&lt; beta &lt; 1)</span>
+
+<span class="sd">    Reference:</span>
+<span class="sd">    Tseng, Huan-Chang; Chang, Rong-Yeu; Hsu, Chia-Hsiang, &#39;An objective tensor</span>
+<span class="sd">    to predict anisotropic fiber orientation in concentrated suspensions&#39;,</span>
+<span class="sd">    Journal of Rheology 60, 215, 2016.</span>
+<span class="sd">    https://doi.org/10.1122/1.4939098</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">compute_closure</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span>
+    <span class="n">W</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij,ij&quot;</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">D</span><span class="p">))</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="n">D2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+    <span class="n">D2_norm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij,ij&quot;</span><span class="p">,</span> <span class="n">D2</span><span class="p">,</span> <span class="n">D2</span><span class="p">))</span>
+
+    <span class="n">Dr</span> <span class="o">=</span> <span class="n">Ci</span> <span class="o">*</span> <span class="p">(</span><span class="n">delta</span> <span class="o">-</span> <span class="n">Cm</span> <span class="o">*</span> <span class="n">D2</span> <span class="o">/</span> <span class="n">D2_norm</span><span class="p">)</span>
+
+    <span class="n">dadt_HD</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+        <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">W</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">xi</span>
+        <span class="o">*</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+            <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ijkl,kl-&gt;ij&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">dadt_iard</span> <span class="o">=</span> <span class="n">G</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="mf">2.0</span> <span class="o">*</span> <span class="n">Dr</span>
+        <span class="o">-</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">Dr</span><span class="p">)</span> <span class="o">*</span> <span class="n">a</span>
+        <span class="o">-</span> <span class="mf">5.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">Dr</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+        <span class="o">-</span> <span class="mf">5.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">Dr</span><span class="p">)</span>
+        <span class="o">+</span> <span class="mf">10.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ijkl,kl-&gt;ij&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">Dr</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">dadt_temp</span> <span class="o">=</span> <span class="n">dadt_HD</span> <span class="o">+</span> <span class="n">dadt_iard</span>
+
+    <span class="c1"># Spectral Decomposition</span>
+    <span class="n">eigenValues</span><span class="p">,</span> <span class="n">eigenVectors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">eigenValues</span><span class="o">.</span><span class="n">argsort</span><span class="p">()[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">eigenVectors</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">]</span>
+
+    <span class="c1"># Estimation of eigenvalue rates (rotated back)</span>
+    <span class="n">dadt_diag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik, kl, lj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">R</span><span class="p">),</span> <span class="n">dadt_temp</span><span class="p">,</span> <span class="n">R</span><span class="p">)</span>
+
+    <span class="n">lbd0</span> <span class="o">=</span> <span class="n">dadt_diag</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">lbd1</span> <span class="o">=</span> <span class="n">dadt_diag</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">lbd2</span> <span class="o">=</span> <span class="n">dadt_diag</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="c1"># Computation of IOK tensor by rotation</span>
+    <span class="n">IOK</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">IOK</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">alpha</span> <span class="o">*</span> <span class="p">(</span><span class="n">lbd0</span> <span class="o">-</span> <span class="n">beta</span> <span class="o">*</span> <span class="p">(</span><span class="n">lbd0</span> <span class="o">**</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">lbd1</span> <span class="o">*</span> <span class="n">lbd2</span><span class="p">))</span>
+    <span class="n">IOK</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">alpha</span> <span class="o">*</span> <span class="p">(</span><span class="n">lbd1</span> <span class="o">-</span> <span class="n">beta</span> <span class="o">*</span> <span class="p">(</span><span class="n">lbd1</span> <span class="o">**</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">lbd0</span> <span class="o">*</span> <span class="n">lbd2</span><span class="p">))</span>
+    <span class="n">IOK</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">alpha</span> <span class="o">*</span> <span class="p">(</span><span class="n">lbd2</span> <span class="o">-</span> <span class="n">beta</span> <span class="o">*</span> <span class="p">(</span><span class="n">lbd2</span> <span class="o">**</span> <span class="mf">2.0</span> <span class="o">+</span> <span class="mf">2.0</span> <span class="o">*</span> <span class="n">lbd0</span> <span class="o">*</span> <span class="n">lbd1</span><span class="p">))</span>
+
+    <span class="n">dadt_rpr</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik, kl, lj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">IOK</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">R</span><span class="p">))</span>
+
+    <span class="n">dadt</span> <span class="o">=</span> <span class="n">dadt_temp</span> <span class="o">+</span> <span class="n">dadt_rpr</span>
+    <span class="k">return</span> <span class="n">dadt</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="mrd_ode"><a class="viewcode-back" href="../../reference.html#fiberoripy.orientation.mrd_ode">[docs]</a><span class="k">def</span> <span class="nf">mrd_ode</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Ci</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">D1</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">D2</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">D3</span><span class="o">=</span><span class="mf">0.15</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sa">u</span><span class="sd">&quot;&quot;&quot;ODE describing MRD model.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">        a (9x1 doubles): Flattened fiber orientation tensor</span>
+
+<span class="sd">        t (double): time of evaluation</span>
+
+<span class="sd">        xi (double): Shape factor computed from aspect ratio</span>
+
+<span class="sd">        L (function handle): function to compute velocity gradient at time t</span>
+
+<span class="sd">        Ci (double): Fiber interaction constant (typically 0 &lt; Ci &lt; 0.05)</span>
+
+<span class="sd">        D1,D2,D3 (double): anisotropy factors (0 &lt; D1, D2, D3)</span>
+
+<span class="sd">    Reference:</span>
+<span class="sd">    A. Bakharev, H. Yu, R. Speight and J. Wang, “Using New Anisotropic Rotational</span>
+<span class="sd">    Diffusion Model To Improve Prediction Of Short Fibers in Thermoplastic Injection</span>
+<span class="sd">    Molding,&quot; in ANTEC, Orlando, 2018.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">compute_closure</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span>
+    <span class="n">W</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij,ij&quot;</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">D</span><span class="p">))</span>
+
+    <span class="n">C_hat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">D1</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">D2</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="n">D3</span><span class="p">]])</span>
+
+    <span class="c1"># Spectral Decomposition</span>
+    <span class="n">eigenValues</span><span class="p">,</span> <span class="n">eigenVectors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">eigenValues</span><span class="o">.</span><span class="n">argsort</span><span class="p">()[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">eigenVectors</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">]</span>
+
+    <span class="n">C</span> <span class="o">=</span> <span class="n">Ci</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij,jk,kl-&gt;il&quot;</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">C_hat</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">R</span><span class="p">))</span>
+
+    <span class="n">dadt_HD</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+        <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">W</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">xi</span>
+        <span class="o">*</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+            <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ijkl,kl-&gt;ij&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">dadt_mrd</span> <span class="o">=</span> <span class="n">G</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="mi">2</span> <span class="o">*</span> <span class="n">C</span>
+        <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">C</span><span class="p">)</span> <span class="o">*</span> <span class="n">a</span>
+        <span class="o">-</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+        <span class="o">-</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+        <span class="o">+</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ijkl,kl-&gt;ij&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">dadt</span> <span class="o">=</span> <span class="n">dadt_HD</span> <span class="o">+</span> <span class="n">dadt_mrd</span>
+    <span class="k">return</span> <span class="n">dadt</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="pard_ode"><a class="viewcode-back" href="../../reference.html#fiberoripy.orientation.pard_ode">[docs]</a><span class="k">def</span> <span class="nf">pard_ode</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Ci</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">Omega</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;ODE describing pARD model.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">        a (9x1 doubles): Flattened fiber orientation tensor</span>
+
+<span class="sd">        t (double): time of evaluation</span>
+
+<span class="sd">        xi (double): Shape factor computed from aspect ratio</span>
+
+<span class="sd">        L (function handle): function to compute velocity gradient at time t</span>
+
+<span class="sd">        Ci (double): Fiber interaction constant (typically 0 &lt; Ci &lt; 0.05)</span>
+
+<span class="sd">        Omega (double): anisotropy factor (0.5 &lt; Omega &lt; 1)</span>
+
+<span class="sd">    Reference:</span>
+<span class="sd">    Tseng, Huan-Chang; Chang, Rong-Yeu; Hsu, Chia-Hsiang, &#39;The use of principal spatial</span>
+<span class="sd">    tensor to predict anisotropic fiber orientation in concentrated fiber suspensions&#39;,</span>
+<span class="sd">    Journal of Rheology 62, 313, 2017.</span>
+<span class="sd">    https://doi.org/10.1122/1.4998520</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">compute_closure</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span>
+    <span class="n">W</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij,ij&quot;</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">D</span><span class="p">))</span>
+
+    <span class="n">C_hat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">Omega</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">Omega</span><span class="p">]]</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Spectral Decomposition</span>
+    <span class="n">eigenValues</span><span class="p">,</span> <span class="n">eigenVectors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">eigenValues</span><span class="o">.</span><span class="n">argsort</span><span class="p">()[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">eigenVectors</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">]</span>
+
+    <span class="n">C</span> <span class="o">=</span> <span class="n">Ci</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij,jk,kl-&gt;il&quot;</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">C_hat</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">R</span><span class="p">))</span>
+
+    <span class="n">dadt_HD</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+        <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">W</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">xi</span>
+        <span class="o">*</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+            <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ijkl,kl-&gt;ij&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">dadt_pard</span> <span class="o">=</span> <span class="n">G</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="mi">2</span> <span class="o">*</span> <span class="n">C</span>
+        <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">C</span><span class="p">)</span> <span class="o">*</span> <span class="n">a</span>
+        <span class="o">-</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+        <span class="o">-</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+        <span class="o">+</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ijkl,kl-&gt;ij&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">dadt</span> <span class="o">=</span> <span class="n">dadt_HD</span> <span class="o">+</span> <span class="n">dadt_pard</span>
+    <span class="k">return</span> <span class="n">dadt</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="pardrpr_ode"><a class="viewcode-back" href="../../reference.html#fiberoripy.orientation.pardrpr_ode">[docs]</a><span class="k">def</span> <span class="nf">pardrpr_ode</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Ci</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">Omega</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;ODE describing pARD model.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">        a (9x1 doubles): Flattened fiber orientation tensor</span>
+
+<span class="sd">        t (double): time of evaluation</span>
+
+<span class="sd">        xi (double): Shape factor computed from aspect ratio</span>
+
+<span class="sd">        L (function handle): function to compute velocity gradient at time t</span>
+
+<span class="sd">        Ci (double): Fiber interaction constant (typically 0 &lt; Ci &lt; 0.05)</span>
+
+<span class="sd">        Omega (double): anisotropy factor (0.5 &lt; Omega &lt; 1)</span>
+
+<span class="sd">        alpha (double): retardance rate (0 &lt; alpha &lt; 1)</span>
+
+<span class="sd">    Reference:</span>
+<span class="sd">    Tseng, Huan-Chang; Chang, Rong-Yeu; Hsu, Chia-Hsiang, &#39;The use of principal spatial</span>
+<span class="sd">    tensor to predict anisotropic fiber orientation in concentrated fiber suspensions&#39;,</span>
+<span class="sd">    Journal of Rheology 62, 313, 2017.</span>
+<span class="sd">    https://doi.org/10.1122/1.4998520</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">compute_closure</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span>
+    <span class="n">W</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij,ij&quot;</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">D</span><span class="p">))</span>
+
+    <span class="n">C_hat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">Omega</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">Omega</span><span class="p">]]</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Spectral Decomposition</span>
+    <span class="n">eigenValues</span><span class="p">,</span> <span class="n">eigenVectors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">idx</span> <span class="o">=</span> <span class="n">eigenValues</span><span class="o">.</span><span class="n">argsort</span><span class="p">()[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">eigenVectors</span><span class="p">[:,</span> <span class="n">idx</span><span class="p">]</span>
+
+    <span class="n">C</span> <span class="o">=</span> <span class="n">Ci</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij,jk,kl-&gt;il&quot;</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">C_hat</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">R</span><span class="p">))</span>
+
+    <span class="n">dadt_HD</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+        <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">W</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">xi</span>
+        <span class="o">*</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+            <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ijkl,kl-&gt;ij&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">dadt_pard</span> <span class="o">=</span> <span class="n">G</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="mi">2</span> <span class="o">*</span> <span class="n">C</span>
+        <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">C</span><span class="p">)</span> <span class="o">*</span> <span class="n">a</span>
+        <span class="o">-</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+        <span class="o">-</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+        <span class="o">+</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ijkl,kl-&gt;ij&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">dadt_temp</span> <span class="o">=</span> <span class="n">dadt_HD</span> <span class="o">+</span> <span class="n">dadt_pard</span>
+
+    <span class="c1"># Estimation of eigenvalue rates (rotated back)</span>
+    <span class="n">dadt_diag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik, kl, lj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">R</span><span class="p">),</span> <span class="n">dadt_temp</span><span class="p">,</span> <span class="n">R</span><span class="p">)</span>
+
+    <span class="n">lbd0</span> <span class="o">=</span> <span class="n">dadt_diag</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="n">lbd1</span> <span class="o">=</span> <span class="n">dadt_diag</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="n">lbd2</span> <span class="o">=</span> <span class="n">dadt_diag</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+
+    <span class="c1"># Computation of IOK tensor by rotation</span>
+    <span class="n">IOK</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">IOK</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">lbd0</span>
+    <span class="n">IOK</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">lbd1</span>
+    <span class="n">IOK</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">lbd2</span>
+
+    <span class="n">dadt_rpr</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik, kl, lj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">R</span><span class="p">,</span> <span class="n">IOK</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">R</span><span class="p">))</span>
+
+    <span class="n">dadt</span> <span class="o">=</span> <span class="n">dadt_temp</span> <span class="o">+</span> <span class="n">dadt_rpr</span>
+    <span class="k">return</span> <span class="n">dadt</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="rsc_ode"><a class="viewcode-back" href="../../reference.html#fiberoripy.orientation.rsc_ode">[docs]</a><span class="k">def</span> <span class="nf">rsc_ode</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">Ci</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">kappa</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;ODE describing RSC model.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">        a (9x1 doubles): Flattened fiber orientation tensor</span>
+
+<span class="sd">        t (double): time of evaluation</span>
+
+<span class="sd">        xi (double): Shape factor computed from aspect ratio</span>
+
+<span class="sd">        L (function handle): function to compute velocity gradient at time t</span>
+
+<span class="sd">        Ci (double): Fiber interaction constant (typically 0 &lt; Ci &lt; 0.1)</span>
+
+<span class="sd">        kappa (double): strain reduction factor (0 &lt; kappa &lt; 1)</span>
+
+<span class="sd">    Reference:</span>
+<span class="sd">    Jin Wang, John F. O&#39;Gara, and Charles L. Tucker, &#39;An objective model</span>
+<span class="sd">    for slow orientation kinetics in concentrated fiber suspensions:</span>
+<span class="sd">    Theory and rheological evidence&#39;, Journal of Rheology 52, 1179, 2008.</span>
+<span class="sd">    https://doi.org/10.1122/1.2946437</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">compute_closure</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span>
+    <span class="n">W</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij,ij&quot;</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">D</span><span class="p">))</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="n">w</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;i,j,k,l-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="o">+</span> <span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;i,j,k,l-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="o">+</span> <span class="n">w</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;i,j,k,l-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+    <span class="p">)</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;i,j,k,l-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;i,j,k,l-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;i,j,k,l-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+    <span class="p">)</span>
+
+    <span class="n">tensor4</span> <span class="o">=</span> <span class="n">A</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">kappa</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">L</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ijmn,mnkl-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">A</span><span class="p">))</span>
+
+    <span class="n">dadt</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+        <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">W</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">xi</span>
+        <span class="o">*</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+            <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ijkl,kl-&gt;ij&quot;</span><span class="p">,</span> <span class="n">tensor4</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">kappa</span> <span class="o">*</span> <span class="n">Ci</span> <span class="o">*</span> <span class="n">G</span> <span class="o">*</span> <span class="p">(</span><span class="n">delta</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">a</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">dadt</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="ard_rsc_ode"><a class="viewcode-back" href="../../reference.html#fiberoripy.orientation.ard_rsc_ode">[docs]</a><span class="k">def</span> <span class="nf">ard_rsc_ode</span><span class="p">(</span>
+    <span class="n">a</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">xi</span><span class="p">,</span> <span class="n">L</span><span class="p">,</span> <span class="n">b1</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">kappa</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">b2</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">b3</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">b4</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">b5</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;ODE describing ARD-RSC model.</span>
+
+<span class="sd">    Arguments</span>
+<span class="sd">    ---------</span>
+<span class="sd">        a (9x1 doubles): Flattened fiber orientation tensor</span>
+
+<span class="sd">        t (double): time of evaluation</span>
+
+<span class="sd">        xi (double): Shape factor computed from aspect ratio</span>
+
+<span class="sd">        L (function handle): function to compute velocity gradient at time t</span>
+
+<span class="sd">        b1 (double): First parameter of rotary diffusion tensor (0 &lt; b1 &lt; 0.1)</span>
+
+<span class="sd">        kappa (double): strain reduction factor (0 &lt; kappa &lt; 1)</span>
+
+<span class="sd">        b2 (double): Second parameter of rotary diffusion tensor</span>
+
+<span class="sd">        b3 (double): Third parameter of rotary diffusion tensor</span>
+
+<span class="sd">        b4 (double): Fourth parameter of rotary diffusion tensor</span>
+
+<span class="sd">        b5 (double): Fifth parameter of rotary diffusion tensor</span>
+
+<span class="sd">    Reference:</span>
+<span class="sd">    J. H. Phelps,  C. L. Tucker, &#39;An anisotropic rotary diffusion model for</span>
+<span class="sd">    fiber orientation in short- and long-fiber thermoplastics&#39;, Journal of</span>
+<span class="sd">    Non-Newtonian Fluid Mechanics 156, 165-176, 2009.</span>
+<span class="sd">    https://doi.org/10.1016/j.jnnfm.2008.08.002</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">compute_closure</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">D</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span>
+    <span class="n">W</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">L</span><span class="p">(</span><span class="n">t</span><span class="p">)))</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij,ij&quot;</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">D</span><span class="p">))</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="n">w</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">eig</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="n">L</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">w</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;i,j,k,l-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="o">+</span> <span class="n">w</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;i,j,k,l-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="o">+</span> <span class="n">w</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;i,j,k,l-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+    <span class="p">)</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;i,j,k,l-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">])</span>
+        <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;i,j,k,l-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;i,j,k,l-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">v</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">G</span> <span class="o">&gt;</span> <span class="mf">0.0</span><span class="p">:</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">b1</span> <span class="o">*</span> <span class="n">delta</span>
+            <span class="o">+</span> <span class="n">b2</span> <span class="o">*</span> <span class="n">a</span>
+            <span class="o">+</span> <span class="n">b3</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">b4</span> <span class="o">*</span> <span class="n">D</span> <span class="o">/</span> <span class="n">G</span>
+            <span class="o">+</span> <span class="n">b5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">G</span> <span class="o">*</span> <span class="n">G</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="n">tensor4</span> <span class="o">=</span> <span class="n">A</span> <span class="o">+</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">kappa</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">L</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ijmn,mnkl-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">A</span><span class="p">))</span>
+
+    <span class="n">dadt</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">W</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+        <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">W</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">xi</span>
+        <span class="o">*</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">D</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+            <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+            <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ijkl,kl-&gt;ij&quot;</span><span class="p">,</span> <span class="n">tensor4</span><span class="p">,</span> <span class="n">D</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="o">+</span> <span class="n">G</span>
+        <span class="o">*</span> <span class="p">(</span>
+            <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">C</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">kappa</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ijkl,kl-&gt;ij&quot;</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">C</span><span class="p">))</span>
+            <span class="o">-</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">kappa</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">trace</span><span class="p">(</span><span class="n">C</span><span class="p">)</span> <span class="o">*</span> <span class="n">a</span>
+            <span class="o">-</span> <span class="mi">5</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,kj-&gt;ij&quot;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">C</span><span class="p">))</span>
+            <span class="o">+</span> <span class="mi">10</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ijkl,kl-&gt;ij&quot;</span><span class="p">,</span> <span class="n">tensor4</span><span class="p">,</span> <span class="n">C</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">dadt</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">fiberoripy</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../reference.html">Orientation Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference.html#module-fiberoripy.closures">Closures</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Nils Meyer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

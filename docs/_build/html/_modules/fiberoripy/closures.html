@@ -1,0 +1,500 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>fiberoripy.closures &#8212; fiberoripy  documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for fiberoripy.closures</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Collection of closure approximations.&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="compute_closure"><a class="viewcode-back" href="../../reference.html#fiberoripy.closures.compute_closure">[docs]</a><span class="k">def</span> <span class="nf">compute_closure</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">closure</span><span class="o">=</span><span class="s2">&quot;IBOF&quot;</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a fourth order tensor from a second order tensor.&quot;&quot;&quot;</span>
+    <span class="c1"># assertation</span>
+    <span class="k">assert</span> <span class="n">closure</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;IBOF&quot;</span><span class="p">,</span> <span class="s2">&quot;LINEAR&quot;</span><span class="p">,</span> <span class="s2">&quot;HYBRID&quot;</span><span class="p">,</span> <span class="s2">&quot;QUADRATIC&quot;</span><span class="p">,</span> <span class="s2">&quot;RANDOM&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">closure</span> <span class="o">==</span> <span class="s2">&quot;IBOF&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">IBOF_closure</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">closure</span> <span class="o">==</span> <span class="s2">&quot;HYBRID&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">hybrid_closure</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">closure</span> <span class="o">==</span> <span class="s2">&quot;LINEAR&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">linear_closure</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">closure</span> <span class="o">==</span> <span class="s2">&quot;QUADRATIC&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">quadratic_closure</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">closure</span> <span class="o">==</span> <span class="s2">&quot;RANDOM&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">random_closure</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">N</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="assert_fot_properties"><a class="viewcode-back" href="../../reference.html#fiberoripy.closures.assert_fot_properties">[docs]</a><span class="k">def</span> <span class="nf">assert_fot_properties</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Assert fiber properties.&quot;&quot;&quot;</span>
+    <span class="c1"># assert symmetry and shape</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span></div>
+    <span class="c1"># assert(A[0, 1] == A[1, 0])</span>
+    <span class="c1"># assert(A[0, 2] == A[2, 0])</span>
+    <span class="c1"># assert(A[1, 2] == A[2, 1])</span>
+
+
+<div class="viewcode-block" id="random_closure"><a class="viewcode-back" href="../../reference.html#fiberoripy.closures.random_closure">[docs]</a><span class="k">def</span> <span class="nf">random_closure</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">N</span><span class="o">=</span><span class="mi">1000</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Sample a random fiber orientaion given a.&quot;&quot;&quot;</span>
+    <span class="n">orientations</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N</span><span class="p">):</span>
+        <span class="n">phi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">costheta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">costheta</span><span class="p">)</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">phi</span><span class="p">)</span>
+        <span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="n">rand_orientation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">])</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">rand_orientation</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="n">p</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="n">orientations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+    <span class="n">a</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">orientations</span><span class="p">:</span>
+        <span class="n">a</span> <span class="o">+=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">N</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;i,j-&gt;ij&quot;</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">o</span><span class="p">)</span>
+        <span class="n">A</span> <span class="o">+=</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="n">N</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;i,j,k,l-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">o</span><span class="p">,</span> <span class="n">o</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">A</span></div>
+
+
+<div class="viewcode-block" id="linear_closure"><a class="viewcode-back" href="../../reference.html#fiberoripy.closures.linear_closure">[docs]</a><span class="k">def</span> <span class="nf">linear_closure</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate a linear closure.</span>
+
+<span class="sd">    This is appropiate for UD directed fibers. See &#39;Modified hybrid closure</span>
+<span class="sd">    approximation for prediction of flow-induced fiber orientation&#39;</span>
+<span class="sd">    - Kyeong-Hee Han and Yong-Taek Im</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">assert_fot_properties</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">7.0</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij,kl-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,jl-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;il,jk-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;kl,ij-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;jl,ik-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;jk,il-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span>
+    <span class="p">)</span> <span class="o">-</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">35.0</span> <span class="o">*</span> <span class="p">(</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij,kl-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ik,jl-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;il,jk-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="quadratic_closure"><a class="viewcode-back" href="../../reference.html#fiberoripy.closures.quadratic_closure">[docs]</a><span class="k">def</span> <span class="nf">quadratic_closure</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate a linear closure.</span>
+
+<span class="sd">    This is appropiate for isotropic orientation states. See &#39;Modified hybrid</span>
+<span class="sd">    closure approximation for prediction of flow-induced fiber orientation&#39;</span>
+<span class="sd">    ~ Kyeong-Hee Han and Yong-Taek Im</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">assert_fot_properties</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij,kl-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">A</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="hybrid_closure"><a class="viewcode-back" href="../../reference.html#fiberoripy.closures.hybrid_closure">[docs]</a><span class="k">def</span> <span class="nf">hybrid_closure</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate a hybrid closure.</span>
+
+<span class="sd">    See &#39;Modified hybrid closure approximation for prediction of flow-induced</span>
+<span class="sd">    fiber orientation&#39; - Kyeong-Hee Han and Yong-Taek Im</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">assert_fot_properties</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="mf">27.0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">f</span><span class="p">)</span> <span class="o">*</span> <span class="n">linear_closure</span><span class="p">(</span><span class="n">A</span><span class="p">)</span> <span class="o">+</span> <span class="n">f</span> <span class="o">*</span> <span class="n">quadratic_closure</span><span class="p">(</span><span class="n">A</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="IBOF_closure"><a class="viewcode-back" href="../../reference.html#fiberoripy.closures.IBOF_closure">[docs]</a><span class="k">def</span> <span class="nf">IBOF_closure</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate IBOF closure.</span>
+
+<span class="sd">    This function utilizes a invariant based optimal fitting closure to</span>
+<span class="sd">    generate a fourth order tensor from a second order tensor.</span>
+<span class="sd">    Reference: Du Hwan ChungTai, Hun Kwon: &#39;Invariant-based optimal fitting</span>
+<span class="sd">    closure approximation for the numerical prediction of flow-induced fiber</span>
+<span class="sd">    orientation&#39;, Journal of Rheology 46(1):169-194,</span>
+<span class="sd">    DOI: 10.1122/1.1423312</span>
+
+<span class="sd">    Input:</span>
+<span class="sd">    A : 3x3 fiber orientation tensor</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">assert_fot_properties</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+
+    <span class="c1"># second invariant</span>
+    <span class="n">II</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+        <span class="o">-</span> <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="o">-</span> <span class="n">A</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="o">-</span> <span class="n">A</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">A</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="c1"># third invariant</span>
+    <span class="n">III</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+
+    <span class="c1"># coefficients from Chung &amp; Kwon paper</span>
+    <span class="n">C1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">21</span><span class="p">))</span>
+
+    <span class="n">C2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">21</span><span class="p">))</span>
+
+    <span class="n">C3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">0.24940908165786e2</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.435101153160329e3</span><span class="p">,</span>
+                <span class="mf">0.372389335663877e4</span><span class="p">,</span>
+                <span class="mf">0.703443657916476e4</span><span class="p">,</span>
+                <span class="mf">0.823995187366106e6</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.133931929894245e6</span><span class="p">,</span>
+                <span class="mf">0.880683515327916e6</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.991630690741981e7</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.159392396237307e5</span><span class="p">,</span>
+                <span class="mf">0.800970026849796e7</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.237010458689252e7</span><span class="p">,</span>
+                <span class="mf">0.379010599355267e8</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.337010820273821e8</span><span class="p">,</span>
+                <span class="mf">0.322219416256417e5</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.257258805870567e9</span><span class="p">,</span>
+                <span class="mf">0.214419090344474e7</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.449275591851490e8</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.213133920223355e8</span><span class="p">,</span>
+                <span class="mf">0.157076702372204e10</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.232153488525298e5</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.395769398304473e10</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">C4</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="o">-</span><span class="mf">0.497217790110754e0</span><span class="p">,</span>
+                <span class="mf">0.234980797511405e2</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.391044251397838e3</span><span class="p">,</span>
+                <span class="mf">0.153965820593506e3</span><span class="p">,</span>
+                <span class="mf">0.152772950743819e6</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.213755248785646e4</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.400138947092812e4</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.185949305922308e7</span><span class="p">,</span>
+                <span class="mf">0.296004865275814e4</span><span class="p">,</span>
+                <span class="mf">0.247717810054366e7</span><span class="p">,</span>
+                <span class="mf">0.101013983339062e6</span><span class="p">,</span>
+                <span class="mf">0.732341494213578e7</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.147919027644202e8</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.104092072189767e5</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.635149929624336e8</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.247435106210237e6</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.902980378929272e7</span><span class="p">,</span>
+                <span class="mf">0.724969796807399e7</span><span class="p">,</span>
+                <span class="mf">0.487093452892595e9</span><span class="p">,</span>
+                <span class="mf">0.138088690964946e5</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.160162178614234e10</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">C5</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">21</span><span class="p">))</span>
+
+    <span class="n">C6</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">[</span>
+                <span class="mf">0.234146291570999e2</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.412048043372534e3</span><span class="p">,</span>
+                <span class="mf">0.319553200392089e4</span><span class="p">,</span>
+                <span class="mf">0.573259594331015e4</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.485212803064813e5</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.605006113515592e5</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.477173740017567e5</span><span class="p">,</span>
+                <span class="mf">0.599066486689836e7</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.110656935176569e5</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.460543580680696e8</span><span class="p">,</span>
+                <span class="mf">0.203042960322874e7</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.556606156734835e8</span><span class="p">,</span>
+                <span class="mf">0.567424911007837e9</span><span class="p">,</span>
+                <span class="mf">0.128967058686204e5</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.152752854956514e10</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.499321746092534e7</span><span class="p">,</span>
+                <span class="mf">0.132124828143333e9</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.162359994620983e10</span><span class="p">,</span>
+                <span class="mf">0.792526849882218e10</span><span class="p">,</span>
+                <span class="mf">0.466767581292985e4</span><span class="p">,</span>
+                <span class="o">-</span><span class="mf">0.128050778279459e11</span><span class="p">,</span>
+            <span class="p">]</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="c1"># build matrix of coefficients by stacking vectors</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">C1</span><span class="p">,</span> <span class="n">C2</span><span class="p">,</span> <span class="n">C3</span><span class="p">,</span> <span class="n">C4</span><span class="p">,</span> <span class="n">C5</span><span class="p">,</span> <span class="n">C6</span><span class="p">))</span>
+
+    <span class="c1"># compute parameters as fith order polynom based on invariants</span>
+    <span class="n">beta3</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="n">III</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">*</span> <span class="n">III</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">III</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">3</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="p">]</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">3</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">III</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">11</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">12</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">3</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">13</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">4</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">14</span><span class="p">]</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">4</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">15</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">III</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">16</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">17</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">3</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">18</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">4</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">19</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">5</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">5</span>
+    <span class="p">)</span>
+
+    <span class="n">beta4</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">C</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="n">III</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">*</span> <span class="n">III</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">III</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">3</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">9</span><span class="p">]</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">3</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">III</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">11</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">12</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">3</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">13</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">4</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">14</span><span class="p">]</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">4</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">15</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">III</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">16</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">17</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">3</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">18</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">4</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">19</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">5</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">5</span>
+    <span class="p">)</span>
+
+    <span class="n">beta6</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">C</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span> <span class="o">*</span> <span class="n">III</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">5</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">*</span> <span class="n">III</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">III</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">8</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">3</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">9</span><span class="p">]</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">3</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">III</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">11</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">12</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">3</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">13</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">4</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">14</span><span class="p">]</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">4</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">15</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">III</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">16</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">17</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">3</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">18</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">4</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">19</span><span class="p">]</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">5</span>
+        <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span> <span class="o">*</span> <span class="n">III</span> <span class="o">**</span> <span class="mi">5</span>
+    <span class="p">)</span>
+
+    <span class="n">beta1</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mf">3.0</span>
+        <span class="o">/</span> <span class="mf">5.0</span>
+        <span class="o">*</span> <span class="p">(</span>
+            <span class="o">-</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mf">7.0</span>
+            <span class="o">+</span> <span class="mf">1.0</span>
+            <span class="o">/</span> <span class="mf">5.0</span>
+            <span class="o">*</span> <span class="n">beta3</span>
+            <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mf">7.0</span> <span class="o">+</span> <span class="mf">4.0</span> <span class="o">/</span> <span class="mf">7.0</span> <span class="o">*</span> <span class="n">II</span> <span class="o">+</span> <span class="mf">8.0</span> <span class="o">/</span> <span class="mf">3.0</span> <span class="o">*</span> <span class="n">III</span><span class="p">)</span>
+            <span class="o">-</span> <span class="n">beta4</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mf">5.0</span> <span class="o">-</span> <span class="mf">8.0</span> <span class="o">/</span> <span class="mf">15.0</span> <span class="o">*</span> <span class="n">II</span> <span class="o">-</span> <span class="mf">14.0</span> <span class="o">/</span> <span class="mf">15.0</span> <span class="o">*</span> <span class="n">III</span><span class="p">)</span>
+            <span class="o">-</span> <span class="n">beta6</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">35.0</span>
+                <span class="o">-</span> <span class="mf">24.0</span> <span class="o">/</span> <span class="mf">105.0</span> <span class="o">*</span> <span class="n">III</span>
+                <span class="o">-</span> <span class="mf">4.0</span> <span class="o">/</span> <span class="mf">35.0</span> <span class="o">*</span> <span class="n">II</span>
+                <span class="o">+</span> <span class="mf">16.0</span> <span class="o">/</span> <span class="mf">15.0</span> <span class="o">*</span> <span class="n">II</span> <span class="o">*</span> <span class="n">III</span>
+                <span class="o">+</span> <span class="mf">8.0</span> <span class="o">/</span> <span class="mf">35.0</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">beta2</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="mf">6.0</span>
+        <span class="o">/</span> <span class="mf">7.0</span>
+        <span class="o">*</span> <span class="p">(</span>
+            <span class="mf">1.0</span>
+            <span class="o">-</span> <span class="mf">1.0</span> <span class="o">/</span> <span class="mf">5.0</span> <span class="o">*</span> <span class="n">beta3</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">+</span> <span class="mf">4.0</span> <span class="o">*</span> <span class="n">II</span><span class="p">)</span>
+            <span class="o">+</span> <span class="mf">7.0</span> <span class="o">/</span> <span class="mf">5.0</span> <span class="o">*</span> <span class="n">beta4</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mf">6.0</span> <span class="o">-</span> <span class="n">II</span><span class="p">)</span>
+            <span class="o">-</span> <span class="n">beta6</span>
+            <span class="o">*</span> <span class="p">(</span>
+                <span class="o">-</span><span class="mf">1.0</span> <span class="o">/</span> <span class="mf">5.0</span>
+                <span class="o">+</span> <span class="mf">2.0</span> <span class="o">/</span> <span class="mf">3.0</span> <span class="o">*</span> <span class="n">III</span>
+                <span class="o">+</span> <span class="mf">4.0</span> <span class="o">/</span> <span class="mf">5.0</span> <span class="o">*</span> <span class="n">II</span>
+                <span class="o">-</span> <span class="mf">8.0</span> <span class="o">/</span> <span class="mf">5.0</span> <span class="o">*</span> <span class="n">II</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">beta5</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="o">-</span><span class="mf">4.0</span> <span class="o">/</span> <span class="mf">5.0</span> <span class="o">*</span> <span class="n">beta3</span>
+        <span class="o">-</span> <span class="mf">7.0</span> <span class="o">/</span> <span class="mf">5.0</span> <span class="o">*</span> <span class="n">beta4</span>
+        <span class="o">-</span> <span class="mf">6.0</span> <span class="o">/</span> <span class="mf">5.0</span> <span class="o">*</span> <span class="n">beta6</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="mf">4.0</span> <span class="o">/</span> <span class="mf">3.0</span> <span class="o">*</span> <span class="n">II</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># second order identy matrix</span>
+    <span class="n">delta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">eye</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+
+    <span class="c1"># generate fourth order tensor with parameters and tensor algebra</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">beta1</span> <span class="o">*</span> <span class="n">symm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij,kl-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">delta</span><span class="p">))</span>
+        <span class="o">+</span> <span class="n">beta2</span> <span class="o">*</span> <span class="n">symm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij,kl-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">A</span><span class="p">))</span>
+        <span class="o">+</span> <span class="n">beta3</span> <span class="o">*</span> <span class="n">symm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij,kl-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">A</span><span class="p">))</span>
+        <span class="o">+</span> <span class="n">beta4</span> <span class="o">*</span> <span class="n">symm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij,km,ml-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">delta</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">A</span><span class="p">))</span>
+        <span class="o">+</span> <span class="n">beta5</span> <span class="o">*</span> <span class="n">symm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ij,km,ml-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">A</span><span class="p">))</span>
+        <span class="o">+</span> <span class="n">beta6</span> <span class="o">*</span> <span class="n">symm</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;im,mj,kn,nl-&gt;ijkl&quot;</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">A</span><span class="p">))</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="symm"><a class="viewcode-back" href="../../reference.html#fiberoripy.closures.symm">[docs]</a><span class="k">def</span> <span class="nf">symm</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Symmetrize the fourth order tensor.</span>
+
+<span class="sd">    This function computes the symmetric part of a fourth order Tensor A</span>
+<span class="sd">    and returns a symmetric fourth order tensor S.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># initial symmetric tensor with zeros</span>
+    <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+    <span class="c1"># Einsteins summation</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+                    <span class="c1"># sum of all permutations divided by 4!=24</span>
+                    <span class="n">S</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="mf">1.0</span>
+                        <span class="o">/</span> <span class="mf">24.0</span>
+                        <span class="o">*</span> <span class="p">(</span>
+                            <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="n">l</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="n">l</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">l</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">l</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="n">l</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="n">l</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="n">l</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="n">l</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">l</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">l</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+                            <span class="o">+</span> <span class="n">A</span><span class="p">[</span><span class="n">k</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">l</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">S</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">fiberoripy</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../reference.html">Orientation Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference.html#module-fiberoripy.closures">Closures</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Nils Meyer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
