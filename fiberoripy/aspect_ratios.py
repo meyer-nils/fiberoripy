@@ -26,13 +26,3 @@ def get_zhang_aspect_ratio(aspect_ratio):
         + 0.764 * aspect_ratio
         + 0.404
     )
-
-
-def get_gm_aspect_ratio(aspect_ratio):
-    u"""Jeffery's equivalent aspect ratio.
-
-    Approximation from
-    Forgacs, O.; Mason, S. Particle motions in sheared suspensions.
-    J. Colloid Sci. 1959, 14, 457–472.
-    """
-    return 0.742 * aspect_ratio - 0.0017 * aspect_ratio ** 2

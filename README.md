@@ -37,4 +37,3 @@ Following models have been implemented:
 ## Approximations for equivalent aspect ratios
  * __Cox__: Cox, R.G. The motion of long slender bodies in a viscous fluid. Part 2. Shear flow. J. Fluid Mech. 1971, 45, 625–657.(http://doi.org/10.1017/S0022112071000259)
  * __Zhang__: Zhang, D.; Smith, D.E.; Jack, D.A.; Montgomery-Smith, S. Numerical Evaluation of Single Fiber Motion for Short-Fiber-Reinforced Composite Materials Processing. J. Manuf. Sci. Eng. 2011, 133, 51002.(http://doi.org/10.1115/1.4004831)
- * __Goldsmith-Mason__: Forgacs, O.; Mason, S. Particle motions in sheared suspensions. J. Colloid Sci. 1959, 14, 457–472.(http://doi.org/10.1016/0095-8522(59)90012-1)
