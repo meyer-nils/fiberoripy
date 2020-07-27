@@ -25,7 +25,9 @@ setuptools.setup(
     description="Fiber orientation models and closures",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    scripts=["bin/fiberoripy"],
+    entry_points={
+        "console_scripts": ["fiberoripy = fiberoripy.__main__:main"]
+    },
     packages=["fiberoripy"],
     url="https://github.com/nilsmeyerkit/fiberoripy",
     package_dir={"fiberoripy": "fiberoripy"},
