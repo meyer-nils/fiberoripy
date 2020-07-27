@@ -10,6 +10,19 @@ with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
 
 
 def package_files(directory):
+    """List files of a directory that should be included by pip.
+
+    Parameters
+    ----------
+    directory : str
+        Included directory.
+
+    Returns
+    -------
+    list of str
+        Filenames to be included.
+
+    """
     paths = []
     for (p, dir, filenames) in walk(directory):
         for filename in filenames:
