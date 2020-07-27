@@ -29,7 +29,7 @@ setuptools.setup(
     packages=["fiberoripy"],
     url="https://github.com/nilsmeyerkit/fiberoripy",
     package_dir={"fiberoripy": "fiberoripy"},
-    package_data={"": package_files("examples")},
+    package_data={"fiberoripy": package_files("examples")},
     install_requires=["numpy", "matplotlib", "scipy"],
     classifiers=[
         "Programming Language :: Python :: 3",
