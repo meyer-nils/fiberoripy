@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Setup file."""
-from os import path
+from os import path, walk
 
 import setuptools
 
@@ -8,9 +8,18 @@ this_directory = path.abspath(path.dirname(__file__))
 with open(path.join(this_directory, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
+
+def package_files(directory):
+    paths = []
+    for (p, dir, filenames) in walk(directory):
+        for filename in filenames:
+            paths.append(path.join("..", p, filename))
+    return paths
+
+
 setuptools.setup(
     name="fiberoripy",
-    version="1.0.5",
+    version="1.0.6",
     author="Nils Meyer",
     author_email="nils.meyer@kit.edu",
     description="Fiber orientation models and closures",
@@ -20,7 +29,7 @@ setuptools.setup(
     packages=["fiberoripy"],
     url="https://github.com/nilsmeyerkit/fiberoripy",
     package_dir={"fiberoripy": "fiberoripy"},
-    package_data={"fiberoripy": ["examples/"]},
+    package_data={"": package_files("examples")},
     install_requires=["numpy", "matplotlib", "scipy"],
     classifiers=[
         "Programming Language :: Python :: 3",
