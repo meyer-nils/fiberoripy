@@ -29,7 +29,7 @@ Following models have been implemented:
  'Orientation behavior of fibers in concentrated suspensions',\
  Journal of Reinforced Plastic Composites 3, 98-119, 1984.\
  (https://doi.org/10.1177%2F073168448400300201)
- * __Maier-Saupe__:\
+ * __FTMS__:\
  A. Latz, U. Strautins, D. Niedziela,\
  'Comparative numerical study of two concentrated fiber suspension models',\
  Journal of Non-Newtonian Fluid Mechanics 165, 764-781, 2010.\
