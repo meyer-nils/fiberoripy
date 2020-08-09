@@ -1,6 +1,6 @@
 [project]
 name = "fiberoripy"
-version = "1.0.3"
+version = "1.0.8"
 description = "Fiber orientation models and closures"
 authors = ["Nils Meyer <nils.meyer@kit.edu>"]
 license = "MIT"
