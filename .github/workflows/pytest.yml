@@ -23,6 +23,8 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install fiberoripy
       run: |
+        pip install --upgrade pip
+        pip install --upgrade setuptools
         python setup.py install
     - name: Test with pytest
       run: |
