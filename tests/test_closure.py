@@ -17,7 +17,7 @@ def get_test_tensors():
     rands = []
     for a in range(10):
         a_rand = np.random.rand(3, 3)
-        a_rand_symm = a_rand + a_rand.T
+        a_rand_symm = a_rand + a_rand.T + np.eye(3)
         rands.append(a_rand_symm / np.trace(a_rand_symm))
 
     return [a_iso, a_uni1, a_uni2, a_uni3] + rands
