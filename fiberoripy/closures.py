@@ -20,7 +20,16 @@ def compute_closure(a, closure="IBOF", N=1000):
 
     """
     # assertation
-    assert closure in ("IBOF", "LINEAR", "HYBRID", "QUADRATIC", "RANDOM")
+    assert closure in (
+        "IBOF",
+        "LINEAR",
+        "HYBRID",
+        "QUADRATIC",
+        "RANDOM",
+        "ORF",
+        "ORW",
+        "ORW3",
+    )
     if closure == "IBOF":
         return IBOF_closure(a)
     if closure == "HYBRID":
@@ -31,6 +40,12 @@ def compute_closure(a, closure="IBOF", N=1000):
         return quadratic_closure(a)
     if closure == "RANDOM":
         return random_closure(a, N)
+    if closure == "ORF":
+        return orthotropic_fitted_closures(a, "ORF")
+    if closure == "ORW":
+        return orthotropic_fitted_closures(a, "ORW")
+    if closure == "ORW3":
+        return orthotropic_fitted_closures(a, "ORW3")
 
 
 def assert_fot_properties(A):
@@ -196,8 +211,8 @@ def IBOF_closure(A):
     References
     ----------
     .. [1] Du Hwan Chung and Tai Hun Kwon,
-       'Invariant-based optimal fitting closure approximation for the numerical prediction
-       of flow-induced fiber orientation',
+       'Invariant-based optimal fitting closure approximation for the numerical
+       prediction of flow-induced fiber orientation',
        Journal of Rheology 46(1):169-194,
        https://doi.org/10.1122/1.1423312
 
@@ -488,3 +503,158 @@ def symm(A):
                         )
                     )
     return S
+
+
+def orthotropic_fitted_closures(a, closure="ORF"):
+    """Generate a orthotropic fitted closure.
+
+    Parameter
+    ---------
+    a : 3x3 array
+        2. order orientation tensor
+    closure: string
+        Defines the used closure ("ORF", "ORW", "ORW3")
+
+    Return:
+    ------
+    A : 3x3x3x3 numpy array
+        4. order orientation tensor
+
+    References
+    ----------
+    .. [1] Joaquim S. Cintra and Charles L. Tucker III (1995),
+    'Orthotropic closure approximations for flow-induced fiber orientation',
+    Journal of Rheology, 39(6), 1095-1122,
+    https://doi.org/10.1122/1.550630
+    .. [2] Chung and Kwon (2001),
+    'Improved model of orthotropic closure approximation for flow induced fiber
+    orientation', Polymer Composites, 22(5), 636-649,
+    https://doi.org/10.1002/pc.10566
+
+    """
+    assert_fot_properties(a)
+
+    A = np.zeros([3, 3, 3, 3])
+
+    # Calculate eigenvalues w and eigenvector-matrix R of a
+    w, R = np.linalg.eigh(a)
+    # Sort eigenvalues and eigenvectors in descending order
+    idx = w.argsort()[::-1]
+    w = w[idx]
+    R = R[:, idx]
+
+    if closure is "ORF":
+        C = np.array(
+            [
+                [0.060964, 0.371243, 0.555301, -0.369160, 0.318266, 0.371218],
+                [0.124711, -0.389402, 0.258844, 0.086169, 0.796080, 0.544992],
+                [1.228982, -2.054116, 0.821548, -2.260574, 1.053907, 1.819756],
+            ]
+        )
+        W = np.array([1.0, w[0], w[0] ** 2, w[1], w[1] ** 2, w[0] * w[1]])
+
+    elif closure is "ORW":
+        C = np.array(
+            [
+                [0.070055, 0.339376, 0.590331, -0.396796, 0.333693, 0.411944],
+                [0.115177, -0.368267, 0.252880, 0.094820, 0.800181, 0.535224],
+                [1.249811, -2.148297, 0.898521, -2.290157, 1.044147, 1.934914],
+            ]
+        )
+        W = np.array([1.0, w[0], w[0] ** 2, w[1], w[1] ** 2, w[0] * w[1]])
+
+    elif closure is "ORW3":
+        C = np.array(
+            [
+                [
+                    -0.1480648093,
+                    0.8084618453,
+                    0.3722003446,
+                    0.7765597096,
+                    -1.3431772379,
+                    -1.7366749542,
+                    0.8895946393,
+                    1.7367571741,
+                    -0.0324756095,
+                    0.6631716575,
+                ],
+                [
+                    -0.2106349673,
+                    0.9092350296,
+                    -1.2840654776,
+                    1.1104441966,
+                    0.1260059291,
+                    -2.5375632310,
+                    1.9988098293,
+                    1.4863151577,
+                    0.5856304774,
+                    -0.0756740034,
+                ],
+                [
+                    0.4868019601,
+                    0.5776328438,
+                    -2.2462007509,
+                    0.4605743789,
+                    -1.9088154281,
+                    -4.8900459209,
+                    4.0544348937,
+                    3.8542602127,
+                    1.1817992322,
+                    0.9512305286,
+                ],
+            ]
+        )
+        W = np.array(
+            [
+                1.0,
+                w[0],
+                w[0] ** 2,
+                w[1],
+                w[1] ** 2,
+                w[0] * w[1],
+                w[0] * w[0] * w[1],
+                w[0] * w[1] * w[1],
+                w[0] * w[0] * w[0],
+                w[1] * w[1] * w[1],
+            ]
+        )
+    # A_sol = ([A11, A22, A33, A44, A55, A66])
+    A_sol = np.zeros(6)
+    [A_sol[0], A_sol[1], A_sol[2]] = np.einsum("ij,j->i", C, W)
+    A_sol[3] = 0.5 * (w[2] - A_sol[2] - w[0] + A_sol[0] + w[1] - A_sol[1])
+    # A_sol[5] = a[1, 1] - A_sol[1] - A_sol[3]
+    # A_sol[4] = a[0, 0] - A_sol[0] - A_sol[5]
+    A_sol[4] = 0.5 * (-A_sol[0] + A_sol[1] - A_sol[2] + w[0] - w[1] + w[2])
+    A_sol[5] = 0.5 * (-A_sol[0] - A_sol[1] + A_sol[2] + w[0] + w[1] - w[2])
+
+    for i in range(3):
+        A[i, i, i, i] = A_sol[i]
+
+    # A1122 = A12 = A66
+    A[0, 0, 1, 1] = A_sol[5]
+    A[1, 1, 0, 0] = A_sol[5]
+    # A1133 = A13 = A55
+    A[0, 0, 2, 2] = A_sol[4]
+    A[2, 2, 0, 0] = A_sol[4]
+    # A2233 = A23 = A44
+    A[1, 1, 2, 2] = A_sol[3]
+    A[2, 2, 1, 1] = A_sol[3]
+    # A2323 = A44
+    A[1, 2, 1, 2] = A_sol[3]
+    A[2, 1, 2, 1] = A_sol[3]
+    A[2, 1, 1, 2] = A_sol[3]
+    A[1, 2, 2, 1] = A_sol[3]
+    # A1313 = A55
+    A[0, 2, 0, 2] = A_sol[4]
+    A[2, 0, 2, 0] = A_sol[4]
+    A[2, 0, 0, 2] = A_sol[4]
+    A[0, 2, 2, 0] = A_sol[4]
+    # A1212 = A66
+    A[0, 1, 0, 1] = A_sol[5]
+    A[1, 0, 1, 0] = A_sol[5]
+    A[1, 0, 0, 1] = A_sol[5]
+    A[0, 1, 1, 0] = A_sol[5]
+
+    A = np.einsum("im,jn,ko,lp,mnop->ijkl", R, R, R, R, A)
+
+    return A
