@@ -526,7 +526,7 @@ def orthotropic_fitted_closures(a, closure="ORF"):
     'Orthotropic closure approximations for flow-induced fiber orientation',
     Journal of Rheology, 39(6), 1095-1122,
     https://doi.org/10.1122/1.550630
-    .. [2] Chung and Kwon (2001),
+    .. [2] Du Hwan Chung and Tai Hun Kwon (2001),
     'Improved model of orthotropic closure approximation for flow induced fiber
     orientation', Polymer Composites, 22(5), 636-649,
     https://doi.org/10.1002/pc.10566
