@@ -5,7 +5,7 @@ import numpy as np
 from .closures import compute_closure
 
 
-def jeffery_ode(a, t, xi, L, **kwargs):
+def jeffery_ode(a, t, xi, L, closure="IBOF", **kwargs):
     """ODE describing Jeffery's model.
 
     Parameters
@@ -18,6 +18,8 @@ def jeffery_ode(a, t, xi, L, **kwargs):
         Shape factor computed from aspect ratio.
     L : function handle
         Function to compute velocity gradient at time t.
+    closure: str
+        Name of closure to be used.
 
     Returns
     -------
@@ -33,7 +35,7 @@ def jeffery_ode(a, t, xi, L, **kwargs):
 
     """
     a = np.reshape(a, (3, 3))
-    A = compute_closure(a)
+    A = compute_closure(a, closure)
     D = 0.5 * (L(t) + np.transpose(L(t)))
     W = 0.5 * (L(t) - np.transpose(L(t)))
 
@@ -50,7 +52,7 @@ def jeffery_ode(a, t, xi, L, **kwargs):
     return dadt.ravel()
 
 
-def folgar_tucker_ode(a, t, xi, L, Ci=0.0, **kwargs):
+def folgar_tucker_ode(a, t, xi, L, Ci=0.0, closure="IBOF", **kwargs):
     """ODE describing the Folgar-Tucker model.
 
     Parameters
@@ -65,6 +67,8 @@ def folgar_tucker_ode(a, t, xi, L, Ci=0.0, **kwargs):
         Function to compute velocity gradient at time t.
     Ci : float
         Fiber interaction constant (typically 0 < Ci < 0.1).
+    closure: str
+        Name of closure to be used.
 
 
     Returns
@@ -81,7 +85,7 @@ def folgar_tucker_ode(a, t, xi, L, Ci=0.0, **kwargs):
 
     """
     a = np.reshape(a, (3, 3))
-    A = compute_closure(a)
+    A = compute_closure(a, closure)
     D = 0.5 * (L(t) + np.transpose(L(t)))
     W = 0.5 * (L(t) - np.transpose(L(t)))
     G = np.sqrt(2.0 * np.einsum("ij,ij", D, D))
@@ -101,7 +105,7 @@ def folgar_tucker_ode(a, t, xi, L, Ci=0.0, **kwargs):
     return dadt.ravel()
 
 
-def maier_saupe_ode(a, t, xi, L, Ci=0.0, U0=0.0, **kwargs):
+def maier_saupe_ode(a, t, xi, L, Ci=0.0, U0=0.0, closure="IBOF", **kwargs):
     """ODE using Folgar-Tucker constant and Maier-Saupe potential.
 
     Parameters
@@ -118,6 +122,8 @@ def maier_saupe_ode(a, t, xi, L, Ci=0.0, U0=0.0, **kwargs):
         Fiber interaction constant (typically 0 < Ci < 0.1).
     U0 : float
         Maier-Saupe Potential (in 3D stable for y U0 < 8 Ci).
+    closure: str
+        Name of closure to be used.
 
     Returns
     -------
@@ -133,7 +139,7 @@ def maier_saupe_ode(a, t, xi, L, Ci=0.0, U0=0.0, **kwargs):
 
     """
     a = np.reshape(a, (3, 3))
-    A = compute_closure(a)
+    A = compute_closure(a, closure)
     D = 0.5 * (L(t) + np.transpose(L(t)))
     W = 0.5 * (L(t) - np.transpose(L(t)))
     G = np.sqrt(2.0 * np.einsum("ij,ij", D, D))
@@ -159,7 +165,7 @@ def maier_saupe_ode(a, t, xi, L, Ci=0.0, U0=0.0, **kwargs):
     return dadt.ravel()
 
 
-def iard_ode(a, t, xi, L, Ci=0.0, Cm=0.0, **kwargs):
+def iard_ode(a, t, xi, L, Ci=0.0, Cm=0.0, closure="IBOF", **kwargs):
     """ODE describing iARD model.
 
     Parameters
@@ -176,6 +182,8 @@ def iard_ode(a, t, xi, L, Ci=0.0, Cm=0.0, **kwargs):
         Fiber interaction constant (typically 0 < Ci < 0.05).
     Cm : float
         Anisotropy factor (0 < Cm < 1).
+    closure: str
+        Name of closure to be used.
 
     Returns
     -------
@@ -191,7 +199,7 @@ def iard_ode(a, t, xi, L, Ci=0.0, Cm=0.0, **kwargs):
 
     """
     a = np.reshape(a, (3, 3))
-    A = compute_closure(a)
+    A = compute_closure(a, closure)
     D = 0.5 * (L(t) + np.transpose(L(t)))
     W = 0.5 * (L(t) - np.transpose(L(t)))
     G = np.sqrt(2.0 * np.einsum("ij,ij", D, D))
@@ -225,7 +233,9 @@ def iard_ode(a, t, xi, L, Ci=0.0, Cm=0.0, **kwargs):
     return dadt.ravel()
 
 
-def iardrpr_ode(a, t, xi, L, Ci=0.0, Cm=0.0, alpha=0.0, beta=0.0, **kwargs):
+def iardrpr_ode(
+    a, t, xi, L, Ci=0.0, Cm=0.0, alpha=0.0, beta=0.0, closure="IBOF", **kwargs
+):
     """ODE describing iARD-RPR model.
 
     Parameters
@@ -246,6 +256,8 @@ def iardrpr_ode(a, t, xi, L, Ci=0.0, Cm=0.0, alpha=0.0, beta=0.0, **kwargs):
         Retardance rate (0 < alpha < 1).
     beta : float
         Retardance tuning factor (0< beta < 1).
+    closure: str
+        Name of closure to be used.
 
     Returns
     -------
@@ -261,7 +273,7 @@ def iardrpr_ode(a, t, xi, L, Ci=0.0, Cm=0.0, alpha=0.0, beta=0.0, **kwargs):
 
     """
     a = np.reshape(a, (3, 3))
-    A = compute_closure(a)
+    A = compute_closure(a, closure)
     D = 0.5 * (L(t) + np.transpose(L(t)))
     W = 0.5 * (L(t) - np.transpose(L(t)))
     G = np.sqrt(2.0 * np.einsum("ij,ij", D, D))
@@ -317,7 +329,9 @@ def iardrpr_ode(a, t, xi, L, Ci=0.0, Cm=0.0, alpha=0.0, beta=0.0, **kwargs):
     return dadt.ravel()
 
 
-def mrd_ode(a, t, xi, L, Ci=0.0, D1=1.0, D2=0.8, D3=0.15, **kwargs):
+def mrd_ode(
+    a, t, xi, L, Ci=0.0, D1=1.0, D2=0.8, D3=0.15, closure="IBOF", **kwargs
+):
     """ODE describing MRD model.
 
     Parameters
@@ -338,6 +352,8 @@ def mrd_ode(a, t, xi, L, Ci=0.0, D1=1.0, D2=0.8, D3=0.15, **kwargs):
         Anisotropy factors (D2 > 0).
     D3 : type
         Anisotropy factors (D3 > 0).
+    closure: str
+        Name of closure to be used.
 
     Returns
     -------
@@ -353,7 +369,7 @@ def mrd_ode(a, t, xi, L, Ci=0.0, D1=1.0, D2=0.8, D3=0.15, **kwargs):
 
     """
     a = np.reshape(a, (3, 3))
-    A = compute_closure(a)
+    A = compute_closure(a, closure)
     D = 0.5 * (L(t) + np.transpose(L(t)))
     W = 0.5 * (L(t) - np.transpose(L(t)))
     G = np.sqrt(2.0 * np.einsum("ij,ij", D, D))
@@ -390,7 +406,7 @@ def mrd_ode(a, t, xi, L, Ci=0.0, D1=1.0, D2=0.8, D3=0.15, **kwargs):
     return dadt.ravel()
 
 
-def pard_ode(a, t, xi, L, Ci=0.0, Omega=0.0, **kwargs):
+def pard_ode(a, t, xi, L, Ci=0.0, Omega=0.0, closure="IBOF", **kwargs):
     """ODE describing pARD model.
 
     Parameters
@@ -407,6 +423,8 @@ def pard_ode(a, t, xi, L, Ci=0.0, Omega=0.0, **kwargs):
         Fiber interaction constant (typically 0 < Ci < 0.05).
     Omega : type
         Anisotropy factor (0.5 < Omega < 1).
+    closure: str
+        Name of closure to be used.
 
     Returns
     -------
@@ -423,7 +441,7 @@ def pard_ode(a, t, xi, L, Ci=0.0, Omega=0.0, **kwargs):
 
     """
     a = np.reshape(a, (3, 3))
-    A = compute_closure(a)
+    A = compute_closure(a, closure)
     D = 0.5 * (L(t) + np.transpose(L(t)))
     W = 0.5 * (L(t) - np.transpose(L(t)))
     G = np.sqrt(2.0 * np.einsum("ij,ij", D, D))
@@ -462,7 +480,9 @@ def pard_ode(a, t, xi, L, Ci=0.0, Omega=0.0, **kwargs):
     return dadt.ravel()
 
 
-def pardrpr_ode(a, t, xi, L, Ci=0.0, Omega=0.0, alpha=0.0, **kwargs):
+def pardrpr_ode(
+    a, t, xi, L, Ci=0.0, Omega=0.0, alpha=0.0, closure="IBOF", **kwargs
+):
     """ODE describing pARD-RPR model.
 
     Parameters
@@ -481,6 +501,8 @@ def pardrpr_ode(a, t, xi, L, Ci=0.0, Omega=0.0, alpha=0.0, **kwargs):
         Anisotropy factor (0.5 < Omega < 1).
     alpha : float
         Retardance rate (0 < alpha < 1).
+    closure: str
+        Name of closure to be used.
 
     Returns
     -------
@@ -497,7 +519,7 @@ def pardrpr_ode(a, t, xi, L, Ci=0.0, Omega=0.0, alpha=0.0, **kwargs):
 
     """
     a = np.reshape(a, (3, 3))
-    A = compute_closure(a)
+    A = compute_closure(a, closure)
     D = 0.5 * (L(t) + np.transpose(L(t)))
     W = 0.5 * (L(t) - np.transpose(L(t)))
     G = np.sqrt(2.0 * np.einsum("ij,ij", D, D))
@@ -553,7 +575,7 @@ def pardrpr_ode(a, t, xi, L, Ci=0.0, Omega=0.0, alpha=0.0, **kwargs):
     return dadt.ravel()
 
 
-def rsc_ode(a, t, xi, L, Ci=0.0, kappa=1.0, **kwargs):
+def rsc_ode(a, t, xi, L, Ci=0.0, kappa=1.0, closure="IBOF", **kwargs):
     """ODE describing RSC model.
 
     Parameters
@@ -570,6 +592,8 @@ def rsc_ode(a, t, xi, L, Ci=0.0, kappa=1.0, **kwargs):
         Fiber interaction constant (typically 0 < Ci < 0.05).
     kappa : float
         Strain reduction factor (0 < kappa < 1).
+    closure: str
+        Name of closure to be used.
 
     Returns
     -------
@@ -586,7 +610,7 @@ def rsc_ode(a, t, xi, L, Ci=0.0, kappa=1.0, **kwargs):
 
     """
     a = np.reshape(a, (3, 3))
-    A = compute_closure(a)
+    A = compute_closure(a, closure)
     D = 0.5 * (L(t) + np.transpose(L(t)))
     W = 0.5 * (L(t) - np.transpose(L(t)))
     G = np.sqrt(2.0 * np.einsum("ij,ij", D, D))
@@ -621,7 +645,18 @@ def rsc_ode(a, t, xi, L, Ci=0.0, kappa=1.0, **kwargs):
 
 
 def ard_rsc_ode(
-    a, t, xi, L, b1=0.0, kappa=1.0, b2=0, b3=0, b4=0, b5=0, **kwargs
+    a,
+    t,
+    xi,
+    L,
+    b1=0.0,
+    kappa=1.0,
+    b2=0,
+    b3=0,
+    b4=0,
+    b5=0,
+    closure="IBOF",
+    **kwargs
 ):
     """ODE describing ARD-RSC model.
 
@@ -647,6 +682,8 @@ def ard_rsc_ode(
         Fourth parameter of rotary diffusion tensor.
     b5 : type
         Fith parameter of rotary diffusion tensor.
+    closure: str
+        Name of closure to be used.
 
     Returns
     -------
@@ -663,7 +700,7 @@ def ard_rsc_ode(
 
     """
     a = np.reshape(a, (3, 3))
-    A = compute_closure(a)
+    A = compute_closure(a, closure)
     D = 0.5 * (L(t) + np.transpose(L(t)))
     W = 0.5 * (L(t) - np.transpose(L(t)))
     G = np.sqrt(2.0 * np.einsum("ij,ij", D, D))
