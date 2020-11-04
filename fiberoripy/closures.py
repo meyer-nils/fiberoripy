@@ -543,7 +543,7 @@ def orthotropic_fitted_closures(a, closure="ORF"):
     w = w[idx]
     R = R[:, idx]
 
-    if closure is "ORF":
+    if closure == "ORF":
         C = np.array(
             [
                 [0.060964, 0.371243, 0.555301, -0.369160, 0.318266, 0.371218],
@@ -553,7 +553,7 @@ def orthotropic_fitted_closures(a, closure="ORF"):
         )
         W = np.array([1.0, w[0], w[0] ** 2, w[1], w[1] ** 2, w[0] * w[1]])
 
-    elif closure is "ORW":
+    elif closure == "ORW":
         C = np.array(
             [
                 [0.070055, 0.339376, 0.590331, -0.396796, 0.333693, 0.411944],
@@ -563,7 +563,7 @@ def orthotropic_fitted_closures(a, closure="ORF"):
         )
         W = np.array([1.0, w[0], w[0] ** 2, w[1], w[1] ** 2, w[0] * w[1]])
 
-    elif closure is "ORW3":
+    elif closure == "ORW3":
         C = np.array(
             [
                 [
