@@ -64,6 +64,9 @@ Following models have been implemented:
  * Quadratic
  * IBOF
  * Sampling from directions
+ * ORF
+ * ORW
+ * ORW3
 
 ## Approximations for equivalent aspect ratios
  * __Cox__:\
