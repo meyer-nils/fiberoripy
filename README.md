@@ -7,9 +7,9 @@
 This python package provides basic functionality and tools for fiber orientations and
 closure models.
 
-For example,
+For example, the Jupyter Notebook
 
-    example/orientation/comparison_perfectshear.py
+    example/orientation/comparison_perfectshear.ipynb
 
 should reproduce Figure 2 in *Favaloro, A.J., Tucker III, C.L., Composites Part A, 126 (2019)*:
 
