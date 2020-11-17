@@ -1,3 +1,4 @@
+# Python
 build
 dist
 docs/_build
@@ -5,4 +6,8 @@ fiberoripy.egg-info
 *.pyc
 *.egg-info
 
+# Custom scripts
 fetch_data.sh
+
+# Jupyter
+.ipynb_checkpoints
