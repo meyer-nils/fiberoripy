@@ -10,7 +10,7 @@ def compute_closure(a, closure="IBOF", N=1000):
 
     Parameters
     ----------
-    A : 3x3 numpy array
+    a : 3x3 numpy array
         Second order fiber orientation tensor.
 
     Returns
@@ -48,17 +48,17 @@ def compute_closure(a, closure="IBOF", N=1000):
         return orthotropic_fitted_closures(a, "ORW3")
 
 
-def assert_fot_properties(A):
+def assert_fot_properties(a):
     """Assert properties of second order input tensor.
 
     Parameters
     ----------
-    A : 3x3 numpy array
+    a : 3x3 numpy array
         Second order fiber orientation tensor.
 
     """
     # assert symmetry and shape
-    assert np.shape(A) == (3, 3)
+    assert np.shape(a) == (3, 3)
     # assert(A[0, 1] == A[1, 0])
     # assert(A[0, 2] == A[2, 0])
     # assert(A[1, 2] == A[2, 1])
@@ -69,7 +69,7 @@ def random_closure(a, N=1000):
 
     Parameters
     ----------
-    A : 3x3 numpy array
+    a : 3x3 numpy array
         Second order fiber orientation tensor.
 
     Returns
@@ -99,12 +99,12 @@ def random_closure(a, N=1000):
     return A
 
 
-def linear_closure(A):
+def linear_closure(a):
     """Generate a linear closure.
 
     Parameters
     ----------
-    A : 3x3 numpy array
+    a : 3x3 numpy array
         Second order fiber orientation tensor.
 
     Returns
@@ -122,16 +122,16 @@ def linear_closure(A):
        https://doi.org/10.1122/1.551002
 
     """
-    assert_fot_properties(A)
+    assert_fot_properties(a)
 
     delta = np.eye(3)
     return 1.0 / 7.0 * (
-        np.einsum("ij,kl->ijkl", A, delta)
-        + np.einsum("ik,jl->ijkl", A, delta)
-        + np.einsum("il,jk->ijkl", A, delta)
-        + np.einsum("kl,ij->ijkl", A, delta)
-        + np.einsum("jl,ik->ijkl", A, delta)
-        + np.einsum("jk,il->ijkl", A, delta)
+        np.einsum("ij,kl->ijkl", a, delta)
+        + np.einsum("ik,jl->ijkl", a, delta)
+        + np.einsum("il,jk->ijkl", a, delta)
+        + np.einsum("kl,ij->ijkl", a, delta)
+        + np.einsum("jl,ik->ijkl", a, delta)
+        + np.einsum("jk,il->ijkl", a, delta)
     ) - 1.0 / 35.0 * (
         np.einsum("ij,kl->ijkl", delta, delta)
         + np.einsum("ik,jl->ijkl", delta, delta)
@@ -139,12 +139,12 @@ def linear_closure(A):
     )
 
 
-def quadratic_closure(A):
+def quadratic_closure(a):
     """Generate a quadratic closure.
 
     Parameters
     ----------
-    A : 3x3 numpy array
+    a : 3x3 numpy array
         Second order fiber orientation tensor.
 
     Returns
@@ -162,16 +162,16 @@ def quadratic_closure(A):
        https://doi.org/10.1122/1.551002
 
     """
-    assert_fot_properties(A)
-    return np.einsum("ij,kl->ijkl", A, A)
+    assert_fot_properties(a)
+    return np.einsum("ij,kl->ijkl", a, a)
 
 
-def hybrid_closure(A):
+def hybrid_closure(a):
     """Generate a hybrid closure.
 
     Parameters
     ----------
-    A : 3x3 numpy array
+    a : 3x3 numpy array
         Second order fiber orientation tensor.
 
     Returns
@@ -189,17 +189,17 @@ def hybrid_closure(A):
        https://doi.org/10.1122/1.551002
 
     """
-    assert_fot_properties(A)
-    f = 1.0 - 27.0 * np.linalg.det(A)
-    return (1.0 - f) * linear_closure(A) + f * quadratic_closure(A)
+    assert_fot_properties(a)
+    f = 1.0 - 27.0 * np.linalg.det(a)
+    return (1.0 - f) * linear_closure(a) + f * quadratic_closure(a)
 
 
-def IBOF_closure(A):
+def IBOF_closure(a):
     """Generate IBOF closure.
 
     Parameters
     ----------
-    A : 3x3 numpy array
+    a : 3x3 numpy array
         Second order fiber orientation tensor.
 
     Returns
@@ -217,20 +217,20 @@ def IBOF_closure(A):
        https://doi.org/10.1122/1.1423312
 
     """
-    assert_fot_properties(A)
+    assert_fot_properties(a)
 
     # second invariant
     II = (
-        A[0, 0] * A[1, 1]
-        + A[1, 1] * A[2, 2]
-        + A[0, 0] * A[2, 2]
-        - A[0, 1] * A[1, 0]
-        - A[1, 2] * A[2, 1]
-        - A[0, 2] * A[2, 0]
+        a[0, 0] * a[1, 1]
+        + a[1, 1] * a[2, 2]
+        + a[0, 0] * a[2, 2]
+        - a[0, 1] * a[1, 0]
+        - a[1, 2] * a[2, 1]
+        - a[0, 2] * a[2, 0]
     )
 
     # third invariant
-    III = np.linalg.det(A)
+    III = np.linalg.det(a)
 
     # coefficients from Chung & Kwon paper
     C1 = np.zeros((1, 21))
@@ -449,11 +449,11 @@ def IBOF_closure(A):
     # generate fourth order tensor with parameters and tensor algebra
     return (
         beta1 * symm(np.einsum("ij,kl->ijkl", delta, delta))
-        + beta2 * symm(np.einsum("ij,kl->ijkl", delta, A))
-        + beta3 * symm(np.einsum("ij,kl->ijkl", A, A))
-        + beta4 * symm(np.einsum("ij,km,ml->ijkl", delta, A, A))
-        + beta5 * symm(np.einsum("ij,km,ml->ijkl", A, A, A))
-        + beta6 * symm(np.einsum("im,mj,kn,nl->ijkl", A, A, A, A))
+        + beta2 * symm(np.einsum("ij,kl->ijkl", delta, a))
+        + beta3 * symm(np.einsum("ij,kl->ijkl", a, a))
+        + beta4 * symm(np.einsum("ij,km,ml->ijkl", delta, a, a))
+        + beta5 * symm(np.einsum("ij,km,ml->ijkl", a, a, a))
+        + beta6 * symm(np.einsum("im,mj,kn,nl->ijkl", a, a, a, a))
     )
 
 
