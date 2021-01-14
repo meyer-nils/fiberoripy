@@ -45,7 +45,7 @@ setuptools.setup(
     url="https://github.com/nilsmeyerkit/fiberoripy",
     package_dir={"fiberoripy": "fiberoripy"},
     package_data={"fiberoripy": package_files("examples")},
-    install_requires=["numpy", "matplotlib", "scipy", "pytest"],
+    install_requires=["numpy", "matplotlib", "scipy", "pytest", "ipympl"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
