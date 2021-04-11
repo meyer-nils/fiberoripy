@@ -2,6 +2,7 @@
 [![Documentation Status](https://readthedocs.org/projects/fiberoripy/badge/?version=latest)](https://fiberoripy.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/fiberoripy.svg)](https://badge.fury.io/py/fiberoripy)
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![DOI](https://zenodo.org/badge/282262907.svg)](https://zenodo.org/badge/latestdoi/282262907)
 
 # Fiberoripy
 This python package provides basic functionality and tools for fiber orientations and
