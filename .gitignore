@@ -6,6 +6,9 @@ fiberoripy.egg-info
 *.pyc
 *.egg-info
 
+# vscode
+.vscode
+
 # Custom scripts
 fetch_data.sh
 
