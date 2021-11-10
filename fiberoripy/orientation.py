@@ -193,7 +193,8 @@ def iard_ode(a, t, xi, L, Ci=0.0, Cm=0.0, closure="IBOF", **kwargs):
     References
     ----------
     .. [1] Tseng, Huan-Chang; Chang, Rong-Yeu; Hsu, Chia-Hsiang,
-       'An objective tensor to predict anisotropic fiber orientation in concentrated suspensions',
+       'An objective tensor to predict anisotropic fiber orientation in concentrated
+       suspensions',
        Journal of Rheology 60, 215, 2016.
        https://doi.org/10.1122/1.4939098
 
@@ -267,7 +268,8 @@ def iardrpr_ode(
     References
     ----------
     .. [1] Tseng, Huan-Chang; Chang, Rong-Yeu; Hsu, Chia-Hsiang,
-       'An objective tensor to predict anisotropic fiber orientation in concentrated suspensions',
+       'An objective tensor to predict anisotropic fiber orientation in
+       concentrated suspensions',
        Journal of Rheology 60, 215, 2016.
        https://doi.org/10.1122/1.4939098
 
@@ -603,7 +605,8 @@ def rsc_ode(a, t, xi, L, Ci=0.0, kappa=1.0, closure="IBOF", **kwargs):
     References
     ----------
     .. [1] Jin Wang, John F. O'Gara, and Charles L. Tucker,
-       'An objective model for slow orientation kinetics in concentrated fiber suspensions:
+       'An objective model for slow orientation kinetics in concentrated fiber
+       suspensions:
        Theory and rheological evidence',
        Journal of Rheology 52, 1179, 2008.
        https://doi.org/10.1122/1.2946437

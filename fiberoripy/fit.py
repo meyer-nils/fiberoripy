@@ -37,7 +37,7 @@ def fit_optimal_params(t, reference, ode, xi, L, params, bounds):
     Returns
     -------
     list
-        Optimal parameter set, resulting fiber orientation evolution, optimization message.
+        Optimal parameter set, resulting fiber orientation evolution, optimizer message.
 
     """
     opt = least_squares(
