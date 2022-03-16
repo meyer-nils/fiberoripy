@@ -50,8 +50,8 @@ def get_zhang_aspect_ratio(aspect_ratio):
 
     """
     return (
-        0.000035 * aspect_ratio ** 3
-        - 0.00467 * aspect_ratio ** 2
+        0.000035 * aspect_ratio**3
+        - 0.00467 * aspect_ratio**2
         + 0.764 * aspect_ratio
         + 0.404
     )

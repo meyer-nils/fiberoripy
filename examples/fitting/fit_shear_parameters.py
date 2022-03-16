@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-u"""Fit parameters of orientation models to micro-simulation data.
+"""Fit parameters of orientation models to micro-simulation data.
 
 This result should match Figure 7 in:
 Meyer, N., Saburow, O., Hohberg, M., Hrymak, A., Henning, F., Kärger, L.:
@@ -23,7 +23,7 @@ from fiberoripy.orientation import rsc_ode
 dark2 = cm.get_cmap("Dark2", 2)
 
 ar = get_zhang_aspect_ratio(4.431135)
-xi = (ar ** 2 - 1) / (ar ** 2 + 1)
+xi = (ar**2 - 1) / (ar**2 + 1)
 G = 1.0
 
 

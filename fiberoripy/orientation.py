@@ -321,9 +321,9 @@ def iardrpr_ode(
 
     # Computation of IOK tensor by rotation
     IOK = np.zeros((3, 3))
-    IOK[0, 0] = alpha * (lbd0 - beta * (lbd0 ** 2.0 + 2.0 * lbd1 * lbd2))
-    IOK[1, 1] = alpha * (lbd1 - beta * (lbd1 ** 2.0 + 2.0 * lbd0 * lbd2))
-    IOK[2, 2] = alpha * (lbd2 - beta * (lbd2 ** 2.0 + 2.0 * lbd0 * lbd1))
+    IOK[0, 0] = alpha * (lbd0 - beta * (lbd0**2.0 + 2.0 * lbd1 * lbd2))
+    IOK[1, 1] = alpha * (lbd1 - beta * (lbd1**2.0 + 2.0 * lbd0 * lbd2))
+    IOK[2, 2] = alpha * (lbd2 - beta * (lbd2**2.0 + 2.0 * lbd0 * lbd1))
 
     dadt_rpr = -np.einsum("ik, kl, lj->ij", R, IOK, np.transpose(R))
 
