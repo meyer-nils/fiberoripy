@@ -70,7 +70,8 @@ def random_closure(a, N=1000):
     Parameters
     ----------
     a : 3x3 numpy array
-        Second order fiber orientation tensor.
+        Second order fiber orientation tensor. Note: This is modified by the
+        function to match the actual random generated state.
 
     Returns
     -------
