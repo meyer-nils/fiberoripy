@@ -92,8 +92,10 @@ def random_closure(a, N=1000):
     # normalize directions
     p /= np.linalg.norm(p, axis=1)[:, np.newaxis]
 
+    # update 2nd order tensor to random state
+    a[:] = np.einsum("Ii, Ij -> ij", p, p) / N
     # build 4th order tensor
-    A = np.einsum("Ii, Ij, Ik, Il -> ijkl", *4 * (p,)) / N
+    A = np.einsum("Ii, Ij, Ik, Il -> ijkl", p, p, p, p) / N
     return A
 
 
