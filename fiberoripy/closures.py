@@ -78,19 +78,22 @@ def random_closure(a, N=1000):
         Fourth order fiber orientation tensor.
 
     """
-    phi = np.random.uniform(0., 2. * np.pi, N)
-    costheta = np.random.uniform(-1., 1., N)
+    phi = np.random.uniform(0.0, 2.0 * np.pi, N)
+    costheta = np.random.uniform(-1.0, 1.0, N)
     theta = np.arccos(costheta)
-    
+
     x = np.cos(phi) * np.sin(theta)
     y = np.sin(phi) * np.sin(theta)
     z = np.cos(theta)
+    # get directions
     p = np.array([x, y, z]).transpose()
+    # project with second order tensor
     p = np.einsum("ij, Ij -> Ii", a, p)
+    # normalize directions
     p /= np.linalg.norm(p, axis=1)[:, np.newaxis]
-    
-    #a = np.einsum("Ii, Ij -> ij", p, p) / len(p)
-    A = np.einsum("Ii, Ij, Ik, Il -> ijkl", *4*(p,)) / N
+
+    # build 4th order tensor
+    A = np.einsum("Ii, Ij, Ik, Il -> ijkl", *4 * (p,)) / N
     return A
 
 
