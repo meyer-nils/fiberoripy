@@ -1,9 +1,9 @@
 [project]
 name = "fiberoripy"
-version = "1.0.8"
+version = "1.0.13"
 description = "Fiber orientation models and closures"
-authors = ["Nils Meyer <nils.meyer@kit.edu>"]
-license = "MIT"
+authors = [{name="Nils Meyer", email = "nils.meyer@kit.edu"}]
+license = {file = "LICENSE"}
 readme = "README.md"
 
 [build-system]
