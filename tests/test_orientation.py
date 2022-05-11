@@ -44,5 +44,5 @@ def test_default_case(model):
         return np.array([[0.0, 0.0, 1.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
 
     a_ref = odeint(jeffery_ode, a0.ravel(), t, args=(1.0, L))
-    a_test = odeint(ard_rsc_ode, a0.ravel(), t, args=(1.0, L))
+    a_test = odeint(model, a0.ravel(), t, args=(1.0, L))
     assert np.allclose(a_ref, a_test, atol=1e-12)
