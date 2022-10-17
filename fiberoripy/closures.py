@@ -5,19 +5,15 @@ import numpy as np
 
 def compute_closure(a, closure="IBOF", N=1000):
     """Create a fourth order tensor from a second order tensor.
-
     This is essentially a wrapper around all closures.
-
     Parameters
     ----------
     a : 3x3 numpy array
         Second order fiber orientation tensor.
-
     Returns
     -------
     3x3x3x3 numpy array
         Fourth order fiber orientation tensor.
-
     """
     # assertation
     assert closure in (
@@ -50,70 +46,91 @@ def compute_closure(a, closure="IBOF", N=1000):
 
 def assert_fot_properties(a):
     """Assert properties of second order input tensor.
-
     Parameters
     ----------
     a : 3x3 numpy array
         Second order fiber orientation tensor.
-
     """
     # assert symmetry and shape
-    assert np.shape(a) == (3, 3)
+    assert np.shape(a)[-2:] == (3, 3)
     # assert(A[0, 1] == A[1, 0])
     # assert(A[0, 2] == A[2, 0])
     # assert(A[1, 2] == A[2, 1])
 
 
-def random_closure(a, N=1000):
+def __random_closure(a, N=1000):
     """Sample a random fiber orientation and compute fourth order tensor.
-
     Parameters
     ----------
     a : 3x3 numpy array
-        Second order fiber orientation tensor. Note: This is modified by the
-        function to match the actual random generated state.
-
+        Second order fiber orientation tensor.
     Returns
     -------
     3x3x3x3 numpy array
         Fourth order fiber orientation tensor.
-
     """
-    phi = np.random.uniform(0.0, 2.0 * np.pi, N)
+
+    phi = np.random.uniform(-np.pi, np.pi, N)
     costheta = np.random.uniform(-1.0, 1.0, N)
     theta = np.arccos(costheta)
 
     x = np.cos(phi) * np.sin(theta)
     y = np.sin(phi) * np.sin(theta)
     z = np.cos(theta)
-    # get directions
     p = np.array([x, y, z]).transpose()
-    # project with second order tensor
     p = np.einsum("ij, Ij -> Ii", a, p)
-    # normalize directions
     p /= np.linalg.norm(p, axis=1)[:, np.newaxis]
 
-    # update 2nd order tensor to random state
-    a[:] = np.einsum("Ii, Ij -> ij", p, p) / N
-    # build 4th order tensor
-    A = np.einsum("Ii, Ij, Ik, Il -> ijkl", p, p, p, p) / N
+    a = np.einsum("Ii, Ij -> ij", p, p) / N
+    A = np.einsum("Ii, Ij, Ik, Il -> ijkl", *4 * (p,)) / N
+
     return A
 
 
-def linear_closure(a):
-    """Generate a linear closure.
+def random_closure(a, N=1000):
+    """ "Sample a random fiber orientation and compute fourth order tensors.
+    Parameters
+    ----------
+    a : (Mx)3x3 numpy array
+        (Array of) Second order fiber orientation tensor.
+    N : int, optional
+        number of random fibers. The default is 1000.
+    Returns
+    -------
+    A : (Mx)3x3x3x3 numpy array
+        (Array of) Fourth order fiber orientation tensor..
+    """
+    if a.ndim == 2:
+        A = __random_closure(a, N)
+    elif a.ndim == 3:
+        phi = np.random.uniform(-np.pi, np.pi, N)
+        costheta = np.random.uniform(-1.0, 1.0, N)
+        theta = np.arccos(costheta)
 
+        x = np.cos(phi) * np.sin(theta)
+        y = np.sin(phi) * np.sin(theta)
+        z = np.cos(theta)
+        p = np.array([x, y, z]).transpose()
+        ps = np.einsum("Iij, Xj -> IXi", a, p)
+        ps /= np.linalg.norm(ps, axis=1)[:, np.newaxis]
+        # I = index for 2nd-order FOT
+        # Y = index of randomly initlilazed fibers
+        # i = index of space dimension
+        A = np.einsum("IXi, IXj, IXk, IXl -> Iijkl", *4 * (ps,)) / N
+
+    return A
+
+
+def __linear_closure(a):
+    """Generate a linear closure.
     Parameters
     ----------
     a : 3x3 numpy array
         Second order fiber orientation tensor.
-
     Returns
     -------
     3x3x3x3 numpy array
         Fourth order fiber orientation tensor.
-
-
     References
     ----------
     .. [1] Kyeong-Hee Han and Yong-Taek Im,
@@ -121,9 +138,7 @@ def linear_closure(a):
        fiber orientation'
        Journal of Rheology 43, 569 (1999)
        https://doi.org/10.1122/1.551002
-
     """
-    assert_fot_properties(a)
 
     delta = np.eye(3)
     return 1.0 / 7.0 * (
@@ -140,20 +155,16 @@ def linear_closure(a):
     )
 
 
-def quadratic_closure(a):
-    """Generate a quadratic closure.
-
+def linear_closure(a):
+    """Generate a linear closure.
     Parameters
     ----------
-    a : 3x3 numpy array
-        Second order fiber orientation tensor.
-
+    a : (Mx)3x3 numpy array
+        (Array of) Second order fiber orientation tensor.
     Returns
     -------
-    3x3x3x3 numpy array
-        Fourth order fiber orientation tensor.
-
-
+    A : (Mx)3x3x3x3 numpy array
+        (Array of) Fourth order fiber orientation tensor.
     References
     ----------
     .. [1] Kyeong-Hee Han and Yong-Taek Im,
@@ -161,26 +172,67 @@ def quadratic_closure(a):
        fiber orientation'
        Journal of Rheology 43, 569 (1999)
        https://doi.org/10.1122/1.551002
-
     """
     assert_fot_properties(a)
+
+    if a.ndim == 2:
+        A = __linear_closure(a)
+    elif a.ndim == 3:
+        delta = np.eye(3)
+        A = (
+            1.0
+            / 7.0
+            * (
+                np.einsum("Iij,kl->Iijkl", a, delta)
+                + np.einsum("Iik,jl->Iijkl", a, delta)
+                + np.einsum("Iil,jk->Iijkl", a, delta)
+                + np.einsum("Ikl,ij->Iijkl", a, delta)
+                + np.einsum("Ijl,ik->Iijkl", a, delta)
+                + np.einsum("Ijk,il->Iijkl", a, delta)
+            )
+            - 1.0
+            / 35.0
+            * (
+                np.einsum("ij,kl->ijkl", delta, delta)
+                + np.einsum("ik,jl->ijkl", delta, delta)
+                + np.einsum("il,jk->ijkl", delta, delta)
+            )[np.newaxis, :]
+        )
+
+    return A
+
+
+def __quadratic_closure(a):
+    """Generate a quadratic closure.
+    Parameters
+    ----------
+    a : 3x3 numpy array
+        Second order fiber orientation tensor.
+    Returns
+    -------
+    3x3x3x3 numpy array
+        Fourth order fiber orientation tensor.
+    References
+    ----------
+    .. [1] Kyeong-Hee Han and Yong-Taek Im,
+       'Modified hybrid closure approximation for prediction of flow-induced
+       fiber orientation'
+       Journal of Rheology 43, 569 (1999)
+       https://doi.org/10.1122/1.551002
+    """
     return np.einsum("ij,kl->ijkl", a, a)
 
 
-def hybrid_closure(a):
-    """Generate a hybrid closure.
-
+def quadratic_closure(a):
+    """Generate a quadratic closure.
     Parameters
     ----------
-    a : 3x3 numpy array
-        Second order fiber orientation tensor.
-
+    a : (Mx)3x3 numpy array
+        (Array of) Second order fiber orientation tensor.
     Returns
     -------
-    3x3x3x3 numpy array
-        Fourth order fiber orientation tensor.
-
-
+    A : (Mx)3x3x3x3 numpy array
+        (Array of) Fourth order fiber orientation tensor.
     References
     ----------
     .. [1] Kyeong-Hee Han and Yong-Taek Im,
@@ -188,27 +240,79 @@ def hybrid_closure(a):
        fiber orientation'
        Journal of Rheology 43, 569 (1999)
        https://doi.org/10.1122/1.551002
-
     """
     assert_fot_properties(a)
+
+    if a.ndim == 2:
+        return __quadratic_closure(a)
+    elif a.ndim == 3:
+        return np.einsum("Iij, Ikl -> Iijkl", a, a)
+
+
+def __hybrid_closure(a):
+    """Generate a hybrid closure.
+    Parameters
+    ----------
+    a : 3x3 numpy array
+        Second order fiber orientation tensor.
+    Returns
+    -------
+    3x3x3x3 numpy array
+        Fourth order fiber orientation tensor.
+    References
+    ----------
+    .. [1] Kyeong-Hee Han and Yong-Taek Im,
+       'Modified hybrid closure approximation for prediction of flow-induced
+       fiber orientation'
+       Journal of Rheology 43, 569 (1999)
+       https://doi.org/10.1122/1.551002
+    """
+
     f = 1.0 - 27.0 * np.linalg.det(a)
     return (1.0 - f) * linear_closure(a) + f * quadratic_closure(a)
 
 
-def IBOF_closure(a):
-    """Generate IBOF closure.
+def hybrid_closure(a):
+    """Generate a hybrid closure.
+    Parameters
+    ----------
+    a : (Mx)3x3 numpy array
+        (Array of) Second order fiber orientation tensor.
+    Returns
+    -------
+    A : (Mx)3x3x3x3 numpy array
+        (Array of) Fourth order fiber orientation tensor.
+    References
+    ----------
+    .. [1] Kyeong-Hee Han and Yong-Taek Im,
+       'Modified hybrid closure approximation for prediction of flow-induced
+       fiber orientation'
+       Journal of Rheology 43, 569 (1999)
+       https://doi.org/10.1122/1.551002
+    """
+    assert_fot_properties(a)
 
+    if a.ndim == 2:
+        A = __hybrid_closure(a)
+    elif a.ndim == 3:
+
+        f = 1.0 - 27.0 * np.linalg.det(a)
+        A = np.einsum("I, Iijkl -> Iijkl", 1.0 - f, linear_closure(a))
+        A += np.einsum("I, Iijkl -> Iijkl", f, quadratic_closure(a))
+
+    return A
+
+
+def __IBOF_closure(a):
+    """Generate IBOF closure.
     Parameters
     ----------
     a : 3x3 numpy array
         Second order fiber orientation tensor.
-
     Returns
     -------
     3x3x3x3 numpy array
         Fourth order fiber orientation tensor.
-
-
     References
     ----------
     .. [1] Du Hwan Chung and Tai Hun Kwon,
@@ -216,7 +320,6 @@ def IBOF_closure(a):
        prediction of flow-induced fiber orientation',
        Journal of Rheology 46(1):169-194,
        https://doi.org/10.1122/1.1423312
-
     """
     assert_fot_properties(a)
 
@@ -458,9 +561,281 @@ def IBOF_closure(a):
     )
 
 
-def symm(A):
-    """Symmetrize the fourth order tensor.
+def IBOF_closure(a):
+    """Generate IBOF closure.
+    Parameters
+    ----------
+    a : 3x3 numpy array
+        Second order fiber orientation tensor.
+    Returns
+    -------
+    3x3x3x3 numpy array
+        Fourth order fiber orientation tensor.
+    References
+    ----------
+    .. [1] Du Hwan Chung and Tai Hun Kwon,
+       'Invariant-based optimal fitting closure approximation for the numerical
+       prediction of flow-induced fiber orientation',
+       Journal of Rheology 46(1):169-194,
+       https://doi.org/10.1122/1.1423312
+    """
+    assert_fot_properties(a)
 
+    if a.ndim == 2:
+        A = __IBOF_closure(a)
+    elif a.ndim == 3:
+
+        # second invariant
+        II = (
+            a[:, 0, 0] * a[:, 1, 1]
+            + a[:, 1, 1] * a[:, 2, 2]
+            + a[:, 0, 0] * a[:, 2, 2]
+            - a[:, 0, 1] * a[:, 1, 0]
+            - a[:, 1, 2] * a[:, 2, 1]
+            - a[:, 0, 2] * a[:, 2, 0]
+        )
+
+        # third invariant
+        III = np.linalg.det(a)
+
+        # coefficients from Chung & Kwon paper
+        C1 = np.zeros((1, 21))
+
+        C2 = np.zeros((1, 21))
+
+        C3 = np.array(
+            [
+                [
+                    0.24940908165786e2,
+                    -0.435101153160329e3,
+                    0.372389335663877e4,
+                    0.703443657916476e4,
+                    0.823995187366106e6,
+                    -0.133931929894245e6,
+                    0.880683515327916e6,
+                    -0.991630690741981e7,
+                    -0.159392396237307e5,
+                    0.800970026849796e7,
+                    -0.237010458689252e7,
+                    0.379010599355267e8,
+                    -0.337010820273821e8,
+                    0.322219416256417e5,
+                    -0.257258805870567e9,
+                    0.214419090344474e7,
+                    -0.449275591851490e8,
+                    -0.213133920223355e8,
+                    0.157076702372204e10,
+                    -0.232153488525298e5,
+                    -0.395769398304473e10,
+                ]
+            ]
+        )
+
+        C4 = np.array(
+            [
+                [
+                    -0.497217790110754e0,
+                    0.234980797511405e2,
+                    -0.391044251397838e3,
+                    0.153965820593506e3,
+                    0.152772950743819e6,
+                    -0.213755248785646e4,
+                    -0.400138947092812e4,
+                    -0.185949305922308e7,
+                    0.296004865275814e4,
+                    0.247717810054366e7,
+                    0.101013983339062e6,
+                    0.732341494213578e7,
+                    -0.147919027644202e8,
+                    -0.104092072189767e5,
+                    -0.635149929624336e8,
+                    -0.247435106210237e6,
+                    -0.902980378929272e7,
+                    0.724969796807399e7,
+                    0.487093452892595e9,
+                    0.138088690964946e5,
+                    -0.160162178614234e10,
+                ]
+            ]
+        )
+
+        C5 = np.zeros((1, 21))
+
+        C6 = np.array(
+            [
+                [
+                    0.234146291570999e2,
+                    -0.412048043372534e3,
+                    0.319553200392089e4,
+                    0.573259594331015e4,
+                    -0.485212803064813e5,
+                    -0.605006113515592e5,
+                    -0.477173740017567e5,
+                    0.599066486689836e7,
+                    -0.110656935176569e5,
+                    -0.460543580680696e8,
+                    0.203042960322874e7,
+                    -0.556606156734835e8,
+                    0.567424911007837e9,
+                    0.128967058686204e5,
+                    -0.152752854956514e10,
+                    -0.499321746092534e7,
+                    0.132124828143333e9,
+                    -0.162359994620983e10,
+                    0.792526849882218e10,
+                    0.466767581292985e4,
+                    -0.128050778279459e11,
+                ]
+            ]
+        )
+
+        # build matrix of coefficients by stacking vectors
+        C = np.vstack((C1, C2, C3, C4, C5, C6))
+
+        # compute parameters as fith order polynom based on invariants
+        beta3 = (
+            C[2, 0]
+            + C[2, 1] * II
+            + C[2, 2] * II**2
+            + C[2, 3] * III
+            + C[2, 4] * III**2
+            + C[2, 5] * II * III
+            + C[2, 6] * II**2 * III
+            + C[2, 7] * II * III**2
+            + C[2, 8] * II**3
+            + C[2, 9] * III**3
+            + C[2, 10] * II**3 * III
+            + C[2, 11] * II**2 * III**2
+            + C[2, 12] * II * III**3
+            + C[2, 13] * II**4
+            + C[2, 14] * III**4
+            + C[2, 15] * II**4 * III
+            + C[2, 16] * II**3 * III**2
+            + C[2, 17] * II**2 * III**3
+            + C[2, 18] * II * III**4
+            + C[2, 19] * II**5
+            + C[2, 20] * III**5
+        )
+
+        beta4 = (
+            C[3, 0]
+            + C[3, 1] * II
+            + C[3, 2] * II**2
+            + C[3, 3] * III
+            + C[3, 4] * III**2
+            + C[3, 5] * II * III
+            + C[3, 6] * II**2 * III
+            + C[3, 7] * II * III**2
+            + C[3, 8] * II**3
+            + C[3, 9] * III**3
+            + C[3, 10] * II**3 * III
+            + C[3, 11] * II**2 * III**2
+            + C[3, 12] * II * III**3
+            + C[3, 13] * II**4
+            + C[3, 14] * III**4
+            + C[3, 15] * II**4 * III
+            + C[3, 16] * II**3 * III**2
+            + C[3, 17] * II**2 * III**3
+            + C[3, 18] * II * III**4
+            + C[3, 19] * II**5
+            + C[3, 20] * III**5
+        )
+
+        beta6 = (
+            C[5, 0]
+            + C[5, 1] * II
+            + C[5, 2] * II**2
+            + C[5, 3] * III
+            + C[5, 4] * III**2
+            + C[5, 5] * II * III
+            + C[5, 6] * II**2 * III
+            + C[5, 7] * II * III**2
+            + C[5, 8] * II**3
+            + C[5, 9] * III**3
+            + C[5, 10] * II**3 * III
+            + C[5, 11] * II**2 * III**2
+            + C[5, 12] * II * III**3
+            + C[5, 13] * II**4
+            + C[5, 14] * III**4
+            + C[5, 15] * II**4 * III
+            + C[5, 16] * II**3 * III**2
+            + C[5, 17] * II**2 * III**3
+            + C[5, 18] * II * III**4
+            + C[5, 19] * II**5
+            + C[5, 20] * III**5
+        )
+
+        beta1 = (
+            3.0
+            / 5.0
+            * (
+                -1.0 / 7.0
+                + 1.0
+                / 5.0
+                * beta3
+                * (1.0 / 7.0 + 4.0 / 7.0 * II + 8.0 / 3.0 * III)
+                - beta4 * (1.0 / 5.0 - 8.0 / 15.0 * II - 14.0 / 15.0 * III)
+                - beta6
+                * (
+                    1.0 / 35.0
+                    - 24.0 / 105.0 * III
+                    - 4.0 / 35.0 * II
+                    + 16.0 / 15.0 * II * III
+                    + 8.0 / 35.0 * II**2
+                )
+            )
+        )
+
+        beta2 = (
+            6.0
+            / 7.0
+            * (
+                1.0
+                - 1.0 / 5.0 * beta3 * (1.0 + 4.0 * II)
+                + 7.0 / 5.0 * beta4 * (1.0 / 6.0 - II)
+                - beta6
+                * (
+                    -1.0 / 5.0
+                    + 2.0 / 3.0 * III
+                    + 4.0 / 5.0 * II
+                    - 8.0 / 5.0 * II**2
+                )
+            )
+        )
+
+        beta5 = (
+            -4.0 / 5.0 * beta3
+            - 7.0 / 5.0 * beta4
+            - 6.0 / 5.0 * beta6 * (1.0 - 4.0 / 3.0 * II)
+        )
+
+        # second order identy matrix
+        delta = np.eye(3)
+
+        # generate fourth order tensor with parameters and tensor algebra
+        A = (
+            beta2[:, np.newaxis, np.newaxis, np.newaxis, np.newaxis]
+            * symm(np.einsum("ij,Ikl->Iijkl", delta, a))
+            + beta3[:, np.newaxis, np.newaxis, np.newaxis, np.newaxis]
+            * symm(np.einsum("Iij,Ikl->Iijkl", a, a))
+            + beta4[:, np.newaxis, np.newaxis, np.newaxis, np.newaxis]
+            * symm(np.einsum("ij,Ikm,Iml->Iijkl", delta, a, a))
+            + beta5[:, np.newaxis, np.newaxis, np.newaxis, np.newaxis]
+            * symm(np.einsum("Iij,Ikm,Iml->Iijkl", a, a, a))
+            + beta6[:, np.newaxis, np.newaxis, np.newaxis, np.newaxis]
+            * symm(np.einsum("Iim,Imj,Ikn,Inl->Iijkl", a, a, a, a))
+        )
+
+        A += (
+            beta1[:, np.newaxis, np.newaxis, np.newaxis, np.newaxis]
+            * symm(np.einsum("ij,kl->ijkl", delta, delta))[np.newaxis, :]
+        )
+
+    return A
+
+
+def __symm(A):
+    """Symmetrize the fourth order tensor.
     This function computes the symmetric part of a fourth order Tensor A
     and returns a symmetric fourth order tensor S.
     """
@@ -506,21 +881,68 @@ def symm(A):
     return S
 
 
+def symm(A):
+    """Symmetrize the fourth order tensor.
+    This function computes the symmetric part of a fourth order Tensor A
+    and returns a symmetric fourth order tensor S.
+    """
+    # initial symmetric tensor with zeros
+    if A.ndim == 4:
+        S = __symm(A)
+    elif A.ndim == 5:
+        S = np.zeros((len(A), 3, 3, 3, 3))
+
+        # Einsteins summation
+        for i in range(3):
+            for j in range(3):
+                for k in range(3):
+                    for l in range(3):
+                        # sum of all permutations divided by 4!=24
+                        S[:, i, j, k, l] = (
+                            1.0
+                            / 24.0
+                            * (
+                                A[:, i, j, k, l]
+                                + A[:, j, i, k, l]
+                                + A[:, i, j, l, k]
+                                + A[:, j, i, l, k]
+                                + A[:, k, l, i, j]
+                                + A[:, l, k, i, j]
+                                + A[:, k, l, j, i]
+                                + A[:, l, k, j, i]
+                                + A[:, i, k, j, l]
+                                + A[:, k, i, j, l]
+                                + A[:, i, k, l, j]
+                                + A[:, k, i, l, j]
+                                + A[:, j, l, i, k]
+                                + A[:, l, j, i, k]
+                                + A[:, j, l, k, i]
+                                + A[:, l, j, k, i]
+                                + A[:, i, l, j, k]
+                                + A[:, l, i, j, k]
+                                + A[:, i, l, k, j]
+                                + A[:, l, i, k, j]
+                                + A[:, j, k, i, l]
+                                + A[:, k, j, i, l]
+                                + A[:, j, k, l, i]
+                                + A[:, k, j, l, i]
+                            )
+                        )
+    return S
+
+
 def orthotropic_fitted_closures(a, closure="ORF"):
     """Generate a orthotropic fitted closure.
-
     Parameter
     ---------
     a : 3x3 array
         2. order orientation tensor
     closure: string
         Defines the used closure ("ORF", "ORW", "ORW3")
-
     Return:
     ------
     A : 3x3x3x3 numpy array
         4. order orientation tensor
-
     References
     ----------
     .. [1] Joaquim S. Cintra and Charles L. Tucker III (1995),
@@ -531,7 +953,6 @@ def orthotropic_fitted_closures(a, closure="ORF"):
     'Improved model of orthotropic closure approximation for flow induced fiber
     orientation', Polymer Composites, 22(5), 636-649,
     https://doi.org/10.1002/pc.10566
-
     """
     assert_fot_properties(a)
 
