@@ -526,7 +526,6 @@ def orthotropic_fitted_closures(a, closure="ORF"):
     # Calculate eigenvalues w and eigenvector-matrix R of a
     w, R = np.linalg.eigh(a)
     # Sort eigenvalues and eigenvectors in descending order
-    idx = w.argsort()[::-1]
     w = w[..., ::-1]
     R = R[..., ::-1]
 
