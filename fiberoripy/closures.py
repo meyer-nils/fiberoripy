@@ -3,7 +3,7 @@
 import numpy as np
 
 
-def compute_closure(a, closure="IBOF", N=1000):
+def compute_closure(a, closure="IBOF"):
     """Create a fourth order tensor from a second order tensor.
     This is essentially a wrapper around all closures.
     Parameters
@@ -21,7 +21,6 @@ def compute_closure(a, closure="IBOF", N=1000):
         "LINEAR",
         "HYBRID",
         "QUADRATIC",
-        "RANDOM",
         "ORF",
         "ORW",
         "ORW3",
@@ -34,8 +33,6 @@ def compute_closure(a, closure="IBOF", N=1000):
         return linear_closure(a)
     if closure == "QUADRATIC":
         return quadratic_closure(a)
-    if closure == "RANDOM":
-        return random_closure(a, N)
     if closure == "ORF":
         return orthotropic_fitted_closures(a, "ORF")
     if closure == "ORW":
@@ -58,15 +55,19 @@ def assert_fot_properties(a):
     # assert(A[1, 2] == A[2, 1])
 
 
-def __random_closure(a, N=1000):
-    """Sample a random fiber orientation and compute fourth order tensor.
+def get_random_tensor_pair(seed=(1.0 / 3.0 * np.eye(3)), N=1000):
+    """Sample a random fiber orientation and compute second and fourth order tensors.
     Parameters
     ----------
-    a : 3x3 numpy array
-        Second order fiber orientation tensor.
+    seed : 3x3 numpy array
+        Second order fiber orientation tensor describing the seed distribution.
+    N : int, optional
+        number of random fibers. The default is 1000.
     Returns
     -------
-    3x3x3x3 numpy array
+    a : 3x3 numpy array
+        Second order fiber orientation tensor
+    A : 3x3x3x3 numpy array
         Fourth order fiber orientation tensor.
     """
 
@@ -78,47 +79,13 @@ def __random_closure(a, N=1000):
     y = np.sin(phi) * np.sin(theta)
     z = np.cos(theta)
     p = np.array([x, y, z]).transpose()
-    p = np.einsum("ij, Ij -> Ii", a, p)
+    p = np.einsum("ij, Ij -> Ii", seed, p)
     p /= np.linalg.norm(p, axis=1)[:, np.newaxis]
 
     a = np.einsum("Ii, Ij -> ij", p, p) / N
     A = np.einsum("Ii, Ij, Ik, Il -> ijkl", *4 * (p,)) / N
 
-    return A
-
-
-def random_closure(a, N=1000):
-    """ "Sample a random fiber orientation and compute fourth order tensors.
-    Parameters
-    ----------
-    a : (Mx)3x3 numpy array
-        (Array of) Second order fiber orientation tensor.
-    N : int, optional
-        number of random fibers. The default is 1000.
-    Returns
-    -------
-    A : (Mx)3x3x3x3 numpy array
-        (Array of) Fourth order fiber orientation tensor..
-    """
-    if a.ndim == 2:
-        A = __random_closure(a, N)
-    elif a.ndim == 3:
-        phi = np.random.uniform(-np.pi, np.pi, N)
-        costheta = np.random.uniform(-1.0, 1.0, N)
-        theta = np.arccos(costheta)
-
-        x = np.cos(phi) * np.sin(theta)
-        y = np.sin(phi) * np.sin(theta)
-        z = np.cos(theta)
-        p = np.array([x, y, z]).transpose()
-        ps = np.einsum("Iij, Xj -> IXi", a, p)
-        ps /= np.linalg.norm(ps, axis=1)[:, np.newaxis]
-        # I = index for 2nd-order FOT
-        # Y = index of randomly initlilazed fibers
-        # i = index of space dimension
-        A = np.einsum("IXi, IXj, IXk, IXl -> Iijkl", *4 * (ps,)) / N
-
-    return A
+    return [a, A]
 
 
 def linear_closure(a):
