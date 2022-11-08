@@ -79,7 +79,7 @@ legend_list = ["SPH", "RSC"]
 plt.figure(figsize=(12, 3))
 for j, c in enumerate(subplots):
     i = COMPS[c]
-    plt.subplot("14" + str(j + 1))
+    plt.subplot(int("14" + str(j + 1)))
     plt.plot(G * t, mean[:, i], color=dark2(0), linewidth=2)
     plt.fill_between(
         G * t,
@@ -99,6 +99,6 @@ for j, c in enumerate(subplots):
 
 plt.tight_layout()
 # save tikz figure (width means individual subplot width!)
-tikzplotlib.save(pic_name.replace(".png", ".tex"), figurewidth=r"\textwidth/4")
+tikzplotlib.save(pic_name.replace(".png", ".tex"), axis_width=r"\textwidth/4")
 plt.savefig(pic_name)
 plt.show()
