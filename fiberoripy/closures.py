@@ -5,19 +5,15 @@ import numpy as np
 
 def compute_closure(a, closure="IBOF", N=1000):
     """Create a fourth order tensor from a second order tensor.
-
     This is essentially a wrapper around all closures.
-
     Parameters
     ----------
     a : 3x3 numpy array
         Second order fiber orientation tensor.
-
     Returns
     -------
     3x3x3x3 numpy array
         Fourth order fiber orientation tensor.
-
     """
     # assertation
     assert closure in (
@@ -50,70 +46,91 @@ def compute_closure(a, closure="IBOF", N=1000):
 
 def assert_fot_properties(a):
     """Assert properties of second order input tensor.
-
     Parameters
     ----------
     a : 3x3 numpy array
         Second order fiber orientation tensor.
-
     """
     # assert symmetry and shape
-    assert np.shape(a) == (3, 3)
+    assert np.shape(a)[-2:] == (3, 3)
     # assert(A[0, 1] == A[1, 0])
     # assert(A[0, 2] == A[2, 0])
     # assert(A[1, 2] == A[2, 1])
 
 
-def random_closure(a, N=1000):
+def __random_closure(a, N=1000):
     """Sample a random fiber orientation and compute fourth order tensor.
-
     Parameters
     ----------
     a : 3x3 numpy array
-        Second order fiber orientation tensor. Note: This is modified by the
-        function to match the actual random generated state.
-
+        Second order fiber orientation tensor.
     Returns
     -------
     3x3x3x3 numpy array
         Fourth order fiber orientation tensor.
-
     """
-    phi = np.random.uniform(0.0, 2.0 * np.pi, N)
+
+    phi = np.random.uniform(-np.pi, np.pi, N)
     costheta = np.random.uniform(-1.0, 1.0, N)
     theta = np.arccos(costheta)
 
     x = np.cos(phi) * np.sin(theta)
     y = np.sin(phi) * np.sin(theta)
     z = np.cos(theta)
-    # get directions
     p = np.array([x, y, z]).transpose()
-    # project with second order tensor
     p = np.einsum("ij, Ij -> Ii", a, p)
-    # normalize directions
     p /= np.linalg.norm(p, axis=1)[:, np.newaxis]
 
-    # update 2nd order tensor to random state
-    a[:] = np.einsum("Ii, Ij -> ij", p, p) / N
-    # build 4th order tensor
-    A = np.einsum("Ii, Ij, Ik, Il -> ijkl", p, p, p, p) / N
+    a = np.einsum("Ii, Ij -> ij", p, p) / N
+    A = np.einsum("Ii, Ij, Ik, Il -> ijkl", *4 * (p,)) / N
+
+    return A
+
+
+def random_closure(a, N=1000):
+    """ "Sample a random fiber orientation and compute fourth order tensors.
+    Parameters
+    ----------
+    a : (Mx)3x3 numpy array
+        (Array of) Second order fiber orientation tensor.
+    N : int, optional
+        number of random fibers. The default is 1000.
+    Returns
+    -------
+    A : (Mx)3x3x3x3 numpy array
+        (Array of) Fourth order fiber orientation tensor..
+    """
+    if a.ndim == 2:
+        A = __random_closure(a, N)
+    elif a.ndim == 3:
+        phi = np.random.uniform(-np.pi, np.pi, N)
+        costheta = np.random.uniform(-1.0, 1.0, N)
+        theta = np.arccos(costheta)
+
+        x = np.cos(phi) * np.sin(theta)
+        y = np.sin(phi) * np.sin(theta)
+        z = np.cos(theta)
+        p = np.array([x, y, z]).transpose()
+        ps = np.einsum("Iij, Xj -> IXi", a, p)
+        ps /= np.linalg.norm(ps, axis=1)[:, np.newaxis]
+        # I = index for 2nd-order FOT
+        # Y = index of randomly initlilazed fibers
+        # i = index of space dimension
+        A = np.einsum("IXi, IXj, IXk, IXl -> Iijkl", *4 * (ps,)) / N
+
     return A
 
 
 def linear_closure(a):
     """Generate a linear closure.
-
     Parameters
     ----------
-    a : 3x3 numpy array
-        Second order fiber orientation tensor.
-
+    a : (Mx)3x3 numpy array
+        (Array of) Second order fiber orientation tensor.
     Returns
     -------
-    3x3x3x3 numpy array
-        Fourth order fiber orientation tensor.
-
-
+    A : (Mx)3x3x3x3 numpy array
+        (Array of) Fourth order fiber orientation tensor.
     References
     ----------
     .. [1] Kyeong-Hee Han and Yong-Taek Im,
@@ -121,39 +138,45 @@ def linear_closure(a):
        fiber orientation'
        Journal of Rheology 43, 569 (1999)
        https://doi.org/10.1122/1.551002
-
     """
     assert_fot_properties(a)
 
     delta = np.eye(3)
-    return 1.0 / 7.0 * (
-        np.einsum("ij,kl->ijkl", a, delta)
-        + np.einsum("ik,jl->ijkl", a, delta)
-        + np.einsum("il,jk->ijkl", a, delta)
-        + np.einsum("kl,ij->ijkl", a, delta)
-        + np.einsum("jl,ik->ijkl", a, delta)
-        + np.einsum("jk,il->ijkl", a, delta)
-    ) - 1.0 / 35.0 * (
-        np.einsum("ij,kl->ijkl", delta, delta)
-        + np.einsum("ik,jl->ijkl", delta, delta)
-        + np.einsum("il,jk->ijkl", delta, delta)
+    A = (
+        1.0
+        / 7.0
+        * (
+            np.einsum("...ij,kl->...ijkl", a, delta)
+            + np.einsum("...ik,jl->...ijkl", a, delta)
+            + np.einsum("...il,jk->...ijkl", a, delta)
+            + np.einsum("...kl,ij->...ijkl", a, delta)
+            + np.einsum("...jl,ik->...ijkl", a, delta)
+            + np.einsum("...jk,il->...ijkl", a, delta)
+        )
     )
+    A -= (
+        1.0
+        / 35.0
+        * (
+            np.einsum("ij,kl->ijkl", delta, delta)
+            + np.einsum("ik,jl->ijkl", delta, delta)
+            + np.einsum("il,jk->ijkl", delta, delta)
+        )
+    )
+
+    return A
 
 
 def quadratic_closure(a):
     """Generate a quadratic closure.
-
     Parameters
     ----------
-    a : 3x3 numpy array
-        Second order fiber orientation tensor.
-
+    a : (Mx)3x3 numpy array
+        (Array of) Second order fiber orientation tensor.
     Returns
     -------
-    3x3x3x3 numpy array
-        Fourth order fiber orientation tensor.
-
-
+    A : (Mx)3x3x3x3 numpy arrayF
+        (Array of) Fourth order fiber orientation tensor.
     References
     ----------
     .. [1] Kyeong-Hee Han and Yong-Taek Im,
@@ -161,26 +184,22 @@ def quadratic_closure(a):
        fiber orientation'
        Journal of Rheology 43, 569 (1999)
        https://doi.org/10.1122/1.551002
-
     """
     assert_fot_properties(a)
-    return np.einsum("ij,kl->ijkl", a, a)
+
+    return np.einsum("...ij, ...kl -> ...ijkl", a, a)
 
 
 def hybrid_closure(a):
     """Generate a hybrid closure.
-
     Parameters
     ----------
-    a : 3x3 numpy array
-        Second order fiber orientation tensor.
-
+    a : (Mx)3x3 numpy array
+        (Array of) Second order fiber orientation tensor.
     Returns
     -------
-    3x3x3x3 numpy array
-        Fourth order fiber orientation tensor.
-
-
+    A : (Mx)3x3x3x3 numpy array
+        (Array of) Fourth order fiber orientation tensor.
     References
     ----------
     .. [1] Kyeong-Hee Han and Yong-Taek Im,
@@ -188,27 +207,26 @@ def hybrid_closure(a):
        fiber orientation'
        Journal of Rheology 43, 569 (1999)
        https://doi.org/10.1122/1.551002
-
     """
     assert_fot_properties(a)
+
     f = 1.0 - 27.0 * np.linalg.det(a)
-    return (1.0 - f) * linear_closure(a) + f * quadratic_closure(a)
+    A = np.einsum("..., ...ijkl -> ...ijkl", 1.0 - f, linear_closure(a))
+    A += np.einsum("..., ...ijkl -> ...ijkl", f, quadratic_closure(a))
+
+    return A
 
 
 def IBOF_closure(a):
     """Generate IBOF closure.
-
     Parameters
     ----------
     a : 3x3 numpy array
         Second order fiber orientation tensor.
-
     Returns
     -------
     3x3x3x3 numpy array
         Fourth order fiber orientation tensor.
-
-
     References
     ----------
     .. [1] Du Hwan Chung and Tai Hun Kwon,
@@ -216,18 +234,17 @@ def IBOF_closure(a):
        prediction of flow-induced fiber orientation',
        Journal of Rheology 46(1):169-194,
        https://doi.org/10.1122/1.1423312
-
     """
     assert_fot_properties(a)
 
     # second invariant
     II = (
-        a[0, 0] * a[1, 1]
-        + a[1, 1] * a[2, 2]
-        + a[0, 0] * a[2, 2]
-        - a[0, 1] * a[1, 0]
-        - a[1, 2] * a[2, 1]
-        - a[0, 2] * a[2, 0]
+        a[..., 0, 0] * a[..., 1, 1]
+        + a[..., 1, 1] * a[..., 2, 2]
+        + a[..., 0, 0] * a[..., 2, 2]
+        - a[..., 0, 1] * a[..., 1, 0]
+        - a[..., 1, 2] * a[..., 2, 1]
+        - a[..., 0, 2] * a[..., 2, 0]
     )
 
     # third invariant
@@ -449,23 +466,29 @@ def IBOF_closure(a):
 
     # generate fourth order tensor with parameters and tensor algebra
     return (
-        beta1 * symm(np.einsum("ij,kl->ijkl", delta, delta))
-        + beta2 * symm(np.einsum("ij,kl->ijkl", delta, a))
-        + beta3 * symm(np.einsum("ij,kl->ijkl", a, a))
-        + beta4 * symm(np.einsum("ij,km,ml->ijkl", delta, a, a))
-        + beta5 * symm(np.einsum("ij,km,ml->ijkl", a, a, a))
-        + beta6 * symm(np.einsum("im,mj,kn,nl->ijkl", a, a, a, a))
+        symm(np.einsum("..., ij,kl->...ijkl", beta1, delta, delta))
+        + symm(np.einsum("..., ij, ...kl-> ...ijkl", beta2, delta, a))
+        + symm(np.einsum("..., ...ij, ...kl -> ...ijkl", beta3, a, a))
+        + symm(
+            np.einsum("..., ij, ...km, ...ml -> ...ijkl", beta4, delta, a, a)
+        )
+        + symm(
+            np.einsum("..., ...ij, ...km, ...ml -> ...ijkl", beta5, a, a, a)
+        )
+        + symm(
+            np.einsum(
+                "..., ...im, ...mj, ...kn, ...nl -> ...ijkl", beta6, a, a, a, a
+            )
+        )
     )
 
 
 def symm(A):
     """Symmetrize the fourth order tensor.
-
     This function computes the symmetric part of a fourth order Tensor A
     and returns a symmetric fourth order tensor S.
     """
-    # initial symmetric tensor with zeros
-    S = np.zeros((3, 3, 3, 3))
+    S = np.zeros((*A.shape[:-4], 3, 3, 3, 3))
 
     # Einsteins summation
     for i in range(3):
@@ -473,34 +496,34 @@ def symm(A):
             for k in range(3):
                 for l in range(3):
                     # sum of all permutations divided by 4!=24
-                    S[i, j, k, l] = (
+                    S[..., i, j, k, l] = (
                         1.0
                         / 24.0
                         * (
-                            A[i, j, k, l]
-                            + A[j, i, k, l]
-                            + A[i, j, l, k]
-                            + A[j, i, l, k]
-                            + A[k, l, i, j]
-                            + A[l, k, i, j]
-                            + A[k, l, j, i]
-                            + A[l, k, j, i]
-                            + A[i, k, j, l]
-                            + A[k, i, j, l]
-                            + A[i, k, l, j]
-                            + A[k, i, l, j]
-                            + A[j, l, i, k]
-                            + A[l, j, i, k]
-                            + A[j, l, k, i]
-                            + A[l, j, k, i]
-                            + A[i, l, j, k]
-                            + A[l, i, j, k]
-                            + A[i, l, k, j]
-                            + A[l, i, k, j]
-                            + A[j, k, i, l]
-                            + A[k, j, i, l]
-                            + A[j, k, l, i]
-                            + A[k, j, l, i]
+                            A[..., i, j, k, l]
+                            + A[..., j, i, k, l]
+                            + A[..., i, j, l, k]
+                            + A[..., j, i, l, k]
+                            + A[..., k, l, i, j]
+                            + A[..., l, k, i, j]
+                            + A[..., k, l, j, i]
+                            + A[..., l, k, j, i]
+                            + A[..., i, k, j, l]
+                            + A[..., k, i, j, l]
+                            + A[..., i, k, l, j]
+                            + A[..., k, i, l, j]
+                            + A[..., j, l, i, k]
+                            + A[..., l, j, i, k]
+                            + A[..., j, l, k, i]
+                            + A[..., l, j, k, i]
+                            + A[..., i, l, j, k]
+                            + A[..., l, i, j, k]
+                            + A[..., i, l, k, j]
+                            + A[..., l, i, k, j]
+                            + A[..., j, k, i, l]
+                            + A[..., k, j, i, l]
+                            + A[..., j, k, l, i]
+                            + A[..., k, j, l, i]
                         )
                     )
     return S
@@ -508,19 +531,16 @@ def symm(A):
 
 def orthotropic_fitted_closures(a, closure="ORF"):
     """Generate a orthotropic fitted closure.
-
     Parameter
     ---------
     a : 3x3 array
         2. order orientation tensor
     closure: string
         Defines the used closure ("ORF", "ORW", "ORW3")
-
     Return:
     ------
     A : 3x3x3x3 numpy array
         4. order orientation tensor
-
     References
     ----------
     .. [1] Joaquim S. Cintra and Charles L. Tucker III (1995),
@@ -531,18 +551,21 @@ def orthotropic_fitted_closures(a, closure="ORF"):
     'Improved model of orthotropic closure approximation for flow induced fiber
     orientation', Polymer Composites, 22(5), 636-649,
     https://doi.org/10.1002/pc.10566
-
     """
     assert_fot_properties(a)
 
-    A = np.zeros([3, 3, 3, 3])
+    A = np.zeros([*a.shape[:-2], 3, 3, 3, 3])
 
     # Calculate eigenvalues w and eigenvector-matrix R of a
     w, R = np.linalg.eigh(a)
     # Sort eigenvalues and eigenvectors in descending order
     idx = w.argsort()[::-1]
-    w = w[idx]
-    R = R[:, idx]
+    w = w[..., ::-1]
+    R = R[..., ::-1]
+
+    ev1 = w[..., 0]
+    ev2 = w[..., 1]
+    ev3 = w[..., 2]
 
     if closure == "ORF":
         C = np.array(
@@ -552,7 +575,16 @@ def orthotropic_fitted_closures(a, closure="ORF"):
                 [1.228982, -2.054116, 0.821548, -2.260574, 1.053907, 1.819756],
             ]
         )
-        W = np.array([1.0, w[0], w[0] ** 2, w[1], w[1] ** 2, w[0] * w[1]])
+        W = np.array(
+            [
+                np.ones(ev1.shape),
+                ev1,
+                ev1**2.0,
+                ev2,
+                ev2**2.0,
+                ev1 * ev2,
+            ]
+        )
 
     elif closure == "ORW":
         C = np.array(
@@ -562,7 +594,16 @@ def orthotropic_fitted_closures(a, closure="ORF"):
                 [1.249811, -2.148297, 0.898521, -2.290157, 1.044147, 1.934914],
             ]
         )
-        W = np.array([1.0, w[0], w[0] ** 2, w[1], w[1] ** 2, w[0] * w[1]])
+        W = np.array(
+            [
+                np.ones(ev1.shape),
+                ev1,
+                ev1**2,
+                ev2,
+                ev2**2,
+                ev1 * ev2,
+            ]
+        )
 
     elif closure == "ORW3":
         C = np.array(
@@ -607,55 +648,68 @@ def orthotropic_fitted_closures(a, closure="ORF"):
         )
         W = np.array(
             [
-                1.0,
-                w[0],
-                w[0] ** 2,
-                w[1],
-                w[1] ** 2,
-                w[0] * w[1],
-                w[0] * w[0] * w[1],
-                w[0] * w[1] * w[1],
-                w[0] * w[0] * w[0],
-                w[1] * w[1] * w[1],
+                np.ones(ev1.shape),
+                ev1,
+                ev1**2,
+                ev2,
+                ev2**2,
+                ev1 * ev2,
+                ev1 * ev1 * ev2,
+                ev1 * ev2 * ev2,
+                ev1 * ev1 * ev1,
+                ev2 * ev2 * ev2,
             ]
         )
+
+    W = np.einsum("I... -> ...I", W)
     # A_sol = ([A11, A22, A33, A44, A55, A66])
-    A_sol = np.zeros(6)
-    [A_sol[0], A_sol[1], A_sol[2]] = np.einsum("ij,j->i", C, W)
-    A_sol[3] = 0.5 * (w[2] - A_sol[2] - w[0] + A_sol[0] + w[1] - A_sol[1])
+    A_sol = np.zeros((*a.shape[:-2], 6))
+    # [A_sol[0], A_sol[1], A_sol[2]] = np.einsum("ij,j->i", C, W)
+    for i in range(3):
+        A_sol[..., i] = (
+            C[i, 0] * W[..., 0] + C[i, 1] * W[..., 1] + C[i, 2] * W[..., 2]
+        )
+
+    A_sol[..., 3] = 0.5 * (
+        ev3 - A_sol[..., 2] - ev1 + A_sol[..., 0] + ev2 - A_sol[..., 1]
+    )
     # A_sol[5] = a[1, 1] - A_sol[1] - A_sol[3]
     # A_sol[4] = a[0, 0] - A_sol[0] - A_sol[5]
-    A_sol[4] = 0.5 * (-A_sol[0] + A_sol[1] - A_sol[2] + w[0] - w[1] + w[2])
-    A_sol[5] = 0.5 * (-A_sol[0] - A_sol[1] + A_sol[2] + w[0] + w[1] - w[2])
+    A_sol[..., 4] = 0.5 * (
+        -A_sol[..., 0] + A_sol[..., 1] - A_sol[..., 2] + ev1 - ev2 + ev3
+    )
+    A_sol[..., 5] = 0.5 * (
+        -A_sol[..., 0] - A_sol[..., 1] + A_sol[..., 2] + ev1 + ev2 - ev3
+    )
 
     for i in range(3):
-        A[i, i, i, i] = A_sol[i]
+        A[..., i, i, i, i] = A_sol[..., i]
 
-    # A1122 = A12 = A66
-    A[0, 0, 1, 1] = A_sol[5]
-    A[1, 1, 0, 0] = A_sol[5]
+    A[..., 0, 0, 1, 1] = A_sol[..., 5]
+    A[..., 1, 1, 0, 0] = A_sol[..., 5]
     # A1133 = A13 = A55
-    A[0, 0, 2, 2] = A_sol[4]
-    A[2, 2, 0, 0] = A_sol[4]
+    A[..., 0, 0, 2, 2] = A_sol[..., 4]
+    A[..., 2, 2, 0, 0] = A_sol[..., 4]
     # A2233 = A23 = A44
-    A[1, 1, 2, 2] = A_sol[3]
-    A[2, 2, 1, 1] = A_sol[3]
+    A[..., 1, 1, 2, 2] = A_sol[..., 3]
+    A[..., 2, 2, 1, 1] = A_sol[..., 3]
     # A2323 = A44
-    A[1, 2, 1, 2] = A_sol[3]
-    A[2, 1, 2, 1] = A_sol[3]
-    A[2, 1, 1, 2] = A_sol[3]
-    A[1, 2, 2, 1] = A_sol[3]
+    A[..., 1, 2, 1, 2] = A_sol[..., 3]
+    A[..., 2, 1, 2, 1] = A_sol[..., 3]
+    A[..., 2, 1, 1, 2] = A_sol[..., 3]
+    A[..., 1, 2, 2, 1] = A_sol[..., 3]
     # A1313 = A55
-    A[0, 2, 0, 2] = A_sol[4]
-    A[2, 0, 2, 0] = A_sol[4]
-    A[2, 0, 0, 2] = A_sol[4]
-    A[0, 2, 2, 0] = A_sol[4]
+    A[..., 0, 2, 0, 2] = A_sol[..., 4]
+    A[..., 2, 0, 2, 0] = A_sol[..., 4]
+    A[..., 2, 0, 0, 2] = A_sol[..., 4]
+    A[..., 0, 2, 2, 0] = A_sol[..., 4]
     # A1212 = A66
-    A[0, 1, 0, 1] = A_sol[5]
-    A[1, 0, 1, 0] = A_sol[5]
-    A[1, 0, 0, 1] = A_sol[5]
-    A[0, 1, 1, 0] = A_sol[5]
-
-    A = np.einsum("im,jn,ko,lp,mnop->ijkl", R, R, R, R, A)
+    A[..., 0, 1, 0, 1] = A_sol[..., 5]
+    A[..., 1, 0, 1, 0] = A_sol[..., 5]
+    A[..., 1, 0, 0, 1] = A_sol[..., 5]
+    A[..., 0, 1, 1, 0] = A_sol[..., 5]
+    A = np.einsum(
+        "...im, ...jn, ...ko, ...lp, ...mnop -> ...ijkl", R, R, R, R, A
+    )
 
     return A
