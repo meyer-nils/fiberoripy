@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """Collection of closure approximations."""
+from itertools import permutations
+
 import numpy as np
 
 
@@ -455,45 +457,15 @@ def symm(A):
     This function computes the symmetric part of a fourth order Tensor A
     and returns a symmetric fourth order tensor S.
     """
-    S = np.zeros((*A.shape[:-4], 3, 3, 3, 3))
-
-    # Einsteins summation
-    for i in range(3):
-        for j in range(3):
-            for k in range(3):
-                for l in range(3):
-                    # sum of all permutations divided by 4!=24
-                    S[..., i, j, k, l] = (
-                        1.0
-                        / 24.0
-                        * (
-                            A[..., i, j, k, l]
-                            + A[..., j, i, k, l]
-                            + A[..., i, j, l, k]
-                            + A[..., j, i, l, k]
-                            + A[..., k, l, i, j]
-                            + A[..., l, k, i, j]
-                            + A[..., k, l, j, i]
-                            + A[..., l, k, j, i]
-                            + A[..., i, k, j, l]
-                            + A[..., k, i, j, l]
-                            + A[..., i, k, l, j]
-                            + A[..., k, i, l, j]
-                            + A[..., j, l, i, k]
-                            + A[..., l, j, i, k]
-                            + A[..., j, l, k, i]
-                            + A[..., l, j, k, i]
-                            + A[..., i, l, j, k]
-                            + A[..., l, i, j, k]
-                            + A[..., i, l, k, j]
-                            + A[..., l, i, k, j]
-                            + A[..., j, k, i, l]
-                            + A[..., k, j, i, l]
-                            + A[..., j, k, l, i]
-                            + A[..., k, j, l, i]
-                        )
-                    )
-    return S
+    if A.ndim == 4:
+        S = np.stack(
+            [np.transpose(A, axes=p) for p in permutations([0, 1, 2, 3])]
+        )
+    else:
+        S = np.stack(
+            [np.transpose(A, axes=(0, *p)) for p in permutations([1, 2, 3, 4])]
+        )
+    return S.sum(axis=0) / 24
 
 
 def orthotropic_fitted_closures(a, closure="ORF"):
