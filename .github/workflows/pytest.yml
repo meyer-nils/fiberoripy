@@ -24,7 +24,7 @@ jobs:
     - name: Install fiberoripy
       run: |
         pip install --upgrade pip
-        pip install --upgrade setuptools pytest
+        pip install --upgrade setuptools pytest numpy matplotlib scipy ipympl
         pip install .
     - name: Test with pytest
       run: |
