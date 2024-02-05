@@ -1,6 +1,6 @@
 [project]
 name = "fiberoripy"
-version = "1.1.1"
+version = "1.1.2"
 description = "Fiber orientation models and closures"
 authors = [{name="Nils Meyer", email = "nils.meyer@uni-a.de"}, {name="Constantin Krauß"}]
 license = {file = "LICENSE"}
