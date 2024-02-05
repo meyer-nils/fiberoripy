@@ -604,15 +604,34 @@ def orthotropic_fitted_closures(a, closure="ORF"):
     A_sol = np.zeros((*a.shape[:-2], 6))
     # [A_sol[0], A_sol[1], A_sol[2]] = np.einsum("ij,j->i", C, W)
     for i in range(3):
-        A_sol[..., i] = (
-            C[i, 0] * W[..., 0] + C[i, 1] * W[..., 1] + C[i, 2] * W[..., 2]
-        )
+        if closure == "ORW3":
+            A_sol[..., i] = (
+                C[i, 0] * W[..., 0]
+                + C[i, 1] * W[..., 1]
+                + C[i, 2] * W[..., 2]
+                + C[i, 3] * W[..., 3]
+                + C[i, 4] * W[..., 4]
+                + C[i, 5] * W[..., 5]
+                + C[i, 6] * W[..., 6]
+                + C[i, 7] * W[..., 7]
+                + C[i, 8] * W[..., 8]
+                + C[i, 9] * W[..., 9]
+            )
+        else:
+            A_sol[..., i] = (
+                C[i, 0] * W[..., 0]
+                + C[i, 1] * W[..., 1]
+                + C[i, 2] * W[..., 2]
+                + C[i, 3] * W[..., 3]
+                + C[i, 4] * W[..., 4]
+                + C[i, 5] * W[..., 5]
+            )
 
     A_sol[..., 3] = 0.5 * (
         ev3 - A_sol[..., 2] - ev1 + A_sol[..., 0] + ev2 - A_sol[..., 1]
     )
-    # A_sol[5] = a[1, 1] - A_sol[1] - A_sol[3]
     # A_sol[4] = a[0, 0] - A_sol[0] - A_sol[5]
+    # A_sol[5] = a[1, 1] - A_sol[1] - A_sol[3]
     A_sol[..., 4] = 0.5 * (
         -A_sol[..., 0] + A_sol[..., 1] - A_sol[..., 2] + ev1 - ev2 + ev3
     )
