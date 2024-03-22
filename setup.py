@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-"""Setup file."""
 from os import path, walk
 
 import setuptools
@@ -24,7 +22,7 @@ def package_files(directory):
 
     """
     paths = []
-    for (p, dir, filenames) in walk(directory):
+    for p, dir, filenames in walk(directory):
         for filename in filenames:
             paths.append(path.join("..", p, filename))
     return paths
@@ -32,8 +30,8 @@ def package_files(directory):
 
 setuptools.setup(
     name="fiberoripy",
-    version="1.1.2",
-    author="Nils Meyer, Constantin Krauß",
+    version="1.1.3",
+    author="Nils Meyer, Constantin Krauß, Louis Schreyer, Julian Karl Bauer",
     author_email="nils.meyer@uni-a.de",
     description="Fiber orientation models and closures",
     long_description=long_description,

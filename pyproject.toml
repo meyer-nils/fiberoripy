@@ -1,8 +1,8 @@
 [project]
 name = "fiberoripy"
-version = "1.1.2"
+version = "1.1.3"
 description = "Fiber orientation models and closures"
-authors = [{name="Nils Meyer", email = "nils.meyer@uni-a.de"}, {name="Constantin Krauß"}]
+authors = [{name="Nils Meyer", email = "nils.meyer@uni-a.de"}, {name="Constantin Krauß"}, {name="Louis Schreyer"}, {name="Julian Karl Bauer"}]
 license = {file = "LICENSE"}
 readme = "README.md"
 
