@@ -684,7 +684,7 @@ def _loss_siq(s, evs):
     Parameters
     ----------
     s : float
-        trace of the unkown second-order tensor in SIQ.
+        trace of the unknown second-order tensor in SIQ.
     evs : 3x1 numpy array
         eigenvalues of the input 2nd-order FOT.
     Returns
@@ -703,7 +703,7 @@ def _grad_loss_siq(s, evs):
     Parameters
     ----------
     s : float
-        trace of the unkown second-order tensor in SIQ.
+        trace of the unknown second-order tensor in SIQ.
     evs : 3x1 numpy array
         eigenvalues of the input 2nd-order FOT.
     Returns
