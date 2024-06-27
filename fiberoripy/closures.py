@@ -728,8 +728,8 @@ def symmetric_implicit_closure(a):
     References
     ----------
     .. [1] Karl, Tobias, Matti Schneider, and Thomas Böhlke,
-       'On fully symmetric implicit closure approximations for fiber orientation tensors',
-       Journal of Non-Newtonian Fluid Mechanics 318 : 105049,
+       'On fully symmetric implicit closure approximations for fiber orientation
+       tensors', Journal of Non-Newtonian Fluid Mechanics 318 : 105049,
        https://doi.org/10.1016/j.jnnfm.2023.105049
     """
     assert_fot_properties(a)
