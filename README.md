@@ -81,7 +81,12 @@ Du Hwan Chung and Tai Hun Kwon, \
 'Improved model of orthotropic closure approximation for flow induced fiber orientation', \
 Polymer Composites, 22(5), 636-649, 2001.\
 (https://doi.org/10.1002/pc.10566)
-* __SIC__, __SQC__:\
+*__SQC__:\
+Tobias Karl, Davide Gatti, Bettina Frohnapfel and Thomas Böhlke,\
+'Asymptotic fiber orientation states of the quadratically closed Folgar--Tucker equation and a subsequent closure improvement',\
+Journal of Rheology 65(5) : 999-1022, 2021\
+(https://doi.org/10.1122/8.0000245)
+* __SIC__:\
 Tobias Karl,  Matti Schneider and Thomas Böhlke,\
 'On fully symmetric implicit closure approximations for fiber orientation tensors',\
 Journal of Non-Newtonian Fluid Mechanics 318 : 105049, 2023.\
