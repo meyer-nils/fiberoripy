@@ -777,7 +777,7 @@ def symmetric_quadratic_closure(a):
        https://doi.org/10.1122/8.0000245
     Notes
     ----------
-        In general, the SQC does contract to its second-order input.
+        In general, the SQC does not contract to its second-order input.
     """
     assert_fot_properties(a)
 
