@@ -28,6 +28,7 @@ def compute_closure(a, closure="IBOF"):
         "ORW",
         "ORW3",
         "SIQ",
+        "SQC",
     )
     if closure == "IBOF":
         return IBOF_closure(a)
@@ -45,6 +46,8 @@ def compute_closure(a, closure="IBOF"):
         return orthotropic_fitted_closures(a, "ORW3")
     if closure == "SIQ":
         return symmetric_implicit_closure(a)
+    if closure == "SQC":
+        return symmetric_quadratic_closure(a)
 
 
 def assert_fot_properties(a):
@@ -752,3 +755,42 @@ def symmetric_implicit_closure(a):
             + np.einsum("...il, ...kj -> ...ijkl", b, b)
         )
     )
+
+
+def symmetric_quadratic_closure(a):
+    """Generate a symmetric quadratic closure.
+    Parameters
+    ----------
+    a : (Mx)3x3 numpy array
+        (Array of) Second order fiber orientation tensor.
+    Returns
+    -------
+    A : (Mx)3x3x3x3 numpy array
+        (Array of) Fourth order fiber orientation tensor.
+    References
+    ----------
+    .. [1] Karl, Tobias and Gatti, Davide and Frohnapfel, Bettina and Böhlke, Thomas,
+       'Asymptotic fiber orientation states of the quadratically
+       closed Folgar--Tucker equation and a subsequent closure
+       improvement',
+       Journal of Rheology 65(5) : 999-1022,
+       https://doi.org/10.1122/8.0000245
+    Notes
+    ----------
+        In general, the SQC does contract to its second-order input.
+    """
+    assert_fot_properties(a)
+
+    a4 = (
+        1.0
+        / 3.0
+        * (
+            np.einsum("...ij, ...kl -> ...ijkl", a, a)
+            + np.einsum("...ik, ...lj -> ...ijkl", a, a)
+            + np.einsum("...il, ...kj -> ...ijkl", a, a)
+        )
+    )
+
+    a4 /= 1.0 / 3.0 * (1.0 + 2.0 * np.einsum("...ij, ...ij -> ...", a, a))
+
+    return a4

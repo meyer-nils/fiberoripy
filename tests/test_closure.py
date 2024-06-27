@@ -41,7 +41,7 @@ def test_reduction(a, type):
 @pytest.mark.parametrize("a", get_test_tensors())
 @pytest.mark.parametrize(
     "type",
-    ["IBOF", "LINEAR", "HYBRID", "QUADRATIC", "ORF", "SIQ"],
+    ["IBOF", "LINEAR", "HYBRID", "QUADRATIC", "ORF", "SIQ", "SQC"],
     # "type", ["IBOF", "LINEAR", "HYBRID", "QUADRATIC", "RANDOM"]
 )
 def test_contraction(a, type):
