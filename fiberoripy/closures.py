@@ -3,6 +3,7 @@
 from itertools import permutations
 
 import numpy as np
+from scipy.optimize import root_scalar
 
 
 def compute_closure(a, closure="IBOF"):
@@ -26,6 +27,7 @@ def compute_closure(a, closure="IBOF"):
         "ORF",
         "ORW",
         "ORW3",
+        "SIQ",
     )
     if closure == "IBOF":
         return IBOF_closure(a)
@@ -41,6 +43,8 @@ def compute_closure(a, closure="IBOF"):
         return orthotropic_fitted_closures(a, "ORW")
     if closure == "ORW3":
         return orthotropic_fitted_closures(a, "ORW3")
+    if closure == "SIQ":
+        return symmetric_implicit_closure(a)
 
 
 def assert_fot_properties(a):
@@ -670,3 +674,81 @@ def orthotropic_fitted_closures(a, closure="ORF"):
     )
 
     return A
+
+
+def _loss_siq(s, evs):
+    """Compute loss for SIQ.
+    Parameters
+    ----------
+    s : float
+        trace of the unkown second-order tensor in SIQ.
+    evs : 3x1 numpy array
+        eigenvalues of the input 2nd-order FOT.
+    Returns
+    -------
+    s_root : float
+        approximated root of the loss function.
+    """
+    d = len(evs)
+    s_root = (d + 4.0) * s - np.sum(np.sqrt(1.5 * evs + s**2.0))
+
+    return s_root
+
+
+def _grad_loss_siq(s, evs):
+    """Compute gradient of the loss function for SIQ.
+    Parameters
+    ----------
+    s : float
+        trace of the unkown second-order tensor in SIQ.
+    evs : 3x1 numpy array
+        eigenvalues of the input 2nd-order FOT.
+    Returns
+    -------
+    k : float
+        gradient of the loss function at s.
+    """
+    k = 4.0 + np.sum(1.0 - s / np.sqrt(1.5 * evs + s**2.0))
+    return k
+
+
+def symmetric_implicit_closure(a):
+    """Generate SIQ closure.
+    Parameters
+    ----------
+    a : 3x3 numpy array
+        Second order fiber orientation tensor.
+    Returns
+    -------
+    3x3x3x3 numpy array
+        Fourth order fiber orientation tensor.
+    References
+    ----------
+    .. [1] Karl, Tobias, Matti Schneider, and Thomas Böhlke,
+       'On fully symmetric implicit closure approximations for fiber orientation tensors',
+       Journal of Non-Newtonian Fluid Mechanics 318 : 105049,
+       https://doi.org/10.1016/j.jnnfm.2023.105049
+    """
+    assert_fot_properties(a)
+
+    if not a.ndim == 2:
+        raise ValueError("Currently SIQ does not support broadcasting")
+
+    evs, r = np.linalg.eigh(a)
+
+    s_root = root_scalar(
+        f=_loss_siq, fprime=_grad_loss_siq, args=(evs,), x0=1.0
+    ).root
+
+    mus = np.sqrt(1.5 * evs + s_root**2) - s_root
+    b = r @ np.diag(mus) @ r.T
+
+    return (
+        1.0
+        / 3.0
+        * (
+            np.einsum("...ij, ...kl -> ...ijkl", b, b)
+            + np.einsum("...ik, ...lj -> ...ijkl", b, b)
+            + np.einsum("...il, ...kj -> ...ijkl", b, b)
+        )
+    )
