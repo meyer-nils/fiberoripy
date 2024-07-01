@@ -3,7 +3,6 @@
 from itertools import permutations
 
 import numpy as np
-from scipy.optimize import root_scalar
 
 
 def compute_closure(a, closure="IBOF"):
