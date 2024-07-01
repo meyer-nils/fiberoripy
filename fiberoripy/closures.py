@@ -27,6 +27,7 @@ def compute_closure(a, closure="IBOF"):
         "ORW",
         "ORW3",
         "SIQ",
+        "SIHYB",
         "SQC",
     )
     if closure == "IBOF":
@@ -45,6 +46,8 @@ def compute_closure(a, closure="IBOF"):
         return orthotropic_fitted_closures(a, "ORW3")
     if closure == "SIQ":
         return symmetric_implicit_closure(a)
+    if closure == "SIHYB":
+        return implicit_hybrid_closure(a)
     if closure == "SQC":
         return symmetric_quadratic_closure(a)
 
@@ -466,7 +469,7 @@ def symm(A):
     # if A.ndim == 4:
     #     S = np.stack(
     #         [np.transpose(A, axes=p) for p in permutations([0, 1, 2, 3])]
-    #     )
+    #     )sy
     S = np.stack(
         [
             np.transpose(A, axes=(*range(A.ndim - 4), *p))
@@ -782,4 +785,130 @@ def symmetric_implicit_closure(a, eps_newton=1.0e-12, n_iter_newton=25):
             + np.einsum("...ik, ...lj -> ...ijkl", b, b)
             + np.einsum("...il, ...kj -> ...ijkl", b, b)
         )
+    )
+
+
+def implicit_hybrid_closure(a, eps_newton=1.0e-12, n_iter_newton=25):
+    """Generate implicit hybrid closure.
+    Parameters
+    ----------
+    a : ...x3x3 numpy array
+        (Array of) second order fiber orientation tensor.
+    eps_newton : float
+        convergence criterion for newton algorithm
+        optional: default 1.0e-12
+    n_iter_newton : int
+        number of maximum iterations in newton algorithm
+        optional: default 25
+    Returns
+    -------
+    ...x3x3x3x3 numpy array
+        Fourth order fiber orientation tensor.
+    References
+    ----------
+    .. [1] Karl, Tobias, Matti Schneider, and Thomas Böhlke,
+       'On fully symmetric implicit closure approximations for fiber orientation tensors',
+       Journal of Non-Newtonian Fluid Mechanics 318 : 105049,
+       https://doi.org/10.1016/j.jnnfm.2023.105049
+    Notes
+    ----------
+    There seems to be a typo in the expression for f_prime in the original work.
+    """
+
+    assert_fot_properties(a)
+
+    evs, r = np.linalg.eigh(a)
+
+    d = evs.shape[-1]
+    s = np.ones(a.shape[:-2])
+
+    k = 1.0 - 27.0 * np.prod(evs, axis=-1)
+
+    err, it = 1.0e12, 0
+
+    #  ignore warnings when input is isotropic (results in k=0)
+    with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
+        while err > eps_newton and it < n_iter_newton:
+
+            # l1 and l2 correspond to a, b in the original work
+            l1 = np.nan_to_num(0.5 * (3.0 + (4.0 * s - 3.0) * k) / k)
+            l2 = np.nan_to_num(
+                (3.0 * (1.0 - k) * (4.0 * s - 1.0)) / (14.0 * k)
+            )
+
+            l1_prime = 4.0 * np.ones(l1.shape)
+            l2_prime = np.nan_to_num((6.0 * (1.0 - k)) / (7.0 * k))
+
+            f = np.nan_to_num(
+                (
+                    4.0 * s
+                    + 0.5 * l1 * d
+                    - np.sum(
+                        np.sqrt(
+                            1.5 * evs / k[..., None]
+                            + 0.25 * l1[..., None] ** 2.0
+                            - l2[..., None]
+                        ),
+                        axis=-1,
+                    )
+                )
+            )
+
+            f_prime = np.nan_to_num(
+                (
+                    4.0
+                    + 0.5 * (l1_prime * d)
+                    - 0.25
+                    * np.sum(
+                        (
+                            2.0 * l1[..., None] * l1_prime[..., None]
+                            - 4.0 * l2_prime[..., None]
+                        )
+                        / np.sqrt(
+                            2.0 * evs / k[..., None]
+                            + l1[..., None] ** 2.0
+                            - 4.0 * l2[..., None]
+                        ),
+                        axis=-1,
+                    )
+                )
+            )
+
+            s -= f / f_prime
+
+            err = np.linalg.norm(f)
+            it += 1
+
+        if err > eps_newton:
+            raise ValueError("Newton algorithm did not converge.")
+
+        l1 = np.nan_to_num(0.5 * (3.0 + (4.0 * s - 3.0) * k) / k)
+        l2 = np.nan_to_num((3.0 * (1.0 - k) * (4.0 * s - 1.0)) / (14.0 * k))
+
+        mus = -0.5 * l1[..., None] + np.sqrt(
+            1.5 * evs / k[..., None]
+            + 0.25 * l1[..., None] ** 2
+            - l2[..., None]
+        )
+
+    b = np.einsum("...ij, ...j, ...kj -> ...ik", r, mus, r)
+
+    w1 = 1.0 - k
+    sym_ii = (
+        -3.0 / 35.0 * symm(np.einsum("ij, kl -> ijkl", np.eye(3), np.eye(3)))
+    )
+    sym_ib = 6.0 / 7.0 * symm(np.einsum("ij, ...kl -> ...ijkl", np.eye(3), b))
+    sym_bb = symm(np.einsum("...ij, ...kl -> ...ijkl", b, b))
+
+    linear_term = np.einsum("..., ...ijkl -> ...ijkl", w1, sym_ii + sym_ib)
+    quadratic_term = np.einsum("..., ...ijkl -> ...ijkl", k, sym_bb)
+
+    a4_iso = 0.2 * symm(np.einsum("ij, kl -> ijkl", *2 * (np.eye(3),)))
+    a4 = linear_term + quadratic_term
+
+    # replace numerical garbage with true isotropic 4th-order FOT
+    return np.where(
+        np.isclose(k, 0.0)[..., None, None, None, None],
+        a4_iso[..., :, :, :, :],
+        a4,
     )
