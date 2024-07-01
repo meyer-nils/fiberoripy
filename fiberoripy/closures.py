@@ -463,14 +463,18 @@ def symm(A):
     This function computes the symmetric part of a fourth order Tensor A
     and returns a symmetric fourth order tensor S.
     """
-    if A.ndim == 4:
-        S = np.stack(
-            [np.transpose(A, axes=p) for p in permutations([0, 1, 2, 3])]
-        )
-    else:
-        S = np.stack(
-            [np.transpose(A, axes=(0, *p)) for p in permutations([1, 2, 3, 4])]
-        )
+    # if A.ndim == 4:
+    #     S = np.stack(
+    #         [np.transpose(A, axes=p) for p in permutations([0, 1, 2, 3])]
+    #     )
+    S = np.stack(
+        [
+            np.transpose(A, axes=(*range(A.ndim - 4), *p))
+            for p in permutations(
+                [A.ndim - 4, A.ndim - 3, A.ndim - 2, A.ndim - 1]
+            )
+        ]
+    )
     return S.sum(axis=0) / 24
 
 
