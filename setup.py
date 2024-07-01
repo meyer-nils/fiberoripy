@@ -30,7 +30,7 @@ def package_files(directory):
 
 setuptools.setup(
     name="fiberoripy",
-    version="1.1.3",
+    version="1.1.4",
     author="Nils Meyer, Constantin Krauß, Louis Schreyer, Julian Karl Bauer",
     author_email="nils.meyer@uni-a.de",
     description="Fiber orientation models and closures",

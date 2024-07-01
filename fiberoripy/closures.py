@@ -702,7 +702,7 @@ def symmetric_quadratic_closure(a):
        https://doi.org/10.1122/8.0000245
     Notes
     ----------
-        In general, the SQC does contract to its second-order input.
+        In general, the SQC does not contract to its second-order input.
     """
     assert_fot_properties(a)
 
@@ -740,8 +740,8 @@ def symmetric_implicit_closure(a, eps_newton=1.0e-12, n_iter_newton=25):
     References
     ----------
     .. [1] Karl, Tobias, Matti Schneider, and Thomas Böhlke,
-       'On fully symmetric implicit closure approximations for fiber orientation tensors',
-       Journal of Non-Newtonian Fluid Mechanics 318 : 105049,
+       'On fully symmetric implicit closure approximations for fiber orientation
+       tensors', Journal of Non-Newtonian Fluid Mechanics 318 : 105049,
        https://doi.org/10.1016/j.jnnfm.2023.105049
     """
 
