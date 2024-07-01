@@ -679,84 +679,6 @@ def orthotropic_fitted_closures(a, closure="ORF"):
     return A
 
 
-def _loss_siq(s, evs):
-    """Compute loss for SIQ.
-    Parameters
-    ----------
-    s : float
-        trace of the unkown second-order tensor in SIQ.
-    evs : 3x1 numpy array
-        eigenvalues of the input 2nd-order FOT.
-    Returns
-    -------
-    s_root : float
-        approximated root of the loss function.
-    """
-    d = len(evs)
-    s_root = (d + 4.0) * s - np.sum(np.sqrt(1.5 * evs + s**2.0))
-
-    return s_root
-
-
-def _grad_loss_siq(s, evs):
-    """Compute gradient of the loss function for SIQ.
-    Parameters
-    ----------
-    s : float
-        trace of the unkown second-order tensor in SIQ.
-    evs : 3x1 numpy array
-        eigenvalues of the input 2nd-order FOT.
-    Returns
-    -------
-    k : float
-        gradient of the loss function at s.
-    """
-    k = 4.0 + np.sum(1.0 - s / np.sqrt(1.5 * evs + s**2.0))
-    return k
-
-
-def symmetric_implicit_closure(a):
-    """Generate SIQ closure.
-    Parameters
-    ----------
-    a : 3x3 numpy array
-        Second order fiber orientation tensor.
-    Returns
-    -------
-    3x3x3x3 numpy array
-        Fourth order fiber orientation tensor.
-    References
-    ----------
-    .. [1] Karl, Tobias, Matti Schneider, and Thomas Böhlke,
-       'On fully symmetric implicit closure approximations for fiber orientation tensors',
-       Journal of Non-Newtonian Fluid Mechanics 318 : 105049,
-       https://doi.org/10.1016/j.jnnfm.2023.105049
-    """
-    assert_fot_properties(a)
-
-    if not a.ndim == 2:
-        raise ValueError("Currently SIQ does not support broadcasting")
-
-    evs, r = np.linalg.eigh(a)
-
-    s_root = root_scalar(
-        f=_loss_siq, fprime=_grad_loss_siq, args=(evs,), x0=1.0
-    ).root
-
-    mus = np.sqrt(1.5 * evs + s_root**2) - s_root
-    b = r @ np.diag(mus) @ r.T
-
-    return (
-        1.0
-        / 3.0
-        * (
-            np.einsum("...ij, ...kl -> ...ijkl", b, b)
-            + np.einsum("...ik, ...lj -> ...ijkl", b, b)
-            + np.einsum("...il, ...kj -> ...ijkl", b, b)
-        )
-    )
-
-
 def symmetric_quadratic_closure(a):
     """Generate a symmetric quadratic closure.
     Parameters
@@ -794,3 +716,67 @@ def symmetric_quadratic_closure(a):
     a4 /= 1.0 / 3.0 * (1.0 + 2.0 * np.einsum("...ij, ...ij -> ...", a, a))
 
     return a4
+
+
+def symmetric_implicit_closure(a, eps_newton=1.0e-12, n_iter_newton=25):
+    """Generate SIQ closure.
+    Parameters
+    ----------
+    a : ...x3x3 numpy array
+        (Array of) second order fiber orientation tensor.
+    eps_newton : float
+        convergence criterion for newton algorithm
+        optional: default 1.0e-12
+    n_iter_newton : int
+        number of maximum iterations in newton algorithm
+        optional: default 25
+    Returns
+    -------
+    ...x3x3x3x3 numpy array
+        Fourth order fiber orientation tensor.
+    References
+    ----------
+    .. [1] Karl, Tobias, Matti Schneider, and Thomas Böhlke,
+       'On fully symmetric implicit closure approximations for fiber orientation tensors',
+       Journal of Non-Newtonian Fluid Mechanics 318 : 105049,
+       https://doi.org/10.1016/j.jnnfm.2023.105049
+    """
+
+    assert_fot_properties(a)
+
+    evs, r = np.linalg.eigh(a)
+
+    d = evs.shape[-1]
+    s = np.ones(a.shape[:-2])
+    err, it = 1.0e12, 0
+
+    while err > eps_newton and it < n_iter_newton:
+
+        f = (d + 4.0) * s - np.sum(
+            np.sqrt(1.5 * evs + s[..., None] ** 2.0), axis=-1
+        )
+        f_prime = 4.0 + np.sum(
+            1.0 - s[..., None] / np.sqrt(1.5 * evs + s[..., None] ** 2.0),
+            axis=-1,
+        )
+
+        s -= f / f_prime
+
+        err = np.linalg.norm(f)
+        it += 1
+
+    if err > eps_newton:
+        raise ValueError("Newton algorithm did not converge.")
+
+    mus = np.sqrt(1.5 * evs + s[..., None] ** 2) - s[..., None]
+    b = np.einsum("...ij, ...j, ...kj -> ...ik", r, mus, r)
+
+    return (
+        1.0
+        / 3.0
+        * (
+            np.einsum("...ij, ...kl -> ...ijkl", b, b)
+            + np.einsum("...ik, ...lj -> ...ijkl", b, b)
+            + np.einsum("...il, ...kj -> ...ijkl", b, b)
+        )
+    )
