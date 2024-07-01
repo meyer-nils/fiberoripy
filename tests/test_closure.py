@@ -26,7 +26,7 @@ def get_test_tensors():
 @pytest.mark.parametrize("a", get_test_tensors())
 @pytest.mark.parametrize(
     "type",
-    ["IBOF", "LINEAR", "HYBRID", "QUADRATIC", "ORF", "SIQ"],
+    ["IBOF", "LINEAR", "HYBRID", "QUADRATIC", "ORF", "SIQ", "SIHYB"],
 )
 def test_reduction(a, type):
     """Test contraction property."""
@@ -40,7 +40,7 @@ def test_reduction(a, type):
 @pytest.mark.parametrize("a", get_test_tensors())
 @pytest.mark.parametrize(
     "type",
-    ["IBOF", "LINEAR", "HYBRID", "QUADRATIC", "ORF", "SIQ", "SQC"],
+    ["IBOF", "LINEAR", "HYBRID", "QUADRATIC", "ORF", "SIQ", "SIHYB", "SQC"],
 )
 def test_contraction(a, type):
     """Test first contraction property."""
