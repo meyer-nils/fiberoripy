@@ -62,13 +62,35 @@ Following models have been implemented:
  (https://doi.org/10.1016/j.jnnfm.2008.08.002)
 
 ## Closures
- * Linear
- * Quadratic
- * IBOF
- * Sampling from directions
- * ORF
- * ORW
- * ORW3
+* __Linear__, __Quadratic__, __Hybrid__:\
+Kyeong-Hee Han and Yong-Taek Im,\
+'Modified hybrid closure approximation for prediction of flow-induced fiber orientation', \
+Journal of Rheology 43, 569, 1999.\
+(https://doi.org/10.1122/1.551002)
+* __IBOF__:\
+Du Hwan Chung and Tai Hun Kwon,\
+'Invariant-based optimal fitting closure approximation for the numerical prediction of flow-induced fiber orientation',\
+Journal of Rheology 46(1), 169-194, 2002.\
+(https://doi.org/10.1122/1.1423312)
+* __ORF__, __ORW__, __ORW3__:\
+Joaquim S. Cintra and Charles L. Tucker III,\
+'Orthotropic closure approximations for flow-induced fiber orientation',\
+Journal of Rheology, 39(6), 1095-1122, 1995.
+(https://doi.org/10.1122/1.550630)\
+Du Hwan Chung and Tai Hun Kwon, \
+'Improved model of orthotropic closure approximation for flow induced fiber orientation', \
+Polymer Composites, 22(5), 636-649, 2001.\
+(https://doi.org/10.1002/pc.10566)
+*__SQC__:\
+Tobias Karl, Davide Gatti, Bettina Frohnapfel and Thomas Böhlke,\
+'Asymptotic fiber orientation states of the quadratically closed Folgar--Tucker equation and a subsequent closure improvement',\
+Journal of Rheology 65(5) : 999-1022, 2021\
+(https://doi.org/10.1122/8.0000245)
+* __SIC__:\
+Tobias Karl,  Matti Schneider and Thomas Böhlke,\
+'On fully symmetric implicit closure approximations for fiber orientation tensors',\
+Journal of Non-Newtonian Fluid Mechanics 318 : 105049, 2023.\
+(https://doi.org/10.1016/j.jnnfm.2023.105049)
 
 ## Approximations for equivalent aspect ratios
  * __Cox__:\
