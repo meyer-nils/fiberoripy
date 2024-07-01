@@ -684,7 +684,6 @@ def symmetric_quadratic_closure(a):
     ----------
     a : (Mx)3x3 numpy array
         (Array of) Second order fiber orientation tensor.
-
     Returns
     -------
     A : (Mx)3x3x3x3 numpy array
@@ -699,7 +698,7 @@ def symmetric_quadratic_closure(a):
        https://doi.org/10.1122/8.0000245
     Notes
     ----------
-        In general, the SQC does contract to its second-order input.
+        In general, the SQC does not contract to its second-order input.
     """
     assert_fot_properties(a)
 
