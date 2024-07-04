@@ -86,7 +86,7 @@ Tobias Karl, Davide Gatti, Bettina Frohnapfel and Thomas Böhlke,\
 'Asymptotic fiber orientation states of the quadratically closed Folgar--Tucker equation and a subsequent closure improvement',\
 Journal of Rheology 65(5) : 999-1022, 2021\
 (https://doi.org/10.1122/8.0000245)
-* __SIC__:\
+* __SIC__, __SIHYB__:\
 Tobias Karl,  Matti Schneider and Thomas Böhlke,\
 'On fully symmetric implicit closure approximations for fiber orientation tensors',\
 Journal of Non-Newtonian Fluid Mechanics 318 : 105049, 2023.\
