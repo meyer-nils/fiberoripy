@@ -76,14 +76,14 @@ Journal of Rheology 46(1), 169-194, 2002.\
 Joaquim S. Cintra and Charles L. Tucker III,\
 'Orthotropic closure approximations for flow-induced fiber orientation',\
 Journal of Rheology, 39(6), 1095-1122, 1995.
-(https://doi.org/10.1122/1.550630)\
+(https://doi.org/10.1122/1.550630) \
 Du Hwan Chung and Tai Hun Kwon, \
 'Improved model of orthotropic closure approximation for flow induced fiber orientation', \
 Polymer Composites, 22(5), 636-649, 2001.\
 (https://doi.org/10.1002/pc.10566)
-*__SQC__:\
+* __SQC__:\
 Tobias Karl, Davide Gatti, Bettina Frohnapfel and Thomas Böhlke,\
-'Asymptotic fiber orientation states of the quadratically closed Folgar--Tucker equation and a subsequent closure improvement',\
+'Asymptotic fiber orientation states of the quadratically closed Folgar-Tucker equation and a subsequent closure improvement',\
 Journal of Rheology 65(5) : 999-1022, 2021\
 (https://doi.org/10.1122/8.0000245)
 * __SIC__:\
