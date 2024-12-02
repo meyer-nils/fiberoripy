@@ -1,29 +1,30 @@
 # -*- coding: utf-8 -*-
 """Orientation models."""
+
 import numpy as np
 
 from .closures import compute_closure
 
 
-def jeffery_ode(a, t, xi, L, closure="IBOF", **kwargs):
+def jeffery_ode(a, A, D, W, xi, **kwargs):
     """ODE describing Jeffery's model.
 
     Parameters
     ----------
-    a : 9x1 numpy array
-        Flattened fiber orientation tensor.
-    t : float
-        Time of evaluation.
+    a : 3x3 numpy array
+        Second-order fiber orientation tensor.
+    A : 3x3x3x3 numpy array
+        Fourth-order fiber orientation tensor.
+    D : 3x3 numpy array
+        Symmetric part of velocity gradient tensor.
+    W : 3x3 numpy array
+        Skew-symmetric part of velocity gradient tensor.
     xi : float
         Shape factor computed from aspect ratio.
-    L : function handle
-        Function to compute velocity gradient at time t.
-    closure: str
-        Name of closure to be used.
 
     Returns
     -------
-    9x1 numpy array
+    3x3 numpy array
         Orientation tensor rate.
 
     References
@@ -34,12 +35,7 @@ def jeffery_ode(a, t, xi, L, closure="IBOF", **kwargs):
        https://doi.org/10.1098/rspa.1922.0078
 
     """
-    a = np.reshape(a, (3, 3))
-    A = compute_closure(a, closure)
-    D = 0.5 * (L(t) + np.transpose(L(t)))
-    W = 0.5 * (L(t) - np.transpose(L(t)))
-
-    dadt = (
+    return (
         np.einsum("ik,kj->ij", W, a)
         - np.einsum("ik,kj->ij", a, W)
         + xi
@@ -49,31 +45,29 @@ def jeffery_ode(a, t, xi, L, closure="IBOF", **kwargs):
             - 2 * np.einsum("ijkl,kl->ij", A, D)
         )
     )
-    return dadt.ravel()
 
 
-def folgar_tucker_ode(a, t, xi, L, Ci=0.0, closure="IBOF", **kwargs):
+def folgar_tucker_ode(a, A, D, W, xi, Ci=0.0, **kwargs):
     """ODE describing the Folgar-Tucker model.
 
     Parameters
     ----------
-    a : 9x1 numpy array
-        Flattened fiber orientation tensor.
-    t : float
-        Time of evaluation.
+    a : 3x3 numpy array
+        Second-order fiber orientation tensor.
+    A : 3x3x3x3 numpy array
+        Fourth-order fiber orientation tensor.
+    D : 3x3 numpy array
+        Symmetric part of velocity gradient tensor.
+    W : 3x3 numpy array
+        Skew-symmetric part of velocity gradient tensor.
     xi : float
         Shape factor computed from aspect ratio.
-    L : function handle
-        Function to compute velocity gradient at time t.
     Ci : float
         Fiber interaction constant (typically 0 < Ci < 0.1).
-    closure: str
-        Name of closure to be used.
-
 
     Returns
     -------
-    9x1 numpy array
+    3x3 numpy array
         Orientation tensor rate.
 
     References
@@ -84,10 +78,6 @@ def folgar_tucker_ode(a, t, xi, L, Ci=0.0, closure="IBOF", **kwargs):
        https://doi.org/10.1177%2F073168448400300201
 
     """
-    a = np.reshape(a, (3, 3))
-    A = compute_closure(a, closure)
-    D = 0.5 * (L(t) + np.transpose(L(t)))
-    W = 0.5 * (L(t) - np.transpose(L(t)))
     G = np.sqrt(2.0 * np.einsum("ij,ij", D, D))
     delta = np.eye(3)
 
@@ -102,32 +92,32 @@ def folgar_tucker_ode(a, t, xi, L, Ci=0.0, closure="IBOF", **kwargs):
         )
         + 2 * Ci * G * (delta - 3 * a)
     )
-    return dadt.ravel()
+    return dadt
 
 
-def maier_saupe_ode(a, t, xi, L, Ci=0.0, U0=0.0, closure="IBOF", **kwargs):
+def maier_saupe_ode(a, A, D, W, xi, Ci=0.0, U0=0.0, **kwargs):
     """ODE using Folgar-Tucker constant and Maier-Saupe potential.
 
     Parameters
     ----------
-    a : 9x1 numpy array
-        Flattened fiber orientation tensor.
-    t : float
-        Time of evaluation.
+    a : 3x3 numpy array
+        Second-order fiber orientation tensor.
+    A : 3x3x3x3 numpy array
+        Fourth-order fiber orientation tensor.
+    D : 3x3 numpy array
+        Symmetric part of velocity gradient tensor.
+    W : 3x3 numpy array
+        Skew-symmetric part of velocity gradient tensor.
     xi : float
         Shape factor computed from aspect ratio.
-    L : function handle
-        Function to compute velocity gradient at time t.
     Ci : float
         Fiber interaction constant (typically 0 < Ci < 0.1).
     U0 : float
         Maier-Saupe Potential (in 3D stable for y U0 < 8 Ci).
-    closure: str
-        Name of closure to be used.
 
     Returns
     -------
-    9x1 numpy array
+    3x3 numpy array
         Orientation tensor rate.
 
     References
@@ -138,10 +128,6 @@ def maier_saupe_ode(a, t, xi, L, Ci=0.0, U0=0.0, closure="IBOF", **kwargs):
        https://doi.org/10.1016/j.jnnfm.2010.04.001
 
     """
-    a = np.reshape(a, (3, 3))
-    A = compute_closure(a, closure)
-    D = 0.5 * (L(t) + np.transpose(L(t)))
-    W = 0.5 * (L(t) - np.transpose(L(t)))
     G = np.sqrt(2.0 * np.einsum("ij,ij", D, D))
     delta = np.eye(3)
 
@@ -158,36 +144,35 @@ def maier_saupe_ode(a, t, xi, L, Ci=0.0, U0=0.0, closure="IBOF", **kwargs):
         * G
         * (
             Ci * (delta - 3 * a)
-            + U0
-            * (np.einsum("ik,kj->ij", a, a) - np.einsum("ijkl,kl->ij", A, a))
+            + U0 * (np.einsum("ik,kj->ij", a, a) - np.einsum("ijkl,kl->ij", A, a))
         )
     )
-    return dadt.ravel()
+    return dadt
 
 
-def iard_ode(a, t, xi, L, Ci=0.0, Cm=0.0, closure="IBOF", **kwargs):
+def iard_ode(a, A, D, W, xi, Ci=0.0, Cm=0.0, **kwargs):
     """ODE describing iARD model.
 
     Parameters
     ----------
-    a : 9x1 numpy array
-        Flattened fiber orientation tensor.
-    t : float
-        Time of evaluation.
+    a : 3x3 numpy array
+        Second-order fiber orientation tensor.
+    A : 3x3x3x3 numpy array
+        Fourth-order fiber orientation tensor.
+    D : 3x3 numpy array
+        Symmetric part of velocity gradient tensor.
+    W : 3x3 numpy array
+        Skew-symmetric part of velocity gradient tensor.
     xi : float
         Shape factor computed from aspect ratio.
-    L : function handle
-        Function to compute velocity gradient at time t.
     Ci : float
-        Fiber interaction constant (typically 0 < Ci < 0.05).
+        Fiber interaction constant (typically 0 < Ci < 0.1).
     Cm : float
         Anisotropy factor (0 < Cm < 1).
-    closure: str
-        Name of closure to be used.
 
     Returns
     -------
-    9x1 numpy array
+    3x3 numpy array
         Orientation tensor rate.
 
     References
@@ -199,10 +184,6 @@ def iard_ode(a, t, xi, L, Ci=0.0, Cm=0.0, closure="IBOF", **kwargs):
        https://doi.org/10.1122/1.4939098
 
     """
-    a = np.reshape(a, (3, 3))
-    A = compute_closure(a, closure)
-    D = 0.5 * (L(t) + np.transpose(L(t)))
-    W = 0.5 * (L(t) - np.transpose(L(t)))
     G = np.sqrt(2.0 * np.einsum("ij,ij", D, D))
     delta = np.eye(3)
 
@@ -231,38 +212,36 @@ def iard_ode(a, t, xi, L, Ci=0.0, Cm=0.0, closure="IBOF", **kwargs):
     )
 
     dadt = dadt_HD + dadt_iard
-    return dadt.ravel()
+    return dadt
 
 
-def iardrpr_ode(
-    a, t, xi, L, Ci=0.0, Cm=0.0, alpha=0.0, beta=0.0, closure="IBOF", **kwargs
-):
+def iardrpr_ode(a, A, D, W, xi, Ci=0.0, Cm=0.0, alpha=0.0, beta=0.0, **kwargs):
     """ODE describing iARD-RPR model.
 
     Parameters
     ----------
-    a : 9x1 numpy array
-        Flattened fiber orientation tensor.
-    t : float
-        Time of evaluation.
+    a : 3x3 numpy array
+        Second-order fiber orientation tensor.
+    A : 3x3x3x3 numpy array
+        Fourth-order fiber orientation tensor.
+    D : 3x3 numpy array
+        Symmetric part of velocity gradient tensor.
+    W : 3x3 numpy array
+        Skew-symmetric part of velocity gradient tensor.
     xi : float
         Shape factor computed from aspect ratio.
-    L : function handle
-        Function to compute velocity gradient at time t.
     Ci : float
-        Fiber interaction constant (typically 0 < Ci < 0.05).
+        Fiber interaction constant (typically 0 < Ci < 0.1).
     Cm : float
         Anisotropy factor (0 < Cm < 1).
     alpha : float
         Retardance rate (0 < alpha < 1).
     beta : float
-        Retardance tuning factor (0< beta < 1).
-    closure: str
-        Name of closure to be used.
+        Retardance tuning factor (0 < beta < 1).
 
     Returns
     -------
-    9x1 numpy array
+    3x3 numpy array
         Orientation tensor rate.
 
     References
@@ -274,10 +253,6 @@ def iardrpr_ode(
        https://doi.org/10.1122/1.4939098
 
     """
-    a = np.reshape(a, (3, 3))
-    A = compute_closure(a, closure)
-    D = 0.5 * (L(t) + np.transpose(L(t)))
-    W = 0.5 * (L(t) - np.transpose(L(t)))
     G = np.sqrt(2.0 * np.einsum("ij,ij", D, D))
     delta = np.eye(3)
 
@@ -328,38 +303,36 @@ def iardrpr_ode(
     dadt_rpr = -np.einsum("ik, kl, lj->ij", R, IOK, np.transpose(R))
 
     dadt = dadt_temp + dadt_rpr
-    return dadt.ravel()
+    return dadt
 
 
-def mrd_ode(
-    a, t, xi, L, Ci=0.0, D1=1.0, D2=0.8, D3=0.15, closure="IBOF", **kwargs
-):
+def mrd_ode(a, A, D, W, xi, Ci=0.0, D1=1.0, D2=0.8, D3=0.15, **kwargs):
     """ODE describing MRD model.
 
     Parameters
     ----------
-    a : 9x1 numpy array
-        Flattened fiber orientation tensor.
-    t : float
-        Time of evaluation.
+    a : 3x3 numpy array
+        Second-order fiber orientation tensor.
+    A : 3x3x3x3 numpy array
+        Fourth-order fiber orientation tensor.
+    D : 3x3 numpy array
+        Symmetric part of velocity gradient tensor.
+    W : 3x3 numpy array
+        Skew-symmetric part of velocity gradient tensor.
     xi : float
         Shape factor computed from aspect ratio.
-    L : function handle
-        Function to compute velocity gradient at time t.
     Ci : float
-        Fiber interaction constant (typically 0 < Ci < 0.05).
+        Fiber interaction constant (typically 0 < Ci < 0.1).
     D1 : type
         Anisotropy factors (D1 > 0).
     D2 : type
         Anisotropy factors (D2 > 0).
     D3 : type
         Anisotropy factors (D3 > 0).
-    closure: str
-        Name of closure to be used.
 
     Returns
     -------
-    9x1 numpy array
+    3x3 numpy array
         Orientation tensor rate.
 
     References
@@ -370,10 +343,6 @@ def mrd_ode(
        ANTEC, Orlando, 2018.
 
     """
-    a = np.reshape(a, (3, 3))
-    A = compute_closure(a, closure)
-    D = 0.5 * (L(t) + np.transpose(L(t)))
-    W = 0.5 * (L(t) - np.transpose(L(t)))
     G = np.sqrt(2.0 * np.einsum("ij,ij", D, D))
 
     C_hat = np.array([[D1, 0.0, 0.0], [0.0, D2, 0.0], [0.0, 0.0, D3]])
@@ -405,32 +374,32 @@ def mrd_ode(
     )
 
     dadt = dadt_HD + dadt_mrd
-    return dadt.ravel()
+    return dadt
 
 
-def pard_ode(a, t, xi, L, Ci=0.0, Omega=0.0, closure="IBOF", **kwargs):
+def pard_ode(a, A, D, W, xi, Ci=0.0, Omega=0.0, **kwargs):
     """ODE describing pARD model.
 
     Parameters
     ----------
-    a : 9x1 numpy array
-        Flattened fiber orientation tensor.
-    t : float
-        Time of evaluation.
+    a : 3x3 numpy array
+        Second-order fiber orientation tensor.
+    A : 3x3x3x3 numpy array
+        Fourth-order fiber orientation tensor.
+    D : 3x3 numpy array
+        Symmetric part of velocity gradient tensor.
+    W : 3x3 numpy array
+        Skew-symmetric part of velocity gradient tensor.
     xi : float
         Shape factor computed from aspect ratio.
-    L : function handle
-        Function to compute velocity gradient at time t.
     Ci : float
         Fiber interaction constant (typically 0 < Ci < 0.05).
     Omega : type
         Anisotropy factor (0.5 < Omega < 1).
-    closure: str
-        Name of closure to be used.
 
     Returns
     -------
-    9x1 numpy array
+    3x3 numpy array
         Orientation tensor rate.
 
     References
@@ -442,15 +411,9 @@ def pard_ode(a, t, xi, L, Ci=0.0, Omega=0.0, closure="IBOF", **kwargs):
        https://doi.org/10.1122/1.4998520
 
     """
-    a = np.reshape(a, (3, 3))
-    A = compute_closure(a, closure)
-    D = 0.5 * (L(t) + np.transpose(L(t)))
-    W = 0.5 * (L(t) - np.transpose(L(t)))
     G = np.sqrt(2.0 * np.einsum("ij,ij", D, D))
 
-    C_hat = np.array(
-        [[1.0, 0.0, 0.0], [0.0, Omega, 0.0], [0.0, 0.0, 1.0 - Omega]]
-    )
+    C_hat = np.array([[1.0, 0.0, 0.0], [0.0, Omega, 0.0], [0.0, 0.0, 1.0 - Omega]])
 
     # Spectral Decomposition
     eigenValues, eigenVectors = np.linalg.eig(a)
@@ -479,36 +442,34 @@ def pard_ode(a, t, xi, L, Ci=0.0, Omega=0.0, closure="IBOF", **kwargs):
     )
 
     dadt = dadt_HD + dadt_pard
-    return dadt.ravel()
+    return dadt
 
 
-def pardrpr_ode(
-    a, t, xi, L, Ci=0.0, Omega=0.0, alpha=0.0, closure="IBOF", **kwargs
-):
+def pardrpr_ode(a, A, D, W, xi, Ci=0.0, Omega=0.0, alpha=0.0, **kwargs):
     """ODE describing pARD-RPR model.
 
     Parameters
     ----------
-    a : 9x1 numpy array
-        Flattened fiber orientation tensor.
-    t : float
-        Time of evaluation.
+    a : 3x3 numpy array
+        Second-order fiber orientation tensor.
+    A : 3x3x3x3 numpy array
+        Fourth-order fiber orientation tensor.
+    D : 3x3 numpy array
+        Symmetric part of velocity gradient tensor.
+    W : 3x3 numpy array
+        Skew-symmetric part of velocity gradient tensor.
     xi : float
         Shape factor computed from aspect ratio.
-    L : function handle
-        Function to compute velocity gradient at time t.
     Ci : float
         Fiber interaction constant (typically 0 < Ci < 0.05).
     Omega : type
         Anisotropy factor (0.5 < Omega < 1).
     alpha : float
         Retardance rate (0 < alpha < 1).
-    closure: str
-        Name of closure to be used.
 
     Returns
     -------
-    9x1 numpy array
+    3x3 numpy array
         Orientation tensor rate.
 
     References
@@ -520,15 +481,9 @@ def pardrpr_ode(
        https://doi.org/10.1122/1.4998520
 
     """
-    a = np.reshape(a, (3, 3))
-    A = compute_closure(a, closure)
-    D = 0.5 * (L(t) + np.transpose(L(t)))
-    W = 0.5 * (L(t) - np.transpose(L(t)))
     G = np.sqrt(2.0 * np.einsum("ij,ij", D, D))
 
-    C_hat = np.array(
-        [[1.0, 0.0, 0.0], [0.0, Omega, 0.0], [0.0, 0.0, 1.0 - Omega]]
-    )
+    C_hat = np.array([[1.0, 0.0, 0.0], [0.0, Omega, 0.0], [0.0, 0.0, 1.0 - Omega]])
 
     # Spectral Decomposition
     eigenValues, eigenVectors = np.linalg.eig(a)
@@ -574,32 +529,32 @@ def pardrpr_ode(
     dadt_rpr = -np.einsum("ik, kl, lj->ij", R, IOK, np.transpose(R))
 
     dadt = dadt_temp + dadt_rpr
-    return dadt.ravel()
+    return dadt
 
 
-def rsc_ode(a, t, xi, L, Ci=0.0, kappa=1.0, closure="IBOF", **kwargs):
+def rsc_ode(a, A, D, W, xi, Ci=0.0, kappa=1.0, **kwargs):
     """ODE describing RSC model.
 
     Parameters
     ----------
-    a : 9x1 numpy array
-        Flattened fiber orientation tensor.
-    t : float
-        Time of evaluation.
+    a : 3x3 numpy array
+        Second-order fiber orientation tensor.
+    A : 3x3x3x3 numpy array
+        Fourth-order fiber orientation tensor.
+    D : 3x3 numpy array
+        Symmetric part of velocity gradient tensor.
+    W : 3x3 numpy array
+        Skew-symmetric part of velocity gradient tensor.
     xi : float
         Shape factor computed from aspect ratio.
-    L : function handle
-        Function to compute velocity gradient at time t.
     Ci : float
         Fiber interaction constant (typically 0 < Ci < 0.05).
     kappa : float
         Strain reduction factor (0 < kappa < 1).
-    closure: str
-        Name of closure to be used.
 
     Returns
     -------
-    9x1 numpy array
+    3x3 numpy array
         Orientation tensor rate.
 
     References
@@ -612,10 +567,6 @@ def rsc_ode(a, t, xi, L, Ci=0.0, kappa=1.0, closure="IBOF", **kwargs):
        https://doi.org/10.1122/1.2946437
 
     """
-    a = np.reshape(a, (3, 3))
-    A = compute_closure(a, closure)
-    D = 0.5 * (L(t) + np.transpose(L(t)))
-    W = 0.5 * (L(t) - np.transpose(L(t)))
     G = np.sqrt(2.0 * np.einsum("ij,ij", D, D))
     delta = np.eye(3)
 
@@ -644,35 +595,24 @@ def rsc_ode(a, t, xi, L, Ci=0.0, kappa=1.0, closure="IBOF", **kwargs):
         )
         + 2 * kappa * Ci * G * (delta - 3 * a)
     )
-    return dadt.ravel()
+    return dadt
 
 
-def ard_rsc_ode(
-    a,
-    t,
-    xi,
-    L,
-    b1=0.0,
-    kappa=1.0,
-    b2=0,
-    b3=0,
-    b4=0,
-    b5=0,
-    closure="IBOF",
-    **kwargs
-):
+def ard_rsc_ode(a, A, D, W, xi, b1=0.0, kappa=1.0, b2=0, b3=0, b4=0, b5=0, **kwargs):
     """ODE describing ARD-RSC model.
 
     Parameters
     ----------
-    a : 9x1 numpy array
-        Flattened fiber orientation tensor.
-    t : float
-        Time of evaluation.
+    a : 3x3 numpy array
+        Second-order fiber orientation tensor.
+    A : 3x3x3x3 numpy array
+        Fourth-order fiber orientation tensor.
+    D : 3x3 numpy array
+        Symmetric part of velocity gradient tensor.
+    W : 3x3 numpy array
+        Skew-symmetric part of velocity gradient tensor.
     xi : float
         Shape factor computed from aspect ratio.
-    L : function handle
-        Function to compute velocity gradient at time t.
     b1 : float
         First parameter of rotary diffusion tensor (0 < b1 < 0.1).
     kappa : float
@@ -685,12 +625,10 @@ def ard_rsc_ode(
         Fourth parameter of rotary diffusion tensor.
     b5 : type
         Fith parameter of rotary diffusion tensor.
-    closure: str
-        Name of closure to be used.
 
     Returns
     -------
-    9x1 numpy array
+    3x3 numpy array
         Orientation tensor rate.
 
     References
@@ -702,10 +640,6 @@ def ard_rsc_ode(
        https://doi.org/10.1016/j.jnnfm.2008.08.002
 
     """
-    a = np.reshape(a, (3, 3))
-    A = compute_closure(a, closure)
-    D = 0.5 * (L(t) + np.transpose(L(t)))
-    W = 0.5 * (L(t) - np.transpose(L(t)))
     G = np.sqrt(2.0 * np.einsum("ij,ij", D, D))
     delta = np.eye(3)
 
@@ -750,4 +684,36 @@ def ard_rsc_ode(
             + 10 * np.einsum("ijkl,kl->ij", tensor4, C)
         )
     )
-    return dadt.ravel()
+    return dadt
+
+
+def integrate_ori_ode(t, a_flat, L, closure, ori_model, kwargs):
+    """Wrapper to solve fiber reorientation ODE using `scipy` solvers.
+
+    Parameters
+    ----------
+    t : float
+        Time of evaluation.
+    a_flat : 9x1 numpy array
+        Flattened second-order fiber orientation tensor.
+    L : function handle
+        Function `L(t)` to retrieve velocity gradient at time `t`. Must return 3x3 numpy array.
+    closure: function handle
+        Function `closure(a)` to compute closure approximation. Must return 3x3x3x3 numpy array.
+    ori_model: function handle
+        Function `ori_model(a,A,D,W,**kwargs)` computing the rate of the orientation tensor.
+    kwargs : dict
+        Keyword arguments for function `ori_model`.
+
+    Returns
+    -------
+    9x1 numpy array
+        Orientation tensor rate.
+    """
+    a = a_flat.reshape((3, 3))
+    A = closure(a)
+
+    D = 0.5 * (L(t) + np.transpose(L(t)))
+    W = 0.5 * (L(t) - np.transpose(L(t)))
+
+    return ori_model(a, A, D, W, **kwargs).ravel()

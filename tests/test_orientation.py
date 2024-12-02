@@ -4,11 +4,13 @@
 import numpy as np
 import pytest
 
+from fiberoripy.closures import IBOF_closure
 from fiberoripy.orientation import (
     ard_rsc_ode,
     folgar_tucker_ode,
     iard_ode,
     iardrpr_ode,
+    integrate_ori_ode,
     jeffery_ode,
     maier_saupe_ode,
     mrd_ode,
@@ -43,6 +45,19 @@ def test_default_case(model):
     def L(t):
         return np.array([[0.0, 0.0, 1.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
 
-    a_ref = odeint(jeffery_ode, a0.ravel(), t, args=(1.0, L))
-    a_test = odeint(model, a0.ravel(), t, args=(1.0, L))
+    kwargs = {"xi": 1.0}
+    a_ref = odeint(
+        integrate_ori_ode,
+        a0.ravel(),
+        t,
+        args=(L, IBOF_closure, jeffery_ode, kwargs),
+        tfirst=True,
+    )
+    a_test = odeint(
+        integrate_ori_ode,
+        a0.ravel(),
+        t,
+        args=(L, IBOF_closure, model, kwargs),
+        tfirst=True,
+    )
     assert np.allclose(a_ref, a_test, atol=1e-12)
