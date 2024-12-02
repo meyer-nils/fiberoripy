@@ -13,6 +13,7 @@ from fiberoripy.orientation import (
     integrate_ori_ode,
     jeffery_ode,
     maier_saupe_ode,
+    mori_tanaka_ode,
     mrd_ode,
     pard_ode,
     pardrpr_ode,
@@ -32,6 +33,7 @@ from fiberoripy.orientation import (
         iardrpr_ode,
         pard_ode,
         pardrpr_ode,
+        mori_tanaka_ode,
     ],
 )
 def test_default_case(model):

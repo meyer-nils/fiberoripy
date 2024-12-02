@@ -3,8 +3,6 @@
 
 import numpy as np
 
-from .closures import compute_closure
-
 
 def jeffery_ode(a, A, D, W, xi, **kwargs):
     """ODE describing Jeffery's model.
@@ -685,6 +683,59 @@ def ard_rsc_ode(a, A, D, W, xi, b1=0.0, kappa=1.0, b2=0, b3=0, b4=0, b5=0, **kwa
         )
     )
     return dadt
+
+
+def mori_tanaka_ode(a, A, D, W, xi, c_f=0.0, **kwargs):
+    """ODE describing the modified Jeffery equation based on the Mori-Tanaka model.
+
+    Parameters
+    ----------
+    a : 3x3 numpy array
+        Second-order fiber orientation tensor.
+    A : 3x3x3x3 numpy array
+        Fourth-order fiber orientation tensor.
+    D : 3x3 numpy array
+        Symmetric part of velocity gradient tensor.
+    W : 3x3 numpy array
+        Skew-symmetric part of velocity gradient tensor.
+    xi : float
+        Shape factor computed from aspect ratio.
+    c_f : float
+        Fiber volume fraction.
+
+    Returns
+    -------
+    3x3 numpy array
+        Orientation tensor rate.
+
+    References
+    ----------
+    .. [1] T. Karl, T. Böhlke,
+       'Generalized Micromechanical Formulation of Fiber Orientation Tensor Evolution
+       Equations',
+       International Journal of Mechanical Sciences 2023.
+       https://doi.org/10.1016/j.ijmecsci.2023.108771
+    """
+    c_m_inv = 1.0 / (1.0 - c_f)
+    return (
+        np.einsum("ij, jk -> ik", W, a)
+        - np.einsum("ij, jk -> ik", a, W)
+        + xi
+        * c_m_inv
+        * (
+            np.einsum("ij, jk -> ik", D, a)
+            + np.einsum("ij, jk -> ik", a, D)
+            - 2.0 * np.einsum("ijkl, kl -> ij", A, D)
+        )
+        - xi
+        * c_f
+        * c_m_inv
+        * (
+            np.einsum("ij, jk, kl -> il", D, a, a)
+            + np.einsum("ij, jk, kl -> il", a, a, D)
+            - 2.0 * np.einsum("ij, jk, kl -> il", a, D, a)
+        )
+    )
 
 
 def integrate_ori_ode(t, a_flat, L, closure, ori_model, kwargs):
