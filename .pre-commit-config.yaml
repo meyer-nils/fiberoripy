@@ -21,3 +21,8 @@ repos:
     hooks:
       - id: isort
         additional_dependencies: ["toml"]
+# nbstripout to remove outputs from Jupyter notebooks
+-   repo: https://github.com/kynan/nbstripout
+    rev: 0.8.1
+    hooks:
+        - id: nbstripout
