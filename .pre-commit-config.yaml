@@ -2,7 +2,7 @@
 repos:
 # Pre-commit itself
 -   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
     -   id: trailing-whitespace
     -   id: end-of-file-fixer
@@ -12,7 +12,7 @@ repos:
     -   id: check-toml
 # Black code style formatter
 -   repo: https://github.com/psf/black
-    rev: 24.4.2
+    rev: 24.10.0
     hooks:
       - id: black
 # isort import sorting
@@ -21,3 +21,8 @@ repos:
     hooks:
       - id: isort
         additional_dependencies: ["toml"]
+# nbstripout to remove outputs from Jupyter notebooks
+-   repo: https://github.com/kynan/nbstripout
+    rev: 0.8.1
+    hooks:
+        - id: nbstripout
