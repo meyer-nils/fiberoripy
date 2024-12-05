@@ -1,6 +1,3 @@
-# -*- coding: utf-8 -*-
-"""Orientation models."""
-
 import numpy as np
 
 
@@ -748,11 +745,14 @@ def integrate_ori_ode(t, a_flat, L, closure, ori_model, kwargs):
     a_flat : 9x1 numpy array
         Flattened second-order fiber orientation tensor.
     L : function handle
-        Function `L(t)` to retrieve velocity gradient at time `t`. Must return 3x3 numpy array.
+        Function `L(t)` to retrieve velocity gradient at time `t`.
+        Must return 3x3 ndarray.
     closure: function handle
-        Function `closure(a)` to compute closure approximation. Must return 3x3x3x3 numpy array.
+        Function `closure(a)` to compute closure approximation.
+        Must return 3x3x3x3 ndarray.
     ori_model: function handle
-        Function `ori_model(a,A,D,W,**kwargs)` computing the rate of the orientation tensor.
+        Function `ori_model(a, A, D, W, **kwargs)` computing the rate of the orientation
+        tensor.
     kwargs : dict
         Keyword arguments for function `ori_model`.
 

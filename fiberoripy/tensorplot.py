@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-"""Tools to plot tensors."""
 import numpy as np
 
 

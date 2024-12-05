@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-"""Constants for this package."""
 COMPS = {
     "A11": 0,
     "A12": 1,

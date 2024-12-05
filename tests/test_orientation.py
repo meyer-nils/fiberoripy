@@ -1,6 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""Testing the orientation models."""
 import numpy as np
 import pytest
 

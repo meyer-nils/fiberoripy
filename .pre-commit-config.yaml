@@ -8,7 +8,6 @@ repos:
     -   id: end-of-file-fixer
     -   id: check-yaml
     -   id: check-added-large-files
-    -   id: fix-encoding-pragma
     -   id: check-toml
 # Black code style formatter
 -   repo: https://github.com/psf/black

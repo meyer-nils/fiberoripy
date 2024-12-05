@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-"""Fit parameters to model."""
 import numpy as np
 from scipy.integrate import odeint
 from scipy.optimize import least_squares

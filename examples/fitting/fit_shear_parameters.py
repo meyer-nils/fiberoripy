@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Fit parameters of orientation models to micro-simulation data.
 
 This result should match Figure 7 in:
@@ -8,6 +7,7 @@ Simulation with Smoothed Particle Hydrodynamics."
 Journal of Composites Science 4 (2020)
 DOI: 10.3390/jcs4020077
 """
+
 import os
 
 import matplotlib.pyplot as plt
@@ -36,9 +36,7 @@ def L(t):
 data_list = []
 volfrac = "30"
 full_path = os.path.realpath(__file__)
-rootdir = os.path.join(
-    os.path.dirname(full_path), "data", "volfrac%s" % volfrac
-)
+rootdir = os.path.join(os.path.dirname(full_path), "data", "volfrac%s" % volfrac)
 print(rootdir)
 file_name = os.path.join(rootdir, "README.md")
 pic_name = os.path.join(rootdir, "volfrac%s.png" % volfrac)
