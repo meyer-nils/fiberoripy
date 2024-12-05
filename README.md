@@ -1,5 +1,6 @@
 [![LICENSE](https://black.readthedocs.io/en/stable/_static/license.svg)](https://raw.github.com/nilsmeyerkit/fiberoripy/master/LICENSE)
 [![Documentation Status](https://readthedocs.org/projects/fiberoripy/badge/?version=latest)](https://fiberoripy.readthedocs.io/en/latest/?badge=latest)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/fiberoripy)
 [![PyPI version](https://badge.fury.io/py/fiberoripy.svg)](https://badge.fury.io/py/fiberoripy)
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![DOI](https://zenodo.org/badge/282262907.svg)](https://zenodo.org/badge/latestdoi/282262907)
