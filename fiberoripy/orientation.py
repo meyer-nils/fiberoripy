@@ -762,6 +762,7 @@ def integrate_ori_ode(t, a_flat, L, closure, ori_model, kwargs):
         Orientation tensor rate.
     """
     a = a_flat.reshape((3, 3))
+    a = np.clip(a, -1.0, 1.0)
     A = closure(a)
 
     D = 0.5 * (L(t) + np.transpose(L(t)))

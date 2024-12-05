@@ -12,15 +12,13 @@ import os
 
 import matplotlib.pyplot as plt
 import numpy as np
-import tikzplotlib
-from matplotlib import cm
 
 from fiberoripy.aspect_ratios import get_zhang_aspect_ratio
 from fiberoripy.constants import COMPS
 from fiberoripy.fit import fit_optimal_params
 from fiberoripy.orientation import rsc_ode
 
-dark2 = cm.get_cmap("Dark2", 2)
+dark2 = plt.get_cmap("Dark2", 2)
 
 ar = get_zhang_aspect_ratio(4.431135)
 xi = (ar**2 - 1) / (ar**2 + 1)
@@ -60,9 +58,10 @@ std = np.std(data[:, :, 1:10], axis=0)
 with open(file_name, "w") as f:
     f.write("# Fitting Results #\n")
 
+
 p0 = [0.001, 1.0]
 p_opt, N_rsc, msg = fit_optimal_params(
-    t, mean, rsc_ode, xi, L, p0, ([0.0, 0.0], [0.1, 1.0])
+    t, mean, rsc_ode, xi, L, ["Ci", "kappa"], p0, ([0.0, 0.0], [0.1, 1.0])
 )
 with open(file_name, "a") as f:
     f.write("## RSC Model ##\n")
@@ -79,6 +78,7 @@ for j, c in enumerate(subplots):
     i = COMPS[c]
     plt.subplot(int("14" + str(j + 1)))
     plt.plot(G * t, mean[:, i], color=dark2(0), linewidth=2)
+    plt.plot(G * t, N_rsc[:, i], color=dark2(1), linewidth=2)
     plt.fill_between(
         G * t,
         mean[:, i] + std[:, i],
@@ -90,13 +90,10 @@ for j, c in enumerate(subplots):
     plt.title("$%s_{%s}$" % (c[0], c[1:]))
     plt.ylim([-(i % 2), 1])
     plt.xlim([0, 150])
-    plt.plot(G * t, N_rsc[:, i], color=dark2(1), linewidth=2)
 
     if j == 2:
         plt.legend(legend_list)
 
 plt.tight_layout()
-# save tikz figure (width means individual subplot width!)
-tikzplotlib.save(pic_name.replace(".png", ".tex"), axis_width=r"\textwidth/4")
 plt.savefig(pic_name)
 plt.show()
