@@ -1,6 +1,6 @@
 [project]
 name = "fiberoripy"
-version = "1.2.0"
+version = "1.2.1"
 description = "Fiber orientation models and closures"
 authors = [
     { name = "Nils Meyer", email = "nils.meyer@uni-a.de" },
