@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-"""Compute equivalent aspect ratios."""
 import numpy as np
 
 

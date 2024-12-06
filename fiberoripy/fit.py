@@ -1,20 +1,30 @@
-# -*- coding: utf-8 -*-
-"""Fit parameters to model."""
 import numpy as np
-from scipy.integrate import odeint
+from scipy.integrate import solve_ivp
 from scipy.optimize import least_squares
 
+from fiberoripy.closures import IBOF_closure
+from fiberoripy.orientation import integrate_ori_ode
 
-def compute_error(params, t, reference, ode, xi, L):
+
+def compute_error(values, keys, t, reference, ode, xi, L):
     """Compute the error between dataset mean and solution."""
+    kwargs = dict(zip(keys, values))
+    kwargs["xi"] = xi
+
     A0 = reference[0, :]
     mask = [0, 1, 2, 4, 5, 8]
-    sol = odeint(ode, A0, t, args=(xi, L) + tuple(params))
-    diff = np.abs(sol[:, mask] - reference[:, mask])
+    sol = solve_ivp(
+        integrate_ori_ode,
+        (t.min(), t.max()),
+        A0,
+        t_eval=t,
+        args=(L, IBOF_closure, ode, kwargs),
+    )
+    diff = np.abs(sol.y[mask, :].T - reference[:, mask])
     return np.linalg.norm(diff, axis=1)
 
 
-def fit_optimal_params(t, reference, ode, xi, L, params, bounds):
+def fit_optimal_params(t, reference, ode, xi, L, keys, values, bounds):
     """Apply least-squares optimization to find optimal parameters.
 
     Parameters
@@ -29,8 +39,10 @@ def fit_optimal_params(t, reference, ode, xi, L, params, bounds):
         shape_factor
     L : function hanlde
         Velocity gradient as function of time.
-    params : list of float
-        parameters passed for optimization.
+    keys : list of str
+        parameters names passed for optimization.
+    values: list of floats
+        Initial guess for the parameters to be optimized.
     bounds : tuple of list of floats
         Upper and lower bounds of the parameters for optimization.
 
@@ -40,14 +52,24 @@ def fit_optimal_params(t, reference, ode, xi, L, params, bounds):
         Optimal parameter set, resulting fiber orientation evolution, optimizer message.
 
     """
+
     opt = least_squares(
         compute_error,
-        params,
+        values,
         bounds=bounds,
         verbose=2,
-        args=[t, reference, ode, xi, L],
+        args=[keys, t, reference, ode, xi, L],
     )
 
+    kwargs = dict(zip(keys, opt.x))
+    kwargs["xi"] = xi
+
     A0 = reference[0, :]
-    A = odeint(ode, A0, t, args=(xi, L) + tuple(opt.x))
-    return [opt.x, A, opt.message]
+    sol = solve_ivp(
+        integrate_ori_ode,
+        (t.min(), t.max()),
+        A0.ravel(),
+        t_eval=t,
+        args=(L, IBOF_closure, ode, kwargs),
+    )
+    return [opt.x, sol.y.T, opt.message]

@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-"""Tools to plot tensors."""
 import numpy as np
 
 
@@ -52,7 +50,7 @@ def plot_orbit2(ax, plotargs, *tensors):
         ax.set_ylabel("$y$")
         ax.set_zlabel("$z$")
         ax.set_title("Second Order Orientation Tensor")
-        # ax.set_aspect(1.0)
+        ax.set_aspect("equal")
 
 
 def plot_orbit4(ax, plotargs, *tensors):
@@ -77,7 +75,7 @@ def plot_orbit4(ax, plotargs, *tensors):
         ax.set_ylabel("$y$")
         ax.set_zlabel("$z$")
         ax.set_title("Fourth Order Orientation Tensor")
-        # ax.set_aspect(1.0)
+        ax.set_aspect("equal")
 
 
 def plot_projection2(ax, plane, *tensors):

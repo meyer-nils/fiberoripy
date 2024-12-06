@@ -1,5 +1,6 @@
 [![LICENSE](https://black.readthedocs.io/en/stable/_static/license.svg)](https://raw.github.com/nilsmeyerkit/fiberoripy/master/LICENSE)
 [![Documentation Status](https://readthedocs.org/projects/fiberoripy/badge/?version=latest)](https://fiberoripy.readthedocs.io/en/latest/?badge=latest)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/fiberoripy)
 [![PyPI version](https://badge.fury.io/py/fiberoripy.svg)](https://badge.fury.io/py/fiberoripy)
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![DOI](https://zenodo.org/badge/282262907.svg)](https://zenodo.org/badge/latestdoi/282262907)
@@ -16,7 +17,6 @@ For example, the Jupyter Notebook
 should reproduce Figure 2 in *Favaloro, A.J., Tucker III, C.L., Composites Part A, 126 (2019)*:
 
   ![example_image](https://raw.github.com/nilsmeyerkit/fiberoripy/master/docs/images/example.png)
-
 
 ## Orientation models
 Following models have been implemented:
@@ -60,6 +60,11 @@ Following models have been implemented:
  'An anisotropic rotary diffusion model for fiber orientation in short- and long-fiber thermoplastics',\
  Journal of Non-Newtonian Fluid Mechanics 156, 165-176, 2009.\
  (https://doi.org/10.1016/j.jnnfm.2008.08.002)
+ * __Mori-Tanaka__:\
+ T. Karl, T. Böhlke,\
+ 'Generalized Micromechanical Formulation of Fiber Orientation Tensor Evolution Equations',\
+ International Journal of Mechanical Sciences, 2023.\
+ (https://doi.org/10.1016/j.ijmecsci.2023.108771)
 
 ## Closures
 * __Linear__, __Quadratic__, __Hybrid__:\

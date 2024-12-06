@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-"""Collection of closure approximations."""
 from itertools import permutations
 
 import numpy as np
@@ -400,10 +398,7 @@ def IBOF_closure(a):
         / 5.0
         * (
             -1.0 / 7.0
-            + 1.0
-            / 5.0
-            * beta3
-            * (1.0 / 7.0 + 4.0 / 7.0 * II + 8.0 / 3.0 * III)
+            + 1.0 / 5.0 * beta3 * (1.0 / 7.0 + 4.0 / 7.0 * II + 8.0 / 3.0 * III)
             - beta4 * (1.0 / 5.0 - 8.0 / 15.0 * II - 14.0 / 15.0 * III)
             - beta6
             * (
@@ -424,12 +419,7 @@ def IBOF_closure(a):
             - 1.0 / 5.0 * beta3 * (1.0 + 4.0 * II)
             + 7.0 / 5.0 * beta4 * (1.0 / 6.0 - II)
             - beta6
-            * (
-                -1.0 / 5.0
-                + 2.0 / 3.0 * III
-                + 4.0 / 5.0 * II
-                - 8.0 / 5.0 * II**2
-            )
+            * (-1.0 / 5.0 + 2.0 / 3.0 * III + 4.0 / 5.0 * II - 8.0 / 5.0 * II**2)
         )
     )
 
@@ -447,16 +437,10 @@ def IBOF_closure(a):
         symm(np.einsum("..., ij,kl->...ijkl", beta1, delta, delta))
         + symm(np.einsum("..., ij, ...kl-> ...ijkl", beta2, delta, a))
         + symm(np.einsum("..., ...ij, ...kl -> ...ijkl", beta3, a, a))
+        + symm(np.einsum("..., ij, ...km, ...ml -> ...ijkl", beta4, delta, a, a))
+        + symm(np.einsum("..., ...ij, ...km, ...ml -> ...ijkl", beta5, a, a, a))
         + symm(
-            np.einsum("..., ij, ...km, ...ml -> ...ijkl", beta4, delta, a, a)
-        )
-        + symm(
-            np.einsum("..., ...ij, ...km, ...ml -> ...ijkl", beta5, a, a, a)
-        )
-        + symm(
-            np.einsum(
-                "..., ...im, ...mj, ...kn, ...nl -> ...ijkl", beta6, a, a, a, a
-            )
+            np.einsum("..., ...im, ...mj, ...kn, ...nl -> ...ijkl", beta6, a, a, a, a)
         )
     )
 
@@ -473,9 +457,7 @@ def symm(A):
     S = np.stack(
         [
             np.transpose(A, axes=(*range(A.ndim - 4), *p))
-            for p in permutations(
-                [A.ndim - 4, A.ndim - 3, A.ndim - 2, A.ndim - 1]
-            )
+            for p in permutations([A.ndim - 4, A.ndim - 3, A.ndim - 2, A.ndim - 1])
         ]
     )
     return S.sum(axis=0) / 24
@@ -678,9 +660,7 @@ def orthotropic_fitted_closures(a, closure="ORF"):
     A[..., 1, 0, 1, 0] = A_sol[..., 5]
     A[..., 1, 0, 0, 1] = A_sol[..., 5]
     A[..., 0, 1, 1, 0] = A_sol[..., 5]
-    A = np.einsum(
-        "...im, ...jn, ...ko, ...lp, ...mnop -> ...ijkl", R, R, R, R, A
-    )
+    A = np.einsum("...im, ...jn, ...ko, ...lp, ...mnop -> ...ijkl", R, R, R, R, A)
 
     return A
 
@@ -758,9 +738,7 @@ def symmetric_implicit_closure(a, eps_newton=1.0e-12, n_iter_newton=25):
 
     while err > eps_newton and it < n_iter_newton:
 
-        f = (d + 4.0) * s - np.sum(
-            np.sqrt(1.5 * evs + s[..., None] ** 2.0), axis=-1
-        )
+        f = (d + 4.0) * s - np.sum(np.sqrt(1.5 * evs + s[..., None] ** 2.0), axis=-1)
         f_prime = 4.0 + np.sum(
             1.0 - s[..., None] / np.sqrt(1.5 * evs + s[..., None] ** 2.0),
             axis=-1,
@@ -807,8 +785,8 @@ def implicit_hybrid_closure(a, eps_newton=1.0e-12, n_iter_newton=25):
     References
     ----------
     .. [1] Karl, Tobias, Matti Schneider, and Thomas Böhlke,
-       'On fully symmetric implicit closure approximations for fiber orientation tensors',
-       Journal of Non-Newtonian Fluid Mechanics 318 : 105049,
+       'On fully symmetric implicit closure approximations for fiber orientation
+       tensors', Journal of Non-Newtonian Fluid Mechanics 318 : 105049,
        https://doi.org/10.1016/j.jnnfm.2023.105049
     Notes
     ----------
@@ -832,9 +810,7 @@ def implicit_hybrid_closure(a, eps_newton=1.0e-12, n_iter_newton=25):
 
             # l1 and l2 correspond to a, b in the original work
             l1 = np.nan_to_num(0.5 * (3.0 + (4.0 * s - 3.0) * k) / k)
-            l2 = np.nan_to_num(
-                (3.0 * (1.0 - k) * (4.0 * s - 1.0)) / (14.0 * k)
-            )
+            l2 = np.nan_to_num((3.0 * (1.0 - k) * (4.0 * s - 1.0)) / (14.0 * k))
 
             l1_prime = 4.0 * np.ones(l1.shape)
             l2_prime = np.nan_to_num((6.0 * (1.0 - k)) / (7.0 * k))
@@ -886,17 +862,13 @@ def implicit_hybrid_closure(a, eps_newton=1.0e-12, n_iter_newton=25):
         l2 = np.nan_to_num((3.0 * (1.0 - k) * (4.0 * s - 1.0)) / (14.0 * k))
 
         mus = -0.5 * l1[..., None] + np.sqrt(
-            1.5 * evs / k[..., None]
-            + 0.25 * l1[..., None] ** 2
-            - l2[..., None]
+            1.5 * evs / k[..., None] + 0.25 * l1[..., None] ** 2 - l2[..., None]
         )
 
     b = np.einsum("...ij, ...j, ...kj -> ...ik", r, mus, r)
 
     w1 = 1.0 - k
-    sym_ii = (
-        -3.0 / 35.0 * symm(np.einsum("ij, kl -> ijkl", np.eye(3), np.eye(3)))
-    )
+    sym_ii = -3.0 / 35.0 * symm(np.einsum("ij, kl -> ijkl", np.eye(3), np.eye(3)))
     sym_ib = 6.0 / 7.0 * symm(np.einsum("ij, ...kl -> ...ijkl", np.eye(3), b))
     sym_bb = symm(np.einsum("...ij, ...kl -> ...ijkl", b, b))
 

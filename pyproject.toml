@@ -1,17 +1,45 @@
 [project]
 name = "fiberoripy"
-version = "1.1.4"
+version = "1.2.0"
 description = "Fiber orientation models and closures"
-authors = [{name="Nils Meyer", email = "nils.meyer@uni-a.de"}, {name="Constantin Krauß"}, {name="Louis Schreyer"}, {name="Julian Karl Bauer"}]
-license = {file = "LICENSE"}
+authors = [
+    { name = "Nils Meyer", email = "nils.meyer@uni-a.de" },
+    { name = "Constantin Krauß" },
+    { name = "Louis Schreyer" },
+    { name = "Julian Karl Bauer" },
+]
+license = { file = "LICENSE" }
 readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+]
+dependencies = ["numpy", "matplotlib", "scipy", "pytest", "ipympl"]
+
+[project.urls]
+source = "https://github.com/meyer-nils/fiberoripy"
+
+[project.scripts]
+fiberoripy = "fiberoripy.__main__:main"
 
 [build-system]
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
+[tool.setuptools]
+include-package-data = true
+packages = ["fiberoripy"]
+
+[tool.setuptools.package-data]
+torchfem = ["examples/*.*"]
+
 [tool.isort]
 profile = "black"
 
 [tool.black]
-line-length = 79
+line-length = 88
