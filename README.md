@@ -3,6 +3,7 @@
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/fiberoripy)
 [![PyPI version](https://badge.fury.io/py/fiberoripy.svg)](https://badge.fury.io/py/fiberoripy)
 [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 [![DOI](https://zenodo.org/badge/282262907.svg)](https://zenodo.org/badge/latestdoi/282262907)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/nilsmeyerkit/fiberoripy/HEAD)
 
