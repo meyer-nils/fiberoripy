@@ -18,7 +18,6 @@ should reproduce Figure 2 in *Favaloro, A.J., Tucker III, C.L., Composites Part 
 
   ![example_image](https://raw.github.com/nilsmeyerkit/fiberoripy/master/docs/images/example.png)
 
-
 ## Orientation models
 Following models have been implemented:
 
@@ -61,6 +60,11 @@ Following models have been implemented:
  'An anisotropic rotary diffusion model for fiber orientation in short- and long-fiber thermoplastics',\
  Journal of Non-Newtonian Fluid Mechanics 156, 165-176, 2009.\
  (https://doi.org/10.1016/j.jnnfm.2008.08.002)
+ * __Mori-Tanaka__:\
+ T. Karl, T. Böhlke,\
+ 'Generalized Micromechanical Formulation of Fiber Orientation Tensor Evolution Equations',\
+ International Journal of Mechanical Sciences, 2023.\
+ (https://doi.org/10.1016/j.ijmecsci.2023.108771)
 
 ## Closures
 * __Linear__, __Quadratic__, __Hybrid__:\
