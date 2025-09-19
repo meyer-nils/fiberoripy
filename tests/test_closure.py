@@ -161,7 +161,7 @@ def get_test_tensors_FOT4():
     "type",
     ["IBOF", "LINEAR", "HYBRID", "QUADRATIC", "ORF", "SIQ", "SIHYB"],
 )
-def test_reduction(a, type):
+def test_reduction_FOT2(a, type):
     """Test contraction property."""
     from fiberoripy.closures import compute_closure
 
@@ -175,7 +175,7 @@ def test_reduction(a, type):
     "type",
     ["IBOF", "LINEAR", "HYBRID", "QUADRATIC", "ORF", "SIQ", "SIHYB", "SQC"],
 )
-def test_contraction(a, type):
+def test_contraction_FOT2(a, type):
     """Test first contraction property."""
     from fiberoripy.closures import compute_closure
 
@@ -188,13 +188,12 @@ def test_contraction(a, type):
 @pytest.mark.parametrize(
     "type",
     ["QUADRATIC", "LINEAR", "HYBRID"],
-    # "type", ["IBOF", "LINEAR", "HYBRID", "QUADRATIC", "RANDOM"]
 )
 def test_reduction_FOT4(A, type):
     """Test contraction property."""
-    from fiberoripy.closures import compute_closure_FOT4
+    from fiberoripy.closures import compute_closure
 
-    A6 = compute_closure_FOT4(A, type)
+    A6 = compute_closure(A, type)
     A_contract = np.einsum("ijklmm", A6)
     assert np.allclose(A_contract, A, atol=1e-5)
 
@@ -203,12 +202,11 @@ def test_reduction_FOT4(A, type):
 @pytest.mark.parametrize(
     "type",
     ["QUADRATIC", "LINEAR", "HYBRID"],
-    # "type", ["IBOF", "LINEAR", "HYBRID", "QUADRATIC", "RANDOM"]
 )
 def test_contraction_FOT4(A, type):
     """Test first contraction property."""
-    from fiberoripy.closures import compute_closure_FOT4
+    from fiberoripy.closures import compute_closure
 
-    A6 = compute_closure_FOT4(A, type)
+    A6 = compute_closure(A, type)
     A_contract = np.einsum("iikkmm", A6)
     assert A_contract == pytest.approx(1.0, 0.0001)
