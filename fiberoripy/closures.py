@@ -2,6 +2,10 @@ from itertools import permutations
 
 import numpy as np
 
+fullsym6_permutations = np.array(
+    ["".join(perm) for perm in list(permutations("ijklmn"))]
+)
+
 
 def compute_closure(a, closure="IBOF"):
     """Create a fourth order tensor from a second order tensor.
@@ -737,7 +741,6 @@ def symmetric_implicit_closure(a, eps_newton=1.0e-12, n_iter_newton=25):
     err, it = 1.0e12, 0
 
     while err > eps_newton and it < n_iter_newton:
-
         f = (d + 4.0) * s - np.sum(np.sqrt(1.5 * evs + s[..., None] ** 2.0), axis=-1)
         f_prime = 4.0 + np.sum(
             1.0 - s[..., None] / np.sqrt(1.5 * evs + s[..., None] ** 2.0),
@@ -807,7 +810,6 @@ def implicit_hybrid_closure(a, eps_newton=1.0e-12, n_iter_newton=25):
     #  ignore warnings when input is isotropic (results in k=0)
     with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
         while err > eps_newton and it < n_iter_newton:
-
             # l1 and l2 correspond to a, b in the original work
             l1 = np.nan_to_num(0.5 * (3.0 + (4.0 * s - 3.0) * k) / k)
             l2 = np.nan_to_num((3.0 * (1.0 - k) * (4.0 * s - 1.0)) / (14.0 * k))
@@ -884,3 +886,138 @@ def implicit_hybrid_closure(a, eps_newton=1.0e-12, n_iter_newton=25):
         a4_iso[..., :, :, :, :],
         a4,
     )
+
+
+# Simple closures from FOT4 to
+def assert_fot4_properties(A):
+    """Assert properties of fourth order fiber orientation tensor.
+
+    Parameters
+    ----------
+    A : np.ndarray
+        Fourth order fiber orientation tensor.
+    """
+    assert np.shape(A)[-2:] == (3, 3, 3, 3)
+
+
+def quadratic_closure_FOT4(A):
+    """Generate quadratic closure. A6 = A x a
+
+    Args:
+        A (Mx)3x3x3x3 Array: (Array of) Fourth order fiber orientation tensor.
+
+    Returns:
+        (Mx)3x3x3x3x3x3: (Array of) Sixth order fiber orientation tensor.
+    References
+    ----------
+    .. [1] Advani, Suresh G.; Tucker, Charles L. (1987),
+    The Use of Tensors to Describe and Predict Fiber Orientation in Short Fiber Comp.
+    In: Journal of Rheology 31 (8), S. 751-784
+    https://doi.org/10.1122/1.549945
+    """
+    assert_fot4_properties(A)
+    return np.einsum("...ijkl, ...mnoo -> ...ijklmn", A, A)
+
+
+def linear_closure_FOT4(A):
+    """Generate linear closure.
+
+    Args:
+        A (Mx)3x3x3x3 Array: (Array of) Fourth order fiber orientation tensor.
+
+    Returns:
+        (Mx)3x3x3x3x3x3: (Array of) Sixth order fiber orientation tensor.
+        References
+    ----------
+    .. [1] Advani, Suresh G.; Tucker, Charles L. (1987),
+    The Use of Tensors to Describe and Predict Fiber Orientation in Short Fiber Comp.
+    In: Journal of Rheology 31 (8), S. 751-784
+    https://doi.org/10.1122/1.549945
+
+    """
+    assert_fot4_properties(A)
+    a = np.einsum("...ijkl,kl->...ij", A, np.eye(3))
+    IxIxI = np.einsum("...ij,kl,mn->...ijklmn", np.eye(3), np.eye(3), np.eye(3))
+    IxIxI_fullsym = sum(
+        np.array(
+            [
+                np.einsum("..." + string + "->...ijklmn", IxIxI)
+                for string in fullsym6_permutations
+            ]
+        )
+    )
+    IxIxI_fullsym = IxIxI_fullsym / len(fullsym6_permutations)
+    axIxI = np.einsum("...ij,kl,mn->...ijklmn", a, np.eye(3), np.eye(3))
+    axIxI_fullsym = sum(
+        np.array(
+            [
+                np.einsum("..." + string + "->...ijklmn", axIxI)
+                for string in fullsym6_permutations
+            ]
+        )
+    )
+    IxaxI = np.einsum("...ij,kl,mn->...ijklmn", np.eye(3), a, np.eye(3))
+    IxaxI_fullsym = sum(
+        np.array(
+            [
+                np.einsum("..." + string + "->...ijklmn", IxaxI)
+                for string in fullsym6_permutations
+            ]
+        )
+    )
+    IxIxa = np.einsum("...ij,kl,mn->...ijklmn", np.eye(3), np.eye(3), a)
+    IxIxa_fullsym = sum(
+        np.array(
+            [
+                np.einsum("..." + string + "->...ijklmn", IxIxa)
+                for string in fullsym6_permutations
+            ]
+        )
+    )
+    axIxI_fullsym_combine = (
+        (axIxI_fullsym + IxaxI_fullsym + IxIxa_fullsym)
+        / 3.0
+        / len(fullsym6_permutations)
+    )
+
+    AxI = np.einsum("...ijkl,mn->...ijklmn", A, np.eye(3))
+    AxI_fullsym = sum(
+        np.array(
+            [
+                np.einsum("..." + string + "->...ijklmn", AxI)
+                for string in fullsym6_permutations
+            ]
+        )
+    )
+    AxI_fullsym = AxI_fullsym / len(fullsym6_permutations)
+    A6 = (
+        15.0 / 693.0 * IxIxI_fullsym
+        - 45.0 / 99.0 * axIxI_fullsym_combine
+        + 15.0 / 11.0 * AxI_fullsym
+    )
+    return A6
+
+
+def hybrid_closure_FOT4(A):
+    """Generate hybrid closure for FOT4.
+
+    Args:
+        A (Mx)3x3x3x3 Array: (Array of) Fourth order fiber orientation tensor.
+
+    Returns:
+        (Mx)3x3x3x3x3x3: (Array of) Sixth order fiber orientation tensor.
+    References
+    ----------
+    .. [1] Advani, Suresh G.; Tucker, Charles L. (1987),
+    The Use of Tensors to Describe and Predict Fiber Orientation in Short Fiber Comp.
+    In: Journal of Rheology 31 (8), S. 751-784
+    https://doi.org/10.1122/1.549945
+
+    """
+    assert_fot4_properties(A)
+    a = np.einsum("...ijkl,kl->...ij", A, np.eye(3))
+    f = 1.0 - 27.0 * np.linalg.det(a)
+    A6 = np.einsum("..., ...ijklmn -> ...ijklmn", 1.0 - f, linear_closure_FOT4(A))
+    A6 += np.einsum("..., ...ijklmn -> ...ijklmn", f, quadratic_closure_FOT4(A))
+
+    return A6
