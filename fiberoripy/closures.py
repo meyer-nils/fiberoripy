@@ -2,7 +2,7 @@ from itertools import permutations
 
 import numpy as np
 
-fullsym6_permutations = np.array(
+FULL_SYM6_PERMUTATIONS = np.array(
     ["".join(perm) for perm in list(permutations("ijklmn"))]
 )
 
@@ -56,7 +56,7 @@ def compute_closure(a, closure="IBOF"):
         )
 
     # Giving priority to 4th order tensors because otherwise a list of
-    # 4th order tensors would also be recognized as a 2nd order tensors.
+    # 4th order tensors would also be recognized as 2nd order tensors.
     # There might be a better way to do this.
     if is_4th:
         if closure not in _FOT4_CLOSURES:
@@ -1019,17 +1019,17 @@ def linear_closure_FOT4(A):
         np.array(
             [
                 np.einsum("..." + string + "->...ijklmn", IxIxI)
-                for string in fullsym6_permutations
+                for string in FULL_SYM6_PERMUTATIONS
             ]
         )
     )
-    IxIxI_fullsym = IxIxI_fullsym / len(fullsym6_permutations)
+    IxIxI_fullsym = IxIxI_fullsym / len(FULL_SYM6_PERMUTATIONS)
     axIxI = np.einsum("...ij,kl,mn->...ijklmn", a, np.eye(3), np.eye(3))
     axIxI_fullsym = sum(
         np.array(
             [
                 np.einsum("..." + string + "->...ijklmn", axIxI)
-                for string in fullsym6_permutations
+                for string in FULL_SYM6_PERMUTATIONS
             ]
         )
     )
@@ -1038,7 +1038,7 @@ def linear_closure_FOT4(A):
         np.array(
             [
                 np.einsum("..." + string + "->...ijklmn", IxaxI)
-                for string in fullsym6_permutations
+                for string in FULL_SYM6_PERMUTATIONS
             ]
         )
     )
@@ -1047,14 +1047,14 @@ def linear_closure_FOT4(A):
         np.array(
             [
                 np.einsum("..." + string + "->...ijklmn", IxIxa)
-                for string in fullsym6_permutations
+                for string in FULL_SYM6_PERMUTATIONS
             ]
         )
     )
     axIxI_fullsym_combine = (
         (axIxI_fullsym + IxaxI_fullsym + IxIxa_fullsym)
         / 3.0
-        / len(fullsym6_permutations)
+        / len(FULL_SYM6_PERMUTATIONS)
     )
 
     AxI = np.einsum("...ijkl,mn->...ijklmn", A, np.eye(3))
@@ -1062,11 +1062,11 @@ def linear_closure_FOT4(A):
         np.array(
             [
                 np.einsum("..." + string + "->...ijklmn", AxI)
-                for string in fullsym6_permutations
+                for string in FULL_SYM6_PERMUTATIONS
             ]
         )
     )
-    AxI_fullsym = AxI_fullsym / len(fullsym6_permutations)
+    AxI_fullsym = AxI_fullsym / len(FULL_SYM6_PERMUTATIONS)
     A6 = (
         15.0 / 693.0 * IxIxI_fullsym
         - 45.0 / 99.0 * axIxI_fullsym_combine
