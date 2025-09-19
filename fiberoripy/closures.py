@@ -6,8 +6,58 @@ fullsym6_permutations = np.array(
     ["".join(perm) for perm in list(permutations("ijklmn"))]
 )
 
+_FOT2_CLOSURES = {
+    "IBOF",
+    "LINEAR",
+    "HYBRID",
+    "QUADRATIC",
+    "ORF",
+    "ORW",
+    "ORW3",
+    "SIQ",
+    "SIHYB",
+    "SQC",
+}
+
+_FOT4_CLOSURES = {"LINEAR", "HYBRID", "QUADRATIC"}
+
 
 def compute_closure(a, closure="IBOF"):
+    """Compute closure for second or fourth order fiber orientation tensor.
+
+    Parameters
+    ----------
+    a : np.ndarray (Nx)3x3 or (Nx)3x3x3x3
+        Fiber orientation tensor second or fourth order.
+    closure : str, optional
+        Closure type, by default "IBOF"
+
+    Returns
+    -------
+    np.ndarray (Nx)3x3x3x3 or (Nx)3x3x3x3x3x3
+        Fiber orientation tensor fourth or sixth order.
+
+    Raises
+    ------
+    ValueError
+        If the closure type is not recognized.
+    """
+
+    if np.shape(a) == (3, 3):
+        if closure not in _FOT2_CLOSURES:
+            raise ValueError(f"Unsupported closure for 2nd-order tensor: {closure}")
+        return compute_closure_FOT2(a, closure)
+
+    elif np.shape(a) == (3, 3, 3, 3):
+        if closure not in _FOT4_CLOSURES:
+            raise ValueError(f"Unsupported closure for 4th-order tensor: {closure}")
+        return compute_closure_FOT4(a, closure)
+
+    else:
+        raise ValueError("Closure type not recognized.")
+
+
+def compute_closure_FOT2(a, closure="IBOF"):
     """Create a fourth order tensor from a second order tensor.
     This is essentially a wrapper around all closures.
     Parameters
@@ -19,19 +69,6 @@ def compute_closure(a, closure="IBOF"):
     3x3x3x3 numpy array
         Fourth order fiber orientation tensor.
     """
-    # assertation
-    assert closure in (
-        "IBOF",
-        "LINEAR",
-        "HYBRID",
-        "QUADRATIC",
-        "ORF",
-        "ORW",
-        "ORW3",
-        "SIQ",
-        "SIHYB",
-        "SQC",
-    )
     if closure == "IBOF":
         return IBOF_closure(a)
     if closure == "HYBRID":
