@@ -897,7 +897,33 @@ def assert_fot4_properties(A):
     A : np.ndarray
         Fourth order fiber orientation tensor.
     """
-    assert np.shape(A)[-2:] == (3, 3, 3, 3)
+    assert np.shape(A)[-4:] == (3, 3, 3, 3)
+
+
+def compute_closure_FOT4(A, closure="QUADRATIC"):
+    """Create a sixth order tensor from a fourth order tensor.
+    This is essentially a wrapper around all closures.
+    Parameters
+    ----------
+    a : 3x3x3x3 numpy array
+        Fourth order fiber orientation tensor.
+    Returns
+    -------
+    3x3x3x3x3x3 numpy array
+        Sixth order fiber orientation tensor.
+    """
+    # assertation
+    assert closure in (
+        "LINEAR",
+        "HYBRID",
+        "QUADRATIC",  # A x a
+    )
+    if closure == "HYBRID":
+        return hybrid_closure_FOT4(A)
+    if closure == "LINEAR":
+        return linear_closure_FOT4(A)
+    if closure == "QUADRATIC":
+        return quadratic_closure_FOT4(A)
 
 
 def quadratic_closure_FOT4(A):
