@@ -19,7 +19,11 @@ _FOT2_CLOSURES = {
     "SQC",
 }
 
-_FOT4_CLOSURES = {"LINEAR", "HYBRID", "QUADRATIC"}
+_FOT4_CLOSURES = {
+    "LINEAR",
+    "HYBRID",
+    "QUADRATIC",
+}
 
 
 def compute_closure(a, closure="IBOF"):
@@ -42,19 +46,29 @@ def compute_closure(a, closure="IBOF"):
     ValueError
         If the closure type is not recognized.
     """
+    # Identify order from trailing dimensions
+    is_4th = a.ndim >= 4 and a.shape[-4:] == (3, 3, 3, 3)
+    is_2nd = a.ndim >= 2 and a.shape[-2:] == (3, 3)
 
-    if np.shape(a) == (3, 3):
-        if closure not in _FOT2_CLOSURES:
-            raise ValueError(f"Unsupported closure for 2nd-order tensor: {closure}")
-        return compute_closure_FOT2(a, closure)
+    if not (is_2nd or is_4th):
+        raise ValueError(
+            f"Expected input shape (..., 3, 3) or (..., 3, 3, 3, 3); got {a.shape}."
+        )
 
-    elif np.shape(a) == (3, 3, 3, 3):
+    # Giving priority to 4th order tensors because otherwise a list of
+    # 4th order tensors would also be recognized as a 2nd order tensors.
+    # There might be a better way to do this.
+    if is_4th:
         if closure not in _FOT4_CLOSURES:
             raise ValueError(f"Unsupported closure for 4th-order tensor: {closure}")
         return compute_closure_FOT4(a, closure)
 
-    else:
-        raise ValueError("Closure type not recognized.")
+    if is_2nd:
+        if closure not in _FOT2_CLOSURES:
+            raise ValueError(f"Unsupported closure for 2nd-order tensor: {closure}")
+        return compute_closure_FOT2(a, closure)
+
+    raise ValueError("Closure type not recognized.")
 
 
 def compute_closure_FOT2(a, closure="IBOF"):
