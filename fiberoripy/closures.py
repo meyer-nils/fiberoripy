@@ -47,14 +47,14 @@ def compute_closure(a, closure="IBOF"):
         If the closure type is not recognized.
     """
     # Identify order from trailing dimensions
-    if a.ndim >= 2 and a.shape[-2:] == (3, 3):
-        if closure not in _FOT2_CLOSURES:
-            raise ValueError(f"Unsupported closure for 2nd-order tensor: {closure}")
-        return compute_closure_FOT2(a, closure)
-    elif a.ndim >= 4 and a.shape[-4:] == (3, 3, 3, 3):
+    if a.ndim >= 4 and a.shape[-4:] == (3, 3, 3, 3):
         if closure not in _FOT4_CLOSURES:
             raise ValueError(f"Unsupported closure for 4th-order tensor: {closure}")
         return compute_closure_FOT4(a, closure)
+    elif a.ndim >= 2 and a.shape[-2:] == (3, 3):
+        if closure not in _FOT2_CLOSURES:
+            raise ValueError(f"Unsupported closure for 2nd-order tensor: {closure}")
+        return compute_closure_FOT2(a, closure)
     else:
         raise ValueError(
             f"Expected input shape (..., 3, 3) or (..., 3, 3, 3, 3); got {a.shape}."
