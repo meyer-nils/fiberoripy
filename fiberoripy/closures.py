@@ -2,8 +2,76 @@ from itertools import permutations
 
 import numpy as np
 
+FULL_SYM6_PERMUTATIONS = np.array(
+    ["".join(perm) for perm in list(permutations("ijklmn"))]
+)
+
+_FOT2_CLOSURES = {
+    "IBOF",
+    "LINEAR",
+    "HYBRID",
+    "QUADRATIC",
+    "ORF",
+    "ORW",
+    "ORW3",
+    "SIQ",
+    "SIHYB",
+    "SQC",
+}
+
+_FOT4_CLOSURES = {
+    "LINEAR",
+    "HYBRID",
+    "QUADRATIC",
+}
+
 
 def compute_closure(a, closure="IBOF"):
+    """Compute closure for second or fourth order fiber orientation tensor.
+
+    Parameters
+    ----------
+    a : np.ndarray (Nx)3x3 or (Nx)3x3x3x3
+        Fiber orientation tensor second or fourth order.
+    closure : str, optional
+        Closure type, by default "IBOF"
+
+    Returns
+    -------
+    np.ndarray (Nx)3x3x3x3 or (Nx)3x3x3x3x3x3
+        Fiber orientation tensor fourth or sixth order.
+
+    Raises
+    ------
+    ValueError
+        If the closure type is not recognized.
+    """
+    # Identify order from trailing dimensions
+    is_4th = a.ndim >= 4 and a.shape[-4:] == (3, 3, 3, 3)
+    is_2nd = a.ndim >= 2 and a.shape[-2:] == (3, 3)
+
+    if not (is_2nd or is_4th):
+        raise ValueError(
+            f"Expected input shape (..., 3, 3) or (..., 3, 3, 3, 3); got {a.shape}."
+        )
+
+    # Giving priority to 4th order tensors because otherwise a list of
+    # 4th order tensors would also be recognized as 2nd order tensors.
+    # There might be a better way to do this.
+    if is_4th:
+        if closure not in _FOT4_CLOSURES:
+            raise ValueError(f"Unsupported closure for 4th-order tensor: {closure}")
+        return compute_closure_FOT4(a, closure)
+
+    if is_2nd:
+        if closure not in _FOT2_CLOSURES:
+            raise ValueError(f"Unsupported closure for 2nd-order tensor: {closure}")
+        return compute_closure_FOT2(a, closure)
+
+    raise ValueError("Closure type not recognized.")
+
+
+def compute_closure_FOT2(a, closure="IBOF"):
     """Create a fourth order tensor from a second order tensor.
     This is essentially a wrapper around all closures.
     Parameters
@@ -15,19 +83,6 @@ def compute_closure(a, closure="IBOF"):
     3x3x3x3 numpy array
         Fourth order fiber orientation tensor.
     """
-    # assertation
-    assert closure in (
-        "IBOF",
-        "LINEAR",
-        "HYBRID",
-        "QUADRATIC",
-        "ORF",
-        "ORW",
-        "ORW3",
-        "SIQ",
-        "SIHYB",
-        "SQC",
-    )
     if closure == "IBOF":
         return IBOF_closure(a)
     if closure == "HYBRID":
@@ -737,7 +792,6 @@ def symmetric_implicit_closure(a, eps_newton=1.0e-12, n_iter_newton=25):
     err, it = 1.0e12, 0
 
     while err > eps_newton and it < n_iter_newton:
-
         f = (d + 4.0) * s - np.sum(np.sqrt(1.5 * evs + s[..., None] ** 2.0), axis=-1)
         f_prime = 4.0 + np.sum(
             1.0 - s[..., None] / np.sqrt(1.5 * evs + s[..., None] ** 2.0),
@@ -807,7 +861,6 @@ def implicit_hybrid_closure(a, eps_newton=1.0e-12, n_iter_newton=25):
     #  ignore warnings when input is isotropic (results in k=0)
     with np.errstate(divide="ignore", invalid="ignore", over="ignore"):
         while err > eps_newton and it < n_iter_newton:
-
             # l1 and l2 correspond to a, b in the original work
             l1 = np.nan_to_num(0.5 * (3.0 + (4.0 * s - 3.0) * k) / k)
             l2 = np.nan_to_num((3.0 * (1.0 - k) * (4.0 * s - 1.0)) / (14.0 * k))
@@ -884,3 +937,164 @@ def implicit_hybrid_closure(a, eps_newton=1.0e-12, n_iter_newton=25):
         a4_iso[..., :, :, :, :],
         a4,
     )
+
+
+# Simple closures from FOT4 to
+def assert_fot4_properties(A):
+    """Assert properties of fourth order fiber orientation tensor.
+
+    Parameters
+    ----------
+    A : np.ndarray
+        Fourth order fiber orientation tensor.
+    """
+    assert np.shape(A)[-4:] == (3, 3, 3, 3)
+
+
+def compute_closure_FOT4(A, closure="QUADRATIC"):
+    """Create a sixth order tensor from a fourth order tensor.
+    This is essentially a wrapper around all closures.
+    Parameters
+    ----------
+    a : 3x3x3x3 numpy array
+        Fourth order fiber orientation tensor.
+    Returns
+    -------
+    3x3x3x3x3x3 numpy array
+        Sixth order fiber orientation tensor.
+    """
+    # assertation
+    assert closure in (
+        "LINEAR",
+        "HYBRID",
+        "QUADRATIC",  # A x a
+    )
+    if closure == "HYBRID":
+        return hybrid_closure_FOT4(A)
+    if closure == "LINEAR":
+        return linear_closure_FOT4(A)
+    if closure == "QUADRATIC":
+        return quadratic_closure_FOT4(A)
+
+
+def quadratic_closure_FOT4(A):
+    """Generate quadratic closure. A6 = A x a
+
+    Args:
+        A (Mx)3x3x3x3 Array: (Array of) Fourth order fiber orientation tensor.
+
+    Returns:
+        (Mx)3x3x3x3x3x3: (Array of) Sixth order fiber orientation tensor.
+    References
+    ----------
+    .. [1] Advani, Suresh G.; Tucker, Charles L. (1987),
+    The Use of Tensors to Describe and Predict Fiber Orientation in Short Fiber Comp.
+    In: Journal of Rheology 31 (8), S. 751-784
+    https://doi.org/10.1122/1.549945
+    """
+    assert_fot4_properties(A)
+    return np.einsum("...ijkl, ...mnoo -> ...ijklmn", A, A)
+
+
+def linear_closure_FOT4(A):
+    """Generate linear closure.
+
+    Args:
+        A (Mx)3x3x3x3 Array: (Array of) Fourth order fiber orientation tensor.
+
+    Returns:
+        (Mx)3x3x3x3x3x3: (Array of) Sixth order fiber orientation tensor.
+        References
+    ----------
+    .. [1] Advani, Suresh G.; Tucker, Charles L. (1987),
+    The Use of Tensors to Describe and Predict Fiber Orientation in Short Fiber Comp.
+    In: Journal of Rheology 31 (8), S. 751-784
+    https://doi.org/10.1122/1.549945
+
+    """
+    assert_fot4_properties(A)
+    a = np.einsum("...ijkl,kl->...ij", A, np.eye(3))
+    IxIxI = np.einsum("...ij,kl,mn->...ijklmn", np.eye(3), np.eye(3), np.eye(3))
+    IxIxI_fullsym = sum(
+        np.array(
+            [
+                np.einsum("..." + string + "->...ijklmn", IxIxI)
+                for string in FULL_SYM6_PERMUTATIONS
+            ]
+        )
+    )
+    IxIxI_fullsym = IxIxI_fullsym / len(FULL_SYM6_PERMUTATIONS)
+    axIxI = np.einsum("...ij,kl,mn->...ijklmn", a, np.eye(3), np.eye(3))
+    axIxI_fullsym = sum(
+        np.array(
+            [
+                np.einsum("..." + string + "->...ijklmn", axIxI)
+                for string in FULL_SYM6_PERMUTATIONS
+            ]
+        )
+    )
+    IxaxI = np.einsum("...ij,kl,mn->...ijklmn", np.eye(3), a, np.eye(3))
+    IxaxI_fullsym = sum(
+        np.array(
+            [
+                np.einsum("..." + string + "->...ijklmn", IxaxI)
+                for string in FULL_SYM6_PERMUTATIONS
+            ]
+        )
+    )
+    IxIxa = np.einsum("...ij,kl,mn->...ijklmn", np.eye(3), np.eye(3), a)
+    IxIxa_fullsym = sum(
+        np.array(
+            [
+                np.einsum("..." + string + "->...ijklmn", IxIxa)
+                for string in FULL_SYM6_PERMUTATIONS
+            ]
+        )
+    )
+    axIxI_fullsym_combine = (
+        (axIxI_fullsym + IxaxI_fullsym + IxIxa_fullsym)
+        / 3.0
+        / len(FULL_SYM6_PERMUTATIONS)
+    )
+
+    AxI = np.einsum("...ijkl,mn->...ijklmn", A, np.eye(3))
+    AxI_fullsym = sum(
+        np.array(
+            [
+                np.einsum("..." + string + "->...ijklmn", AxI)
+                for string in FULL_SYM6_PERMUTATIONS
+            ]
+        )
+    )
+    AxI_fullsym = AxI_fullsym / len(FULL_SYM6_PERMUTATIONS)
+    A6 = (
+        15.0 / 693.0 * IxIxI_fullsym
+        - 45.0 / 99.0 * axIxI_fullsym_combine
+        + 15.0 / 11.0 * AxI_fullsym
+    )
+    return A6
+
+
+def hybrid_closure_FOT4(A):
+    """Generate hybrid closure for FOT4.
+
+    Args:
+        A (Mx)3x3x3x3 Array: (Array of) Fourth order fiber orientation tensor.
+
+    Returns:
+        (Mx)3x3x3x3x3x3: (Array of) Sixth order fiber orientation tensor.
+    References
+    ----------
+    .. [1] Advani, Suresh G.; Tucker, Charles L. (1987),
+    The Use of Tensors to Describe and Predict Fiber Orientation in Short Fiber Comp.
+    In: Journal of Rheology 31 (8), S. 751-784
+    https://doi.org/10.1122/1.549945
+
+    """
+    assert_fot4_properties(A)
+    a = np.einsum("...ijkl,kl->...ij", A, np.eye(3))
+    f = 1.0 - 27.0 * np.linalg.det(a)
+    A6 = np.einsum("..., ...ijklmn -> ...ijklmn", 1.0 - f, linear_closure_FOT4(A))
+    A6 += np.einsum("..., ...ijklmn -> ...ijklmn", f, quadratic_closure_FOT4(A))
+
+    return A6
