@@ -1,3 +1,5 @@
+"""Index of each tensor component in a flattened second order tensor."""
+
 COMPS = {
     "A11": 0,
     "A12": 1,
@@ -9,3 +11,4 @@ COMPS = {
     "A32": 7,
     "A33": 8,
 }
+"""Index of each component in a second order tensor flattened row by row."""

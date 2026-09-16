@@ -9,6 +9,7 @@ follows [SemVer](https://semver.org/spec/v2.0.0.html).
 - Tests for the fitting, plotting, aspect ratio and constants modules, and for the
   error paths of the closures, taking statement coverage to 100%. CI measures
   coverage, fails below 95% and reports a table in the job summary.
+- The `constants` module is now part of the API reference.
 
 ### Changed
 - Enabled the bugbear, pyupgrade and ruff-specific lint rules, and fixed what they
