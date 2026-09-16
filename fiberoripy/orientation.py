@@ -736,7 +736,7 @@ def mori_tanaka_ode(a, A, D, W, xi, c_f=0.0, **kwargs):
 
 
 def integrate_ori_ode(t, a_flat, L, closure, ori_model, kwargs):
-    """Wrapper to solve fiber reorientation ODE using `scipy` solvers.
+    """Compute the orientation tensor rate for `scipy` ODE solvers.
 
     Parameters
     ----------

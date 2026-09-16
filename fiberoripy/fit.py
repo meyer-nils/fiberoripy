@@ -52,7 +52,6 @@ def fit_optimal_params(t, reference, ode, xi, L, keys, values, bounds):
         Optimal parameter set, resulting fiber orientation evolution, optimizer message.
 
     """
-
     opt = least_squares(
         compute_error,
         values,

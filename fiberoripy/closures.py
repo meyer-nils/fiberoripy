@@ -63,15 +63,21 @@ def compute_closure(a, closure="IBOF"):
 
 def compute_closure_FOT2(a, closure="IBOF"):
     """Create a fourth order tensor from a second order tensor.
+
     This is essentially a wrapper around all closures.
+
     Parameters
     ----------
-    a : 3x3 numpy array
-        Second order fiber orientation tensor.
+    a : (Mx)3x3 numpy array
+        (Array of) Second order fiber orientation tensor.
+    closure : str, optional
+        Closure type, by default "IBOF".
+
     Returns
     -------
-    3x3x3x3 numpy array
-        Fourth order fiber orientation tensor.
+    (Mx)3x3x3x3 numpy array
+        (Array of) Fourth order fiber orientation tensor.
+
     """
     if closure == "IBOF":
         return IBOF_closure(a)
@@ -97,6 +103,7 @@ def compute_closure_FOT2(a, closure="IBOF"):
 
 def assert_fot_properties(a):
     """Assert properties of second order input tensor.
+
     Parameters
     ----------
     a : 3x3 numpy array
@@ -111,12 +118,14 @@ def assert_fot_properties(a):
 
 def get_random_tensor_pair(seed=(1.0 / 3.0 * np.eye(3)), N=1000):
     """Sample a random fiber orientation and compute second and fourth order tensors.
+
     Parameters
     ----------
     seed : 3x3 numpy array
         Second order fiber orientation tensor describing the seed distribution.
     N : int, optional
         number of random fibers. The default is 1000.
+
     Returns
     -------
     a : 3x3 numpy array
@@ -124,7 +133,6 @@ def get_random_tensor_pair(seed=(1.0 / 3.0 * np.eye(3)), N=1000):
     A : 3x3x3x3 numpy array
         Fourth order fiber orientation tensor.
     """
-
     phi = np.random.uniform(-np.pi, np.pi, N)
     costheta = np.random.uniform(-1.0, 1.0, N)
     theta = np.arccos(costheta)
@@ -144,14 +152,17 @@ def get_random_tensor_pair(seed=(1.0 / 3.0 * np.eye(3)), N=1000):
 
 def linear_closure(a):
     """Generate a linear closure.
+
     Parameters
     ----------
     a : (Mx)3x3 numpy array
         (Array of) Second order fiber orientation tensor.
+
     Returns
     -------
     A : (Mx)3x3x3x3 numpy array
         (Array of) Fourth order fiber orientation tensor.
+
     References
     ----------
     .. [1] Kyeong-Hee Han and Yong-Taek Im,
@@ -190,14 +201,17 @@ def linear_closure(a):
 
 def quadratic_closure(a):
     """Generate a quadratic closure.
+
     Parameters
     ----------
     a : (Mx)3x3 numpy array
         (Array of) Second order fiber orientation tensor.
+
     Returns
     -------
     A : (Mx)3x3x3x3 numpy arrayF
         (Array of) Fourth order fiber orientation tensor.
+
     References
     ----------
     .. [1] Kyeong-Hee Han and Yong-Taek Im,
@@ -213,14 +227,17 @@ def quadratic_closure(a):
 
 def hybrid_closure(a):
     """Generate a hybrid closure.
+
     Parameters
     ----------
     a : (Mx)3x3 numpy array
         (Array of) Second order fiber orientation tensor.
+
     Returns
     -------
     A : (Mx)3x3x3x3 numpy array
         (Array of) Fourth order fiber orientation tensor.
+
     References
     ----------
     .. [1] Kyeong-Hee Han and Yong-Taek Im,
@@ -240,14 +257,17 @@ def hybrid_closure(a):
 
 def IBOF_closure(a):
     """Generate IBOF closure.
+
     Parameters
     ----------
     a : 3x3 numpy array
         Second order fiber orientation tensor.
+
     Returns
     -------
     3x3x3x3 numpy array
         Fourth order fiber orientation tensor.
+
     References
     ----------
     .. [1] Du Hwan Chung and Tai Hun Kwon,
@@ -492,8 +512,10 @@ def IBOF_closure(a):
 
 def symm(A):
     """Symmetrize the fourth order tensor.
-    This function computes the symmetric part of a fourth order Tensor A
+
+    This function computes the symmetric part of a fourth order tensor A
     and returns a symmetric fourth order tensor S.
+
     """
     # if A.ndim == 4:
     #     S = np.stack(
@@ -509,17 +531,20 @@ def symm(A):
 
 
 def orthotropic_fitted_closures(a, closure="ORF"):
-    """Generate a orthotropic fitted closure.
-    Parameter
-    ---------
-    a : 3x3 array
-        2. order orientation tensor
-    closure: string
-        Defines the used closure ("ORF", "ORW", "ORW3")
-    Return:
-    ------
-    A : 3x3x3x3 numpy array
-        4. order orientation tensor
+    """Generate an orthotropic fitted closure.
+
+    Parameters
+    ----------
+    a : (Mx)3x3 numpy array
+        (Array of) Second order fiber orientation tensor.
+    closure : str, optional
+        Closure type, one of "ORF", "ORW" or "ORW3". The default is "ORF".
+
+    Returns
+    -------
+    A : (Mx)3x3x3x3 numpy array
+        (Array of) Fourth order fiber orientation tensor.
+
     References
     ----------
     .. [1] Joaquim S. Cintra and Charles L. Tucker III (1995),
@@ -712,14 +737,17 @@ def orthotropic_fitted_closures(a, closure="ORF"):
 
 def symmetric_quadratic_closure(a):
     """Generate a symmetric quadratic closure.
+
     Parameters
     ----------
     a : (Mx)3x3 numpy array
         (Array of) Second order fiber orientation tensor.
+
     Returns
     -------
     A : (Mx)3x3x3x3 numpy array
         (Array of) Fourth order fiber orientation tensor.
+
     References
     ----------
     .. [1] Karl, Tobias and Gatti, Davide and Frohnapfel, Bettina and Böhlke, Thomas,
@@ -728,8 +756,9 @@ def symmetric_quadratic_closure(a):
        improvement',
        Journal of Rheology 65(5) : 999-1022,
        https://doi.org/10.1122/8.0000245
+
     Notes
-    ----------
+    -----
         In general, the SQC does not contract to its second-order input.
     """
     assert_fot_properties(a)
@@ -751,6 +780,7 @@ def symmetric_quadratic_closure(a):
 
 def symmetric_implicit_closure(a, eps_newton=1.0e-12, n_iter_newton=25):
     """Generate SIQ closure.
+
     Parameters
     ----------
     a : ...x3x3 numpy array
@@ -761,10 +791,12 @@ def symmetric_implicit_closure(a, eps_newton=1.0e-12, n_iter_newton=25):
     n_iter_newton : int
         number of maximum iterations in newton algorithm
         optional: default 25
+
     Returns
     -------
     ...x3x3x3x3 numpy array
         Fourth order fiber orientation tensor.
+
     References
     ----------
     .. [1] Karl, Tobias, Matti Schneider, and Thomas Böhlke,
@@ -772,7 +804,6 @@ def symmetric_implicit_closure(a, eps_newton=1.0e-12, n_iter_newton=25):
        tensors', Journal of Non-Newtonian Fluid Mechanics 318 : 105049,
        https://doi.org/10.1016/j.jnnfm.2023.105049
     """
-
     assert_fot_properties(a)
 
     evs, r = np.linalg.eigh(a)
@@ -812,6 +843,7 @@ def symmetric_implicit_closure(a, eps_newton=1.0e-12, n_iter_newton=25):
 
 def implicit_hybrid_closure(a, eps_newton=1.0e-12, n_iter_newton=25):
     """Generate implicit hybrid closure.
+
     Parameters
     ----------
     a : ...x3x3 numpy array
@@ -822,21 +854,23 @@ def implicit_hybrid_closure(a, eps_newton=1.0e-12, n_iter_newton=25):
     n_iter_newton : int
         number of maximum iterations in newton algorithm
         optional: default 25
+
     Returns
     -------
     ...x3x3x3x3 numpy array
         Fourth order fiber orientation tensor.
+
     References
     ----------
     .. [1] Karl, Tobias, Matti Schneider, and Thomas Böhlke,
        'On fully symmetric implicit closure approximations for fiber orientation
        tensors', Journal of Non-Newtonian Fluid Mechanics 318 : 105049,
        https://doi.org/10.1016/j.jnnfm.2023.105049
+
     Notes
-    ----------
+    -----
     There seems to be a typo in the expression for f_prime in the original work.
     """
-
     assert_fot_properties(a)
 
     evs, r = np.linalg.eigh(a)
@@ -943,15 +977,21 @@ def assert_fot4_properties(A):
 
 def compute_closure_FOT4(A, closure="QUADRATIC"):
     """Create a sixth order tensor from a fourth order tensor.
+
     This is essentially a wrapper around all closures.
+
     Parameters
     ----------
-    a : 3x3x3x3 numpy array
-        Fourth order fiber orientation tensor.
+    A : (Mx)3x3x3x3 numpy array
+        (Array of) Fourth order fiber orientation tensor.
+    closure : str, optional
+        Closure type, by default "QUADRATIC".
+
     Returns
     -------
-    3x3x3x3x3x3 numpy array
-        Sixth order fiber orientation tensor.
+    (Mx)3x3x3x3x3x3 numpy array
+        (Array of) Sixth order fiber orientation tensor.
+
     """
     # assertation
     assert closure in (
@@ -968,38 +1008,51 @@ def compute_closure_FOT4(A, closure="QUADRATIC"):
 
 
 def quadratic_closure_FOT4(A):
-    """Generate quadratic closure. A6 = A x a
+    """Generate a quadratic closure, A6 = A x a.
 
-    Args:
-        A (Mx)3x3x3x3 Array: (Array of) Fourth order fiber orientation tensor.
+    Parameters
+    ----------
+    A : (Mx)3x3x3x3 numpy array
+        (Array of) Fourth order fiber orientation tensor.
 
-    Returns:
-        (Mx)3x3x3x3x3x3: (Array of) Sixth order fiber orientation tensor.
+    Returns
+    -------
+    (Mx)3x3x3x3x3x3 numpy array
+        (Array of) Sixth order fiber orientation tensor.
+
     References
     ----------
     .. [1] Advani, Suresh G.; Tucker, Charles L. (1987),
-    The Use of Tensors to Describe and Predict Fiber Orientation in Short Fiber Comp.
-    In: Journal of Rheology 31 (8), S. 751-784
-    https://doi.org/10.1122/1.549945
+       'The Use of Tensors to Describe and Predict Fiber Orientation in Short Fiber
+       Composites',
+       Journal of Rheology 31(8), 751-784.
+       https://doi.org/10.1122/1.549945
+
     """
     assert_fot4_properties(A)
     return np.einsum("...ijkl, ...mnoo -> ...ijklmn", A, A)
 
 
 def linear_closure_FOT4(A):
-    """Generate linear closure.
+    """Generate a linear closure.
 
-    Args:
-        A (Mx)3x3x3x3 Array: (Array of) Fourth order fiber orientation tensor.
+    Parameters
+    ----------
+    A : (Mx)3x3x3x3 numpy array
+        (Array of) Fourth order fiber orientation tensor.
 
-    Returns:
-        (Mx)3x3x3x3x3x3: (Array of) Sixth order fiber orientation tensor.
-        References
+    Returns
+    -------
+    (Mx)3x3x3x3x3x3 numpy array
+        (Array of) Sixth order fiber orientation tensor.
+
+    References
     ----------
     .. [1] Advani, Suresh G.; Tucker, Charles L. (1987),
-    The Use of Tensors to Describe and Predict Fiber Orientation in Short Fiber Comp.
-    In: Journal of Rheology 31 (8), S. 751-784
-    https://doi.org/10.1122/1.549945
+       'The Use of Tensors to Describe and Predict Fiber Orientation in Short Fiber
+       Composites',
+       Journal of Rheology 31(8), 751-784.
+       https://doi.org/10.1122/1.549945
 
     """
     assert_fot4_properties(A)
@@ -1066,19 +1119,25 @@ def linear_closure_FOT4(A):
 
 
 def hybrid_closure_FOT4(A):
-    """Generate hybrid closure for FOT4.
+    """Generate a hybrid closure for a fourth order tensor.
 
-    Args:
-        A (Mx)3x3x3x3 Array: (Array of) Fourth order fiber orientation tensor.
+    Parameters
+    ----------
+    A : (Mx)3x3x3x3 numpy array
+        (Array of) Fourth order fiber orientation tensor.
 
-    Returns:
-        (Mx)3x3x3x3x3x3: (Array of) Sixth order fiber orientation tensor.
+    Returns
+    -------
+    (Mx)3x3x3x3x3x3 numpy array
+        (Array of) Sixth order fiber orientation tensor.
+
     References
     ----------
     .. [1] Advani, Suresh G.; Tucker, Charles L. (1987),
-    The Use of Tensors to Describe and Predict Fiber Orientation in Short Fiber Comp.
-    In: Journal of Rheology 31 (8), S. 751-784
-    https://doi.org/10.1122/1.549945
+       'The Use of Tensors to Describe and Predict Fiber Orientation in Short Fiber
+       Composites',
+       Journal of Rheology 31(8), 751-784.
+       https://doi.org/10.1122/1.549945
 
     """
     assert_fot4_properties(A)

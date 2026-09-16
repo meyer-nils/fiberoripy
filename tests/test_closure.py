@@ -32,13 +32,18 @@ def create_random_spherical_distribution(N=100):
 
 
 def get_test_tensor_FOT2(N=100):
-    """Create random fiber orientation tensor second order.
+    """Create a random second order fiber orientation tensor.
 
-    Args:
-        N (int, optional): Number of random fiber vectors. Defaults to 100.
+    Parameters
+    ----------
+    N : int, optional
+        Number of random fiber vectors. The default is 100.
 
-    Returns:
-        3x3 Array: Fiber orientation tensor second order.
+    Returns
+    -------
+    3x3 numpy array
+        Second order fiber orientation tensor.
+
     """
     fibervecs = create_random_spherical_distribution(N)
     a = np.einsum(
@@ -50,13 +55,18 @@ def get_test_tensor_FOT2(N=100):
 
 
 def get_test_tensor_FOT4(N=100):
-    """Create random fiber orientation tensor fourth order.
+    """Create a random fourth order fiber orientation tensor.
 
-    Args:
-        N (int, optional): Number of random fiber vectors. Defaults to 100.
+    Parameters
+    ----------
+    N : int, optional
+        Number of random fiber vectors. The default is 100.
 
-    Returns:
-        3x3x3x3 Array: Fiber orientation tensor fourth order.
+    Returns
+    -------
+    3x3x3x3 numpy array
+        Fourth order fiber orientation tensor.
+
     """
     fibervecs = create_random_spherical_distribution(N)
     A = np.einsum(
@@ -66,10 +76,13 @@ def get_test_tensor_FOT4(N=100):
 
 
 def get_isotropic_FOT4():
-    """Generate the isotropic fiberorientation tensor fourth order.
+    """Generate the isotropic fourth order fiber orientation tensor.
 
-    Returns:
-        3x3x3x3 Array: Isotropic fiberorientation tensor fourth order.
+    Returns
+    -------
+    3x3x3x3 numpy array
+        Isotropic fourth order fiber orientation tensor.
+
     """
     A_iso = np.array(
         [
