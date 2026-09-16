@@ -5,6 +5,11 @@ follows [SemVer](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Added
+- Tests for the fitting, plotting, aspect ratio and constants modules, and for the
+  error paths of the closures, taking statement coverage to 100%. CI measures
+  coverage, fails below 95% and reports a table in the job summary.
+
 ### Changed
 - Enabled the bugbear, pyupgrade and ruff-specific lint rules, and fixed what they
   reported: `%`-formatting in the fitting example, redundant parentheses, and list

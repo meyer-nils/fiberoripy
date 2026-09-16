@@ -1,6 +1,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/meyer-nils/fiberoripy/blob/master/LICENSE)
 [![Tests](https://github.com/meyer-nils/fiberoripy/actions/workflows/pytest.yml/badge.svg)](https://github.com/meyer-nils/fiberoripy/actions/workflows/pytest.yml)
 [![Documentation](https://github.com/meyer-nils/fiberoripy/actions/workflows/docs.yml/badge.svg)](https://meyer-nils.github.io/fiberoripy)
+[![Coverage](https://img.shields.io/badge/coverage-%E2%89%A595%25-brightgreen)](https://github.com/meyer-nils/fiberoripy/actions/workflows/pytest.yml)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/fiberoripy)](https://badge.fury.io/py/fiberoripy)
 [![PyPI version](https://badge.fury.io/py/fiberoripy.svg)](https://badge.fury.io/py/fiberoripy)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)

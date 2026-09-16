@@ -54,3 +54,18 @@ def test_default_case(model):
         ).y
 
     assert np.allclose(solve(jeffery_ode), solve(model), atol=1e-12)
+
+
+@pytest.mark.parametrize("model", [ard_rsc_ode, folgar_tucker_ode, jeffery_ode])
+def test_quiescent_flow_leaves_the_orientation_unchanged(model):
+    """Without a velocity gradient there is no reorientation.
+
+    This also exercises the branch that `ard_rsc_ode` takes when the shear rate
+    vanishes and its rotary diffusion tensor cannot be normalised by it.
+    """
+    a = np.diag([0.6, 0.3, 0.1])
+    A = IBOF_closure(a)
+    zero = np.zeros((3, 3))
+
+    dadt = model(a, A, zero, zero, xi=1.0)
+    assert np.allclose(dadt, 0.0)

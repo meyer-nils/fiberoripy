@@ -41,7 +41,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-test = ["pytest>=7"]
+test = ["pytest>=7", "pytest-cov>=4"]
 examples = ["ipympl>=0.9", "jupyter"]
 docs = ["zensical>=0.0.62", "mkdocs", "mkdocstrings-python>=2", "nbconvert>=7", "ipykernel"]
 
@@ -61,6 +61,12 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools]
 packages = ["fiberoripy"]
 
+
+[tool.coverage.run]
+source = ["fiberoripy"]
+
+[tool.coverage.report]
+exclude_also = ['if __name__ == "__main__":']
 
 [tool.ruff]
 line-length = 88

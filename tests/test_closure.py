@@ -269,3 +269,107 @@ def test_batch_FOT4(type):
 
     assert batched.shape == (len(tensors), 3, 3, 3, 3, 3, 3)
     assert np.allclose(batched, individual, atol=1e-10)
+
+
+def test_get_random_tensor_pair_returns_a_consistent_pair():
+    """The fourth order tensor must contract to the second order one."""
+    from fiberoripy.closures import get_random_tensor_pair
+
+    a, A = get_random_tensor_pair(N=500, rng=np.random.default_rng(0))
+    assert a.shape == (3, 3) and A.shape == (3, 3, 3, 3)
+    assert np.trace(a) == pytest.approx(1.0)
+    assert np.allclose(np.einsum("ijkk", A), a)
+    assert np.allclose(a, a.T)
+
+
+def test_get_random_tensor_pair_is_reproducible():
+    """Passing a seeded generator must make the sample repeatable."""
+    from fiberoripy.closures import get_random_tensor_pair
+
+    first = get_random_tensor_pair(N=50, rng=np.random.default_rng(7))
+    second = get_random_tensor_pair(N=50, rng=np.random.default_rng(7))
+    assert np.allclose(first[0], second[0])
+    assert np.allclose(first[1], second[1])
+
+
+def test_get_random_tensor_pair_follows_its_seed_tensor():
+    """A uniaxial seed must concentrate the sampled directions on that axis."""
+    from fiberoripy.closures import get_random_tensor_pair
+
+    seed = np.diag([1.0, 0.05, 0.05])
+    a, _ = get_random_tensor_pair(seed=seed, N=2000, rng=np.random.default_rng(1))
+    assert a[0, 0] > a[1, 1] and a[0, 0] > a[2, 2]
+
+
+@pytest.mark.parametrize(
+    "tensor, closure, match",
+    [
+        (np.eye(3) / 3.0, "NOPE", "2nd-order"),
+        (np.zeros((3, 3, 3, 3)), "NOPE", "4th-order"),
+    ],
+)
+def test_compute_closure_rejects_unknown_names(tensor, closure, match):
+    """An unrecognised closure name must not fall through to None."""
+    from fiberoripy.closures import compute_closure
+
+    with pytest.raises(ValueError, match=match):
+        compute_closure(tensor, closure)
+
+
+def test_compute_closure_rejects_an_unusable_shape():
+    """Only 3x3 and 3x3x3x3 trailing dimensions can be closed."""
+    from fiberoripy.closures import compute_closure
+
+    with pytest.raises(ValueError, match="Expected input shape"):
+        compute_closure(np.zeros((4, 4)))
+
+
+@pytest.mark.parametrize(
+    "func, shape",
+    [("assert_fot_properties", (2, 2)), ("assert_fot4_properties", (3, 3))],
+)
+def test_shape_assertions_report_the_offending_shape(func, shape):
+    """The error message has to name what was passed in."""
+    import fiberoripy.closures as closures
+
+    with pytest.raises(ValueError, match="Expected input shape"):
+        getattr(closures, func)(np.zeros(shape))
+
+
+@pytest.mark.parametrize("type", ["SIQ", "SIHYB"])
+def test_implicit_closures_report_non_convergence(type):
+    """The Newton iteration must fail loudly rather than return a wrong tensor."""
+    from fiberoripy.closures import (
+        compute_closure_FOT2,
+        implicit_hybrid_closure,
+        symmetric_implicit_closure,
+    )
+
+    func = symmetric_implicit_closure if type == "SIQ" else implicit_hybrid_closure
+    with pytest.raises(ValueError, match="did not converge"):
+        func(np.diag([0.6, 0.3, 0.1]), n_iter_newton=0)
+    assert compute_closure_FOT2(np.diag([0.6, 0.3, 0.1]), type) is not None
+
+
+@pytest.mark.parametrize(
+    "func, tensor, match",
+    [
+        ("compute_closure_FOT2", np.eye(3) / 3.0, "2nd-order"),
+        ("compute_closure_FOT4", np.zeros((3, 3, 3, 3)), "4th-order"),
+    ],
+)
+def test_dispatch_helpers_reject_unknown_names(func, tensor, match):
+    """The helpers are public, so they guard their own input too."""
+    import fiberoripy.closures as closures
+
+    with pytest.raises(ValueError, match=match):
+        getattr(closures, func)(tensor, "NOPE")
+
+
+def test_get_random_tensor_pair_works_without_an_explicit_generator():
+    """Omitting `rng` must still produce a valid tensor pair."""
+    from fiberoripy.closures import get_random_tensor_pair
+
+    a, A = get_random_tensor_pair(N=200)
+    assert np.trace(a) == pytest.approx(1.0)
+    assert np.allclose(np.einsum("ijkk", A), a)
