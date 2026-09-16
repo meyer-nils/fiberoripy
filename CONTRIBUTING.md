@@ -15,6 +15,10 @@ pytest
 `pre-commit run --all-files` checks the whole repository. CI runs the test suite on
 Python 3.11 to 3.14.
 
+Documentation is built by `.github/workflows/docs.yml`; its API reference comes from
+the docstrings, so new models and closures appear on their own. Preview it locally
+with `pip install -e ".[docs]"` and `zensical serve -o`.
+
 ## Conventions
 
 - Linting and formatting are handled by [ruff](https://docs.astral.sh/ruff/)
@@ -34,6 +38,9 @@ Python 3.11 to 3.14.
 2. Add its name to `_FOT2_CLOSURES` or `_FOT4_CLOSURES` and to the matching dispatch.
 3. Add it to the parametrised lists in `tests/test_closure.py`, batched tests included.
 4. List it in the README under the exact name the code accepts.
+
+When adding an example notebook, add a card for it to `docs/examples.md`. Notebooks
+in any subdirectory of `examples/` are rendered automatically.
 
 ## Pull requests
 

@@ -20,6 +20,10 @@ follows [SemVer](https://semver.org/spec/v2.0.0.html).
 - Actions updated to current majors; PyPI releases use Trusted Publishing.
 - Replaced black, isort and flake8 with ruff, and added a CI lint job.
 - Unified docstrings on the numpydoc style, now enforced by ruff.
+- Documentation moved from Sphinx on Read the Docs to Zensical on GitHub Pages at
+  <https://meyer-nils.github.io/fiberoripy>. The API reference is generated from the
+  docstrings by mkdocstrings, and all example notebooks are executed and rendered
+  into a gallery.
 
 ### Fixed
 - Orientation models used `np.linalg.eig`, which returns `complex128`
@@ -30,6 +34,8 @@ follows [SemVer](https://semver.org/spec/v2.0.0.html).
 - The `fiberoripy` command pointed at a non-existent examples directory and emitted
   `SyntaxWarning` on Python 3.12+.
 - README: closure `SIC` renamed to `SIQ` (the accepted name), stale repository links.
+- The published API reference omitted the `closures`, `fit` and `tensorplot`
+  modules entirely; all three are now documented.
 
 ## [1.3.0] - 2025-09-22
 - Added fourth- to sixth-order closures (`LINEAR`, `QUADRATIC`, `HYBRID`).

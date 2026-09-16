@@ -1,3 +1,0 @@
-mock
-numpydoc
-sphinx-rtd-theme

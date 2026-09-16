@@ -43,10 +43,11 @@ dependencies = [
 [project.optional-dependencies]
 test = ["pytest>=7"]
 examples = ["ipympl>=0.9", "jupyter"]
+docs = ["zensical>=0.0.62", "mkdocs", "mkdocstrings-python>=2", "nbconvert>=7", "ipykernel"]
 
 [project.urls]
 homepage = "https://github.com/meyer-nils/fiberoripy"
-documentation = "https://fiberoripy.readthedocs.io"
+documentation = "https://meyer-nils.github.io/fiberoripy"
 repository = "https://github.com/meyer-nils/fiberoripy"
 issues = "https://github.com/meyer-nils/fiberoripy/issues"
 

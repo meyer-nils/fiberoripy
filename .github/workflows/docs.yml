@@ -1,0 +1,57 @@
+# Build the documentation with Zensical and deploy it to GitHub Pages.
+name: Documentation
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+    - uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+        cache: pip
+        cache-dependency-path: pyproject.toml
+    - name: Install fiberoripy and the documentation dependencies
+      # Deliberately without the `examples` extra: absent ipympl, the notebooks fall
+      # back to the static backend and render their figures into the page.
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install ".[docs]"
+    - name: Build the site
+      run: zensical build --clean
+    - name: Execute and render the example notebooks
+      run: |
+        for notebook in examples/*/*.ipynb; do
+          jupyter nbconvert --to html --execute \
+            --output-dir "site/examples/$(basename "$(dirname "$notebook")")" "$notebook"
+        done
+    - uses: actions/upload-pages-artifact@v5
+      with:
+        path: site
+
+  deploy:
+    # Only publish from master; pull requests just verify that the build works.
+    if: github.ref == 'refs/heads/master' && github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+    - uses: actions/deploy-pages@v5
+      id: deployment

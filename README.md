@@ -1,6 +1,6 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/meyer-nils/fiberoripy/blob/master/LICENSE)
 [![Tests](https://github.com/meyer-nils/fiberoripy/actions/workflows/pytest.yml/badge.svg)](https://github.com/meyer-nils/fiberoripy/actions/workflows/pytest.yml)
-[![Documentation Status](https://readthedocs.org/projects/fiberoripy/badge/?version=latest)](https://fiberoripy.readthedocs.io/en/latest/?badge=latest)
+[![Documentation](https://github.com/meyer-nils/fiberoripy/actions/workflows/docs.yml/badge.svg)](https://meyer-nils.github.io/fiberoripy)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/fiberoripy)](https://badge.fury.io/py/fiberoripy)
 [![PyPI version](https://badge.fury.io/py/fiberoripy.svg)](https://badge.fury.io/py/fiberoripy)
 [![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
@@ -12,7 +12,7 @@
 This python package provides basic functionality and tools for fiber orientations and
 closure models.
 
-For example, the Jupyter notebook `examples/orientation/comparison_perfectshear.ipynb` should reproduce Figure 2 in *Favaloro, A.J., Tucker III, C.L., Composites Part A, 126 (2019)*:
+For example, the [model comparison notebook](https://meyer-nils.github.io/fiberoripy/examples/orientation/comparison_perfectshear.html) reproduces Figure 2 in *Favaloro, A.J., Tucker III, C.L., Composites Part A, 126 (2019)*:
 
   ![example_image](https://raw.githubusercontent.com/meyer-nils/fiberoripy/master/docs/images/example.png)
 
@@ -51,8 +51,8 @@ a = solution.y.T.reshape(-1, 3, 3)
 ```
 
 Closures also accept stacked input of shape `(N, 3, 3)` or `(N, 3, 3, 3, 3)`.
-See [`examples/`](examples) for more and
-[fiberoripy.readthedocs.io](https://fiberoripy.readthedocs.io) for the API reference.
+See the [examples](https://meyer-nils.github.io/fiberoripy/examples/) and the
+[API reference](https://meyer-nils.github.io/fiberoripy/reference/) in the documentation.
 
 ## Orientation models
 Following models have been implemented:
