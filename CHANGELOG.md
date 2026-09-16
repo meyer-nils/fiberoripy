@@ -5,6 +5,11 @@ follows [SemVer](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+### Changed
+- Shape validation in `assert_fot_properties` and `assert_fot4_properties` raises
+  `ValueError` with the offending shape instead of using a bare `assert`, which is
+  stripped under `python -O`.
+
 ## [1.4.0] - 2026-09-16
 
 ### Added

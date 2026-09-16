@@ -105,16 +105,22 @@ def compute_closure_FOT2(a, closure="IBOF"):
 def assert_fot_properties(a):
     """Assert properties of second order input tensor.
 
+    Symmetry is assumed but not verified: integrating an orientation model lets the
+    tensor drift from exact symmetry by a few ulp, and this runs on every closure
+    evaluation.
+
     Parameters
     ----------
-    a : 3x3 numpy array
-        Second order fiber orientation tensor.
+    a : (Mx)3x3 numpy array
+        (Array of) Second order fiber orientation tensor.
+
+    Raises
+    ------
+    ValueError
+        If the trailing dimensions are not 3x3.
     """
-    # assert symmetry and shape
-    assert np.shape(a)[-2:] == (3, 3)
-    # assert(A[0, 1] == A[1, 0])
-    # assert(A[0, 2] == A[2, 0])
-    # assert(A[1, 2] == A[2, 1])
+    if np.shape(a)[-2:] != (3, 3):
+        raise ValueError(f"Expected input shape (..., 3, 3); got {np.shape(a)}.")
 
 
 def get_random_tensor_pair(seed=None, N=1000, rng=None):
@@ -980,10 +986,16 @@ def assert_fot4_properties(A):
 
     Parameters
     ----------
-    A : np.ndarray
-        Fourth order fiber orientation tensor.
+    A : (Mx)3x3x3x3 numpy array
+        (Array of) Fourth order fiber orientation tensor.
+
+    Raises
+    ------
+    ValueError
+        If the trailing dimensions are not 3x3x3x3.
     """
-    assert np.shape(A)[-4:] == (3, 3, 3, 3)
+    if np.shape(A)[-4:] != (3, 3, 3, 3):
+        raise ValueError(f"Expected input shape (..., 3, 3, 3, 3); got {np.shape(A)}.")
 
 
 def compute_closure_FOT4(A, closure="QUADRATIC"):
