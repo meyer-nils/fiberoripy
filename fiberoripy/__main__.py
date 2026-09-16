@@ -1,26 +1,26 @@
-import os
-
-import fiberoripy
+# Raw string: the ASCII art contains backslashes that must not be read as escapes.
+BANNER = r"""  ______ _ _                ____       _ _____
+ |  ____(_) |              / __ \     (_)  __ \
+ | |__   _| |__   ___ _ __| |  | |_ __ _| |__) |   _
+ |  __| | | '_ \ / _ \ '__| |  | | '__| |  ___/ | | |
+ | |    | | |_) |  __/ |  | |__| | |  | | |   | |_| |
+ |_|    |_|_.__/ \___|_|   \____/|_|  |_|_|    \__, |
+                                                __/ |
+                                               |___/
+"""
 
 
 def main(args=None):
     """Show usage information."""
-    path = os.path.dirname(os.path.dirname(fiberoripy.__file__))
-
     print(
-        "  ______ _ _                ____       _ _____       \n"
-        " |  ____(_) |              / __ \     (_)  __ \      \n"
-        " | |__   _| |__   ___ _ __| |  | |_ __ _| |__) |   _ \n"
-        " |  __| | | '_ \ / _ \ '__| |  | | '__| |  ___/ | | |\n"
-        " | |    | | |_) |  __/ |  | |__| | |  | | |   | |_| |\n"
-        " |_|    |_|_.__/ \___|_|   \____/|_|  |_|_|    \__, |\n"
-        "                                                __/ |\n"
-        "                                               |___/ \n"
-        "Copyright (c) 2024 "
-        "Nils Meyer, Constantin Krauß, Louis Schreyer, Julian Bauer\n\n"
+        BANNER + "\n"
+        "Copyright (c) 2026 "
+        "Nils Meyer, Constantin Krauß, Louis Schreyer, Julian Bauer, "
+        "Johannes Mitsch\n\n"
         "Fiberoripy is a python package that provides fiber orientation models"
-        " and closures for fourth order orientation tensos.\n\n"
-        f"Check out the examples at: {os.path.join(path, 'examples')}"
+        " and closures for fourth order orientation tensors.\n\n"
+        "Check out the examples at: "
+        "https://github.com/meyer-nils/fiberoripy/tree/master/examples"
     )
 
 

@@ -9,35 +9,56 @@ authors = [
     { name = "Julian Karl Bauer" },
     { name = "Johannes Mitsch" },
 ]
-license = { file = "LICENSE" }
+license = "MIT"
+license-files = ["LICENSE"]
 readme = "README.md"
-requires-python = ">=3.9"
-classifiers = [
-    'Programming Language :: Python',
-    'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.9',
-    'Programming Language :: Python :: 3.10',
-    'Programming Language :: Python :: 3.11',
-    'Programming Language :: Python :: 3.12',
+requires-python = ">=3.11"
+keywords = [
+    "fiber orientation",
+    "orientation tensor",
+    "closure approximation",
+    "fiber suspension",
+    "composites",
 ]
-dependencies = ["numpy", "matplotlib", "scipy", "pytest", "ipympl"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Physics",
+]
+# Lower bounds are the oldest releases that provide Python 3.11 wheels.
+dependencies = [
+    "numpy>=1.23.3",
+    "scipy>=1.9.2",
+    "matplotlib>=3.6",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+examples = ["ipympl>=0.9", "jupyter"]
 
 [project.urls]
-source = "https://github.com/meyer-nils/fiberoripy"
+homepage = "https://github.com/meyer-nils/fiberoripy"
+documentation = "https://fiberoripy.readthedocs.io"
+repository = "https://github.com/meyer-nils/fiberoripy"
+issues = "https://github.com/meyer-nils/fiberoripy/issues"
 
 [project.scripts]
 fiberoripy = "fiberoripy.__main__:main"
 
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-include-package-data = true
 packages = ["fiberoripy"]
-
-[tool.setuptools.package-data]
-torchfem = ["examples/*.*"]
 
 [tool.isort]
 profile = "black"

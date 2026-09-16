@@ -27,7 +27,7 @@ for mod_name in mock_modules:
 
 project = "fiberoripy"
 copyright = (
-    "2025, Nils Meyer, Constantin Krauß, Louis Schreyer, Julian Bauer, Johannes Mitsch"
+    "2026, Nils Meyer, Constantin Krauß, Louis Schreyer, Julian Bauer, Johannes Mitsch"
 )
 author = "Nils Meyer, Constantin Krauß, Louis Schreyer, Julian Bauer, Johannes Mitsch"
 
