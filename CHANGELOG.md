@@ -10,6 +10,8 @@ follows [SemVer](https://semver.org/spec/v2.0.0.html).
 - `test` and `examples` extras; `CITATION.cff`, `CHANGELOG.md`, `CONTRIBUTING.md`.
 - README quickstart and documentation of the fourth- to sixth-order closures.
 - Dependabot configuration for GitHub Actions.
+- An optional `rng` argument on `get_random_tensor_pair` for reproducible
+  sampling.
 
 ### Changed
 - Minimum Python is now 3.11; CI covers 3.11-3.14.
@@ -17,6 +19,10 @@ follows [SemVer](https://semver.org/spec/v2.0.0.html).
 - Runtime dependencies gained tested lower bounds (`numpy>=1.23.3`, `scipy>=1.9.2`,
   `matplotlib>=3.6`).
 - License metadata migrated to a PEP 639 SPDX expression.
+- Random sampling uses `numpy.random.Generator` instead of the legacy global
+  `numpy.random` functions; the test tensors are now seeded and reproducible.
+- `get_random_tensor_pair` takes `seed=None` rather than evaluating the default
+  isotropic tensor at import time.
 - Actions updated to current majors; PyPI releases use Trusted Publishing.
 - Replaced black, isort and flake8 with ruff, and added a CI lint job.
 - Unified docstrings on the numpydoc style, now enforced by ruff.

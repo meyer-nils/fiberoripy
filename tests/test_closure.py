@@ -1,6 +1,9 @@
 import numpy as np
 import pytest
 
+# Seeded so that the parametrised test tensors are identical on every run.
+RNG = np.random.default_rng(20240914)
+
 # Helper function to generate test tensors
 
 
@@ -19,8 +22,8 @@ def create_random_spherical_distribution(N=100):
         Normalized fiber directions.
 
     """
-    phi_rand = np.random.uniform(0.0, 2.0 * np.pi, N)
-    theta_rand = np.arccos(1.0 - 2.0 * np.random.uniform(0.0, 1.0, N))
+    phi_rand = RNG.uniform(0.0, 2.0 * np.pi, N)
+    theta_rand = np.arccos(1.0 - 2.0 * RNG.uniform(0.0, 1.0, N))
     fiber_vecs = np.array(
         [
             np.cos(phi_rand) * np.sin(theta_rand),

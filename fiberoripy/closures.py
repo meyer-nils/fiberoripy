@@ -116,15 +116,18 @@ def assert_fot_properties(a):
     # assert(A[1, 2] == A[2, 1])
 
 
-def get_random_tensor_pair(seed=(1.0 / 3.0 * np.eye(3)), N=1000):
+def get_random_tensor_pair(seed=None, N=1000, rng=None):
     """Sample a random fiber orientation and compute second and fourth order tensors.
 
     Parameters
     ----------
-    seed : 3x3 numpy array
+    seed : 3x3 numpy array, optional
         Second order fiber orientation tensor describing the seed distribution.
+        The default is the isotropic tensor.
     N : int, optional
         number of random fibers. The default is 1000.
+    rng : numpy.random.Generator, optional
+        Random number generator. Pass a seeded generator for reproducible results.
 
     Returns
     -------
@@ -133,8 +136,13 @@ def get_random_tensor_pair(seed=(1.0 / 3.0 * np.eye(3)), N=1000):
     A : 3x3x3x3 numpy array
         Fourth order fiber orientation tensor.
     """
-    phi = np.random.uniform(-np.pi, np.pi, N)
-    costheta = np.random.uniform(-1.0, 1.0, N)
+    if seed is None:
+        seed = 1.0 / 3.0 * np.eye(3)
+    if rng is None:
+        rng = np.random.default_rng()
+
+    phi = rng.uniform(-np.pi, np.pi, N)
+    costheta = rng.uniform(-1.0, 1.0, N)
     theta = np.arccos(costheta)
 
     x = np.cos(phi) * np.sin(theta)

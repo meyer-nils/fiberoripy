@@ -61,12 +61,14 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools]
 packages = ["fiberoripy"]
 
+
 [tool.ruff]
 line-length = 88
 
 [tool.ruff.lint]
-# pycodestyle, pyflakes, isort and pydocstyle; E/F/W keep the previous flake8 checks.
-select = ["E", "F", "W", "I", "D"]
+# pycodestyle, pyflakes, isort, pydocstyle and NumPy-specific rules;
+# E/F/W keep the previous flake8 checks.
+select = ["E", "F", "W", "I", "D", "NPY"]
 # Module- and package-level docstrings are not required.
 ignore = ["D100", "D104"]
 
