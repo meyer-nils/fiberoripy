@@ -1,3 +1,4 @@
+from functools import partial
 from itertools import permutations
 
 import numpy as np
@@ -5,25 +6,6 @@ import numpy as np
 FULL_SYM6_PERMUTATIONS = np.array(
     ["".join(perm) for perm in list(permutations("ijklmn"))]
 )
-
-_FOT2_CLOSURES = {
-    "IBOF",
-    "LINEAR",
-    "HYBRID",
-    "QUADRATIC",
-    "ORF",
-    "ORW",
-    "ORW3",
-    "SIQ",
-    "SIHYB",
-    "SQC",
-}
-
-_FOT4_CLOSURES = {
-    "LINEAR",
-    "HYBRID",
-    "QUADRATIC",
-}
 
 
 def compute_closure(a, closure="IBOF"):
@@ -79,27 +61,9 @@ def compute_closure_FOT2(a, closure="IBOF"):
         (Array of) Fourth order fiber orientation tensor.
 
     """
-    if closure == "IBOF":
-        return IBOF_closure(a)
-    if closure == "HYBRID":
-        return hybrid_closure(a)
-    if closure == "LINEAR":
-        return linear_closure(a)
-    if closure == "QUADRATIC":
-        return quadratic_closure(a)
-    if closure == "ORF":
-        return orthotropic_fitted_closures(a, "ORF")
-    if closure == "ORW":
-        return orthotropic_fitted_closures(a, "ORW")
-    if closure == "ORW3":
-        return orthotropic_fitted_closures(a, "ORW3")
-    if closure == "SIQ":
-        return symmetric_implicit_closure(a)
-    if closure == "SIHYB":
-        return implicit_hybrid_closure(a)
-    if closure == "SQC":
-        return symmetric_quadratic_closure(a)
-    raise ValueError(f"Unsupported closure for 2nd-order tensor: {closure}")
+    if closure not in _FOT2_CLOSURES:
+        raise ValueError(f"Unsupported closure for 2nd-order tensor: {closure}")
+    return _FOT2_CLOSURES[closure](a)
 
 
 def assert_fot_properties(a):
@@ -1016,13 +980,9 @@ def compute_closure_FOT4(A, closure="QUADRATIC"):
         (Array of) Sixth order fiber orientation tensor.
 
     """
-    if closure == "HYBRID":
-        return hybrid_closure_FOT4(A)
-    if closure == "LINEAR":
-        return linear_closure_FOT4(A)
-    if closure == "QUADRATIC":  # A x a
-        return quadratic_closure_FOT4(A)
-    raise ValueError(f"Unsupported closure for 4th-order tensor: {closure}")
+    if closure not in _FOT4_CLOSURES:
+        raise ValueError(f"Unsupported closure for 4th-order tensor: {closure}")
+    return _FOT4_CLOSURES[closure](A)
 
 
 def quadratic_closure_FOT4(A):
@@ -1165,3 +1125,24 @@ def hybrid_closure_FOT4(A):
     A6 += np.einsum("..., ...ijklmn -> ...ijklmn", f, quadratic_closure_FOT4(A))
 
     return A6
+
+
+# Dispatch tables
+_FOT2_CLOSURES = {
+    "IBOF": IBOF_closure,
+    "LINEAR": linear_closure,
+    "QUADRATIC": quadratic_closure,
+    "HYBRID": hybrid_closure,
+    "ORF": partial(orthotropic_fitted_closures, closure="ORF"),
+    "ORW": partial(orthotropic_fitted_closures, closure="ORW"),
+    "ORW3": partial(orthotropic_fitted_closures, closure="ORW3"),
+    "SQC": symmetric_quadratic_closure,
+    "SIQ": symmetric_implicit_closure,
+    "SIHYB": implicit_hybrid_closure,
+}
+
+_FOT4_CLOSURES = {
+    "LINEAR": linear_closure_FOT4,
+    "QUADRATIC": quadratic_closure_FOT4,  # A6 = A x a
+    "HYBRID": hybrid_closure_FOT4,
+}

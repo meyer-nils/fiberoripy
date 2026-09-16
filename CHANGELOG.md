@@ -9,6 +9,8 @@ follows [SemVer](https://semver.org/spec/v2.0.0.html).
 - Shape validation in `assert_fot_properties` and `assert_fot4_properties` raises
   `ValueError` with the offending shape instead of using a bare `assert`, which is
   stripped under `python -O`.
+- Closure dispatch uses lookup tables, so the supported closure names are recorded
+  in one place rather than in both a name set and a chain of `if` statements.
 
 ## [1.4.0] - 2026-09-16
 
