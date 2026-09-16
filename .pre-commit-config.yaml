@@ -9,17 +9,13 @@ repos:
     -   id: check-yaml
     -   id: check-added-large-files
     -   id: check-toml
-# Black code style formatter
--   repo: https://github.com/psf/black
-    rev: 25.9.0
+# Ruff replaces black, isort and flake8 for linting and formatting
+-   repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.7
     hooks:
-      - id: black
-# isort import sorting
--   repo: https://github.com/timothycrosley/isort
-    rev: '6.0.1'
-    hooks:
-      - id: isort
-        additional_dependencies: ["toml"]
+    -   id: ruff-check
+        args: [--fix]
+    -   id: ruff-format
 # nbstripout to remove outputs from Jupyter notebooks
 -   repo: https://github.com/kynan/nbstripout
     rev: 0.8.1

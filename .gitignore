@@ -5,6 +5,14 @@ docs/_build
 fiberoripy.egg-info
 *.pyc
 *.egg-info
+__pycache__/
+.venv/
+venv/
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
 
 # vscode
 .vscode
@@ -14,3 +22,6 @@ fetch_data.sh
 
 # Jupyter
 .ipynb_checkpoints
+
+# macOS
+.DS_Store

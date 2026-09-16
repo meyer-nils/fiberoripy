@@ -18,6 +18,7 @@ follows [SemVer](https://semver.org/spec/v2.0.0.html).
   `matplotlib>=3.6`).
 - License metadata migrated to a PEP 639 SPDX expression.
 - Actions updated to current majors; PyPI releases use Trusted Publishing.
+- Replaced black, isort and flake8 with ruff, and added a CI lint job.
 - Unified docstrings on the numpydoc style, now enforced by ruff.
 
 ### Fixed

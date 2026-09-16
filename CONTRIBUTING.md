@@ -17,7 +17,8 @@ Python 3.11 to 3.14.
 
 ## Conventions
 
-- black and isort, 88 characters. Notebook outputs are stripped by `nbstripout`.
+- Linting and formatting are handled by [ruff](https://docs.astral.sh/ruff/)
+  (88 characters). Notebook outputs are stripped by `nbstripout`.
 - [numpydoc](https://numpydoc.readthedocs.io/) docstrings, since the API reference is
   generated from them. Include a `References` section with a DOI for published work.
 - Orientation models use the signature `model(a, A, D, W, xi, **kwargs)` and return
