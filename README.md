@@ -18,7 +18,7 @@ For example, the [model comparison notebook](https://meyer-nils.github.io/fibero
 
 ## Installation
 ```
-pip install fiberoripy            # library
+pip install fiberoripy              # library
 pip install "fiberoripy[examples]"  # plus interactive plotting for the notebooks
 ```
 
