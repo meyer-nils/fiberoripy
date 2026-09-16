@@ -278,7 +278,7 @@ def iardrpr_ode(a, A, D, W, xi, Ci=0.0, Cm=0.0, alpha=0.0, beta=0.0, **kwargs):
     dadt_temp = dadt_HD + dadt_iard
 
     # Spectral Decomposition
-    eigenValues, eigenVectors = np.linalg.eig(a)
+    eigenValues, eigenVectors = np.linalg.eigh(a)
     idx = eigenValues.argsort()[::-1]
     R = eigenVectors[:, idx]
 
@@ -343,7 +343,7 @@ def mrd_ode(a, A, D, W, xi, Ci=0.0, D1=1.0, D2=0.8, D3=0.15, **kwargs):
     C_hat = np.array([[D1, 0.0, 0.0], [0.0, D2, 0.0], [0.0, 0.0, D3]])
 
     # Spectral Decomposition
-    eigenValues, eigenVectors = np.linalg.eig(a)
+    eigenValues, eigenVectors = np.linalg.eigh(a)
     idx = eigenValues.argsort()[::-1]
     R = eigenVectors[:, idx]
 
@@ -411,7 +411,7 @@ def pard_ode(a, A, D, W, xi, Ci=0.0, Omega=0.0, **kwargs):
     C_hat = np.array([[1.0, 0.0, 0.0], [0.0, Omega, 0.0], [0.0, 0.0, 1.0 - Omega]])
 
     # Spectral Decomposition
-    eigenValues, eigenVectors = np.linalg.eig(a)
+    eigenValues, eigenVectors = np.linalg.eigh(a)
     idx = eigenValues.argsort()[::-1]
     R = eigenVectors[:, idx]
 
@@ -481,7 +481,7 @@ def pardrpr_ode(a, A, D, W, xi, Ci=0.0, Omega=0.0, alpha=0.0, **kwargs):
     C_hat = np.array([[1.0, 0.0, 0.0], [0.0, Omega, 0.0], [0.0, 0.0, 1.0 - Omega]])
 
     # Spectral Decomposition
-    eigenValues, eigenVectors = np.linalg.eig(a)
+    eigenValues, eigenVectors = np.linalg.eigh(a)
     idx = eigenValues.argsort()[::-1]
     R = eigenVectors[:, idx]
 
@@ -565,7 +565,7 @@ def rsc_ode(a, A, D, W, xi, Ci=0.0, kappa=1.0, **kwargs):
     G = np.sqrt(2.0 * np.einsum("ij,ij", D, D))
     delta = np.eye(3)
 
-    w, v = np.linalg.eig(a)
+    w, v = np.linalg.eigh(a)
     L = (
         w[0] * np.einsum("i,j,k,l->ijkl", v[:, 0], v[:, 0], v[:, 0], v[:, 0])
         + w[1] * np.einsum("i,j,k,l->ijkl", v[:, 1], v[:, 1], v[:, 1], v[:, 1])
@@ -638,7 +638,7 @@ def ard_rsc_ode(a, A, D, W, xi, b1=0.0, kappa=1.0, b2=0, b3=0, b4=0, b5=0, **kwa
     G = np.sqrt(2.0 * np.einsum("ij,ij", D, D))
     delta = np.eye(3)
 
-    w, v = np.linalg.eig(a)
+    w, v = np.linalg.eigh(a)
     L = (
         w[0] * np.einsum("i,j,k,l->ijkl", v[:, 0], v[:, 0], v[:, 0], v[:, 0])
         + w[1] * np.einsum("i,j,k,l->ijkl", v[:, 1], v[:, 1], v[:, 1], v[:, 1])
