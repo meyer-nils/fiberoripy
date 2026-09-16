@@ -1,5 +1,5 @@
-# This workflow will install Python dependencies and run tests with a variety of Python versions
-name: Python package
+# Install the package and run the test suite on all supported Python versions.
+name: Tests
 
 on:
   push:
@@ -7,25 +7,33 @@ on:
   pull_request:
     branches: [ master ]
 
-jobs:
-  build:
+permissions:
+  contents: read
 
+# Cancel superseded runs on the same branch or pull request.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v7
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v7
       with:
         python-version: ${{ matrix.python-version }}
+        cache: pip
+        cache-dependency-path: pyproject.toml
     - name: Install fiberoripy
       run: |
-        pip install --upgrade pip
-        pip install --upgrade setuptools pytest numpy matplotlib scipy ipympl
-        pip install .
+        python -m pip install --upgrade pip
+        python -m pip install . pytest
     - name: Test with pytest
-      run: |
-        pytest
+      run: pytest
