@@ -10,6 +10,9 @@ follows [SemVer](https://semver.org/spec/v2.0.0.html).
   error paths of the closures, taking statement coverage to 100%. CI measures
   coverage, fails below 95% and reports a table in the job summary.
 - The `constants` module is now part of the API reference.
+- CI builds the distribution and runs the test suite against the installed wheel,
+  so a file missing from the wheel or sdist fails a pull request rather than a
+  release.
 
 ### Changed
 - Enabled the bugbear, pyupgrade and ruff-specific lint rules, and fixed what they

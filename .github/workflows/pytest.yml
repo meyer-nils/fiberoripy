@@ -43,3 +43,23 @@ jobs:
       run: |
         echo "### Coverage: $(coverage report --format=total)%" >> $GITHUB_STEP_SUMMARY
         coverage report --format=markdown >> $GITHUB_STEP_SUMMARY
+
+  package:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+    - uses: actions/setup-python@v7
+      with:
+        python-version: "3.13"
+        cache: pip
+        cache-dependency-path: pyproject.toml
+    - name: Build the distribution
+      run: |
+        python -m pip install --upgrade pip build
+        python -m build
+    - name: Run the tests against the installed wheel
+      run: |
+        python -m pip install "$(ls dist/*.whl)[test]"
+        # From outside the source tree, so the installed package is imported.
+        cd "$(mktemp -d)"
+        python -m pytest "$GITHUB_WORKSPACE/tests" -q
