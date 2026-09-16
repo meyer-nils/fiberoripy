@@ -6,6 +6,14 @@ follows [SemVer](https://semver.org/spec/v2.0.0.html).
 ## [Unreleased]
 
 ### Changed
+- Enabled the bugbear, pyupgrade and ruff-specific lint rules, and fixed what they
+  reported: `%`-formatting in the fitting example, redundant parentheses, and list
+  concatenation in the tests.
+- `fit_optimal_params` and `compute_error` pair parameter names with values using
+  `zip(..., strict=True)`, so a mismatched `keys`/`values` pair raises instead of
+  silently fitting fewer parameters.
+
+### Changed
 - Shape validation in `assert_fot_properties` and `assert_fot4_properties` raises
   `ValueError` with the offending shape instead of using a bare `assert`, which is
   stripped under `python -O`.

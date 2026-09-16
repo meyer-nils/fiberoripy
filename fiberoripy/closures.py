@@ -874,37 +874,33 @@ def implicit_hybrid_closure(a, eps_newton=1.0e-12, n_iter_newton=25):
             l2_prime = np.nan_to_num((6.0 * (1.0 - k)) / (7.0 * k))
 
             f = np.nan_to_num(
-                (
-                    4.0 * s
-                    + 0.5 * l1 * d
-                    - np.sum(
-                        np.sqrt(
-                            1.5 * evs / k[..., None]
-                            + 0.25 * l1[..., None] ** 2.0
-                            - l2[..., None]
-                        ),
-                        axis=-1,
-                    )
+                4.0 * s
+                + 0.5 * l1 * d
+                - np.sum(
+                    np.sqrt(
+                        1.5 * evs / k[..., None]
+                        + 0.25 * l1[..., None] ** 2.0
+                        - l2[..., None]
+                    ),
+                    axis=-1,
                 )
             )
 
             f_prime = np.nan_to_num(
-                (
-                    4.0
-                    + 0.5 * (l1_prime * d)
-                    - 0.25
-                    * np.sum(
-                        (
-                            2.0 * l1[..., None] * l1_prime[..., None]
-                            - 4.0 * l2_prime[..., None]
-                        )
-                        / np.sqrt(
-                            2.0 * evs / k[..., None]
-                            + l1[..., None] ** 2.0
-                            - 4.0 * l2[..., None]
-                        ),
-                        axis=-1,
+                4.0
+                + 0.5 * (l1_prime * d)
+                - 0.25
+                * np.sum(
+                    (
+                        2.0 * l1[..., None] * l1_prime[..., None]
+                        - 4.0 * l2_prime[..., None]
                     )
+                    / np.sqrt(
+                        2.0 * evs / k[..., None]
+                        + l1[..., None] ** 2.0
+                        - 4.0 * l2[..., None]
+                    ),
+                    axis=-1,
                 )
             )
 

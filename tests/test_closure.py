@@ -155,7 +155,7 @@ def get_test_tensors():
     a_uni2[1, 1] = 1.0
     a_uni3[2, 2] = 1.0
     rands = [get_test_tensor_FOT2(N=10) for _ in range(10)]
-    return [a_iso, a_uni1, a_uni2, a_uni3] + rands
+    return [a_iso, a_uni1, a_uni2, a_uni3, *rands]
 
 
 def get_test_tensors_FOT4():
@@ -169,7 +169,7 @@ def get_test_tensors_FOT4():
     A_uni3[2, 2, 2, 2] = 1.0
     rands = [get_test_tensor_FOT4(N=10) for _ in range(10)]
 
-    return [A_iso, A_uni1, A_uni2, A_uni3] + rands
+    return [A_iso, A_uni1, A_uni2, A_uni3, *rands]
 
 
 @pytest.mark.parametrize("a", get_test_tensors())

@@ -66,9 +66,9 @@ packages = ["fiberoripy"]
 line-length = 88
 
 [tool.ruff.lint]
-# pycodestyle, pyflakes, isort, pydocstyle and NumPy-specific rules;
-# E/F/W keep the previous flake8 checks.
-select = ["E", "F", "W", "I", "D", "NPY"]
+# pycodestyle, pyflakes, isort, pydocstyle, bugbear, pyupgrade and the NumPy- and
+# ruff-specific rules; E/F/W keep the previous flake8 checks.
+select = ["E", "F", "W", "I", "D", "B", "UP", "NPY", "RUF"]
 # Module- and package-level docstrings are not required.
 ignore = ["D100", "D104"]
 

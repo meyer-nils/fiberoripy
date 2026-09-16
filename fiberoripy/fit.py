@@ -8,7 +8,7 @@ from fiberoripy.orientation import integrate_ori_ode
 
 def compute_error(values, keys, t, reference, ode, xi, L):
     """Compute the error between dataset mean and solution."""
-    kwargs = dict(zip(keys, values))
+    kwargs = dict(zip(keys, values, strict=True))
     kwargs["xi"] = xi
 
     A0 = reference[0, :]
@@ -60,7 +60,7 @@ def fit_optimal_params(t, reference, ode, xi, L, keys, values, bounds):
         args=[keys, t, reference, ode, xi, L],
     )
 
-    kwargs = dict(zip(keys, opt.x))
+    kwargs = dict(zip(keys, opt.x, strict=True))
     kwargs["xi"] = xi
 
     A0 = reference[0, :]

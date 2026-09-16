@@ -34,11 +34,11 @@ def L(t):
 data_list = []
 volfrac = "30"
 full_path = os.path.realpath(__file__)
-rootdir = os.path.join(os.path.dirname(full_path), "data", "volfrac%s" % volfrac)
+rootdir = os.path.join(os.path.dirname(full_path), "data", f"volfrac{volfrac}")
 print(rootdir)
 file_name = os.path.join(rootdir, "README.md")
-pic_name = os.path.join(rootdir, "volfrac%s.png" % volfrac)
-for subdir, dirs, files in os.walk(rootdir):
+pic_name = os.path.join(rootdir, f"volfrac{volfrac}.png")
+for subdir, _dirs, files in os.walk(rootdir):
     for file in files:
         if file == "A.csv":
             name = os.path.join(subdir, file)
@@ -66,8 +66,8 @@ p_opt, N_rsc, msg = fit_optimal_params(
 with open(file_name, "a") as f:
     f.write("## RSC Model ##\n")
     f.write(msg + "\n")
-    f.write("C_i:   %f\n" % p_opt[0])
-    f.write("Kappa: %f\n" % p_opt[1])
+    f.write(f"C_i:   {p_opt[0]:f}\n")
+    f.write(f"Kappa: {p_opt[1]:f}\n")
 
 subplots = ["A11", "A22", "A33", "A12"]
 
@@ -87,7 +87,7 @@ for j, c in enumerate(subplots):
         alpha=0.3,
     )
     plt.xlabel("Strains")
-    plt.title("$%s_{%s}$" % (c[0], c[1:]))
+    plt.title(f"${c[0]}_{{{c[1:]}}}$")
     plt.ylim([-(i % 2), 1])
     plt.xlim([0, 150])
 
