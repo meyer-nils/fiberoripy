@@ -32,9 +32,10 @@ jobs:
         cache: pip
         cache-dependency-path: pyproject.toml
     - name: Install fiberoripy
+      # Editable, so that the tests import the same files coverage measures.
       run: |
         python -m pip install --upgrade pip
-        python -m pip install ".[test]"
+        python -m pip install -e ".[test]"
     - name: Test with pytest
       run: pytest --cov --cov-report=term-missing --cov-fail-under=95
     - name: Coverage summary
