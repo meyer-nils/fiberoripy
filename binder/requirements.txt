@@ -1,0 +1,4 @@
+# Environment for the Binder badge in README.md.
+# Installs fiberoripy itself plus the interactive plotting backend that the
+# example notebooks use via `%matplotlib widget`.
+.[examples]
