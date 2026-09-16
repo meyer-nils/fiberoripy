@@ -22,8 +22,8 @@ abstract: >-
 repository-code: https://github.com/meyer-nils/fiberoripy
 url: https://meyer-nils.github.io/fiberoripy
 license: MIT
-version: 1.3.0
-date-released: '2025-09-22'
+version: 1.4.0
+date-released: '2026-09-16'
 keywords:
   - fiber orientation
   - orientation tensor

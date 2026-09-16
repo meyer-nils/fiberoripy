@@ -5,6 +5,8 @@ follows [SemVer](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
+## [1.4.0] - 2026-09-16
+
 ### Added
 - Batched-input tests for every closure.
 - `test` and `examples` extras; `CITATION.cff`, `CHANGELOG.md`, `CONTRIBUTING.md`.
@@ -12,6 +14,7 @@ follows [SemVer](https://semver.org/spec/v2.0.0.html).
 - Dependabot configuration for GitHub Actions.
 - An optional `rng` argument on `get_random_tensor_pair` for reproducible
   sampling.
+- `fiberoripy.__version__`, read from the installed package metadata.
 
 ### Changed
 - Minimum Python is now 3.11; CI covers 3.11-3.14.
@@ -62,7 +65,8 @@ follows [SemVer](https://semver.org/spec/v2.0.0.html).
 
 Earlier releases: see the [tags](https://github.com/meyer-nils/fiberoripy/tags).
 
-[Unreleased]: https://github.com/meyer-nils/fiberoripy/compare/v1.3.0...HEAD
+[Unreleased]: https://github.com/meyer-nils/fiberoripy/compare/v1.4.0...HEAD
+[1.4.0]: https://github.com/meyer-nils/fiberoripy/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/meyer-nils/fiberoripy/compare/v1.2.1...v1.3.0
 [1.2.1]: https://github.com/meyer-nils/fiberoripy/compare/v1.2.0...v1.2.1
 [1.2.0]: https://github.com/meyer-nils/fiberoripy/compare/v1.1.4...v1.2.0
