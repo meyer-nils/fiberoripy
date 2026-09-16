@@ -1,0 +1,36 @@
+cff-version: 1.2.0
+title: fiberoripy
+message: >-
+  If you use this software, please cite it using the metadata from this file.
+type: software
+authors:
+  - given-names: Nils
+    family-names: Meyer
+    email: nils.meyer@uni-a.de
+    affiliation: University of Augsburg
+  - given-names: Constantin
+    family-names: Krauß
+  - given-names: Louis
+    family-names: Schreyer
+  - given-names: Julian Karl
+    family-names: Bauer
+  - given-names: Johannes
+    family-names: Mitsch
+abstract: >-
+  Fiber orientation models and closure approximations for fiber orientation
+  tensors.
+repository-code: https://github.com/meyer-nils/fiberoripy
+url: https://fiberoripy.readthedocs.io
+license: MIT
+version: 1.3.0
+date-released: '2025-09-22'
+keywords:
+  - fiber orientation
+  - orientation tensor
+  - closure approximation
+  - fiber suspension
+  - composites
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.4679755
+    description: Concept DOI resolving to the latest archived release.
