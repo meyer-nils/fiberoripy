@@ -35,7 +35,7 @@ from fiberoripy.orientation import (
 )
 def test_default_case(model):
     """The default argument set of all functions should yield to Jeffery's solution."""
-    from scipy.integrate import odeint
+    from scipy.integrate import solve_ivp
 
     t = np.linspace(0, 1, 100)
 
@@ -44,19 +44,13 @@ def test_default_case(model):
     def L(t):
         return np.array([[0.0, 0.0, 1.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]])
 
-    kwargs = {"xi": 1.0}
-    a_ref = odeint(
-        integrate_ori_ode,
-        a0.ravel(),
-        t,
-        args=(L, IBOF_closure, jeffery_ode, kwargs),
-        tfirst=True,
-    )
-    a_test = odeint(
-        integrate_ori_ode,
-        a0.ravel(),
-        t,
-        args=(L, IBOF_closure, model, kwargs),
-        tfirst=True,
-    )
-    assert np.allclose(a_ref, a_test, atol=1e-12)
+    def solve(ode):
+        return solve_ivp(
+            integrate_ori_ode,
+            (t.min(), t.max()),
+            a0.ravel(),
+            t_eval=t,
+            args=(L, IBOF_closure, ode, {"xi": 1.0}),
+        ).y
+
+    assert np.allclose(solve(jeffery_ode), solve(model), atol=1e-12)
