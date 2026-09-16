@@ -12,6 +12,8 @@ follows [SemVer](https://semver.org/spec/v2.0.0.html).
 - `fit_optimal_params` and `compute_error` pair parameter names with values using
   `zip(..., strict=True)`, so a mismatched `keys`/`values` pair raises instead of
   silently fitting fewer parameters.
+- Each example notebook now has a heading that identifies it; three shared
+  "Testing re-orientation in shearflow" and two more were also duplicates.
 
 ### Changed
 - Shape validation in `assert_fot_properties` and `assert_fot4_properties` raises
