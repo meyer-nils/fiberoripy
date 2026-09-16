@@ -160,13 +160,7 @@ Journal of Rheology 31(8), 751-784, 1987.\
  J. Manuf. Sci. Eng. 2011, 133, 51002.\
  (http://doi.org/10.1115/1.4004831)
 
-## Contributing
-See [CONTRIBUTING.md](CONTRIBUTING.md).
-
 ## Citing
 Please cite the archived release,
 [10.5281/zenodo.4679755](https://doi.org/10.5281/zenodo.4679755); full metadata is in
 [CITATION.cff](CITATION.cff).
-
-## License
-[MIT](LICENSE)
