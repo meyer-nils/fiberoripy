@@ -210,3 +210,46 @@ def test_contraction_FOT4(A, type):
     A6 = compute_closure(A, type)
     A_contract = np.einsum("iikkmm", A6)
     assert A_contract == pytest.approx(1.0, 0.0001)
+
+
+@pytest.mark.parametrize(
+    "type",
+    [
+        "IBOF",
+        "LINEAR",
+        "HYBRID",
+        "QUADRATIC",
+        "ORF",
+        "ORW",
+        "ORW3",
+        "SIQ",
+        "SIHYB",
+        "SQC",
+    ],
+)
+def test_batch_FOT2(type):
+    """A batched call must equal the individual results, stacked."""
+    from fiberoripy.closures import compute_closure
+
+    tensors = get_test_tensors()
+    batched = compute_closure(np.array(tensors), type)
+    individual = np.array([compute_closure(a, type) for a in tensors])
+
+    assert batched.shape == (len(tensors), 3, 3, 3, 3)
+    assert np.allclose(batched, individual, atol=1e-10)
+
+
+@pytest.mark.parametrize(
+    "type",
+    ["QUADRATIC", "LINEAR", "HYBRID"],
+)
+def test_batch_FOT4(type):
+    """A batched call must equal the individual results, stacked."""
+    from fiberoripy.closures import compute_closure
+
+    tensors = get_test_tensors_FOT4()[:4]
+    batched = compute_closure(np.array(tensors), type)
+    individual = np.array([compute_closure(A, type) for A in tensors])
+
+    assert batched.shape == (len(tensors), 3, 3, 3, 3, 3, 3)
+    assert np.allclose(batched, individual, atol=1e-10)

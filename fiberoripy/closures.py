@@ -744,9 +744,9 @@ def symmetric_quadratic_closure(a):
         )
     )
 
-    a4 /= 1.0 / 3.0 * (1.0 + 2.0 * np.einsum("...ij, ...ij -> ...", a, a))
+    norm = 1.0 / 3.0 * (1.0 + 2.0 * np.einsum("...ij, ...ij -> ...", a, a))
 
-    return a4
+    return np.einsum("..., ...ijkl -> ...ijkl", 1.0 / norm, a4)
 
 
 def symmetric_implicit_closure(a, eps_newton=1.0e-12, n_iter_newton=25):
@@ -1004,7 +1004,7 @@ def linear_closure_FOT4(A):
     """
     assert_fot4_properties(A)
     a = np.einsum("...ijkl,kl->...ij", A, np.eye(3))
-    IxIxI = np.einsum("...ij,kl,mn->...ijklmn", np.eye(3), np.eye(3), np.eye(3))
+    IxIxI = np.einsum("ij,kl,mn->ijklmn", np.eye(3), np.eye(3), np.eye(3))
     IxIxI_fullsym = sum(
         np.array(
             [
@@ -1023,7 +1023,7 @@ def linear_closure_FOT4(A):
             ]
         )
     )
-    IxaxI = np.einsum("...ij,kl,mn->...ijklmn", np.eye(3), a, np.eye(3))
+    IxaxI = np.einsum("ij,...kl,mn->...ijklmn", np.eye(3), a, np.eye(3))
     IxaxI_fullsym = sum(
         np.array(
             [
@@ -1032,7 +1032,7 @@ def linear_closure_FOT4(A):
             ]
         )
     )
-    IxIxa = np.einsum("...ij,kl,mn->...ijklmn", np.eye(3), np.eye(3), a)
+    IxIxa = np.einsum("ij,kl,...mn->...ijklmn", np.eye(3), np.eye(3), a)
     IxIxa_fullsym = sum(
         np.array(
             [
