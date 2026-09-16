@@ -99,6 +99,7 @@ def compute_closure_FOT2(a, closure="IBOF"):
         return implicit_hybrid_closure(a)
     if closure == "SQC":
         return symmetric_quadratic_closure(a)
+    raise ValueError(f"Unsupported closure for 2nd-order tensor: {closure}")
 
 
 def assert_fot_properties(a):
@@ -1003,18 +1004,13 @@ def compute_closure_FOT4(A, closure="QUADRATIC"):
         (Array of) Sixth order fiber orientation tensor.
 
     """
-    # assertation
-    assert closure in (
-        "LINEAR",
-        "HYBRID",
-        "QUADRATIC",  # A x a
-    )
     if closure == "HYBRID":
         return hybrid_closure_FOT4(A)
     if closure == "LINEAR":
         return linear_closure_FOT4(A)
-    if closure == "QUADRATIC":
+    if closure == "QUADRATIC":  # A x a
         return quadratic_closure_FOT4(A)
+    raise ValueError(f"Unsupported closure for 4th-order tensor: {closure}")
 
 
 def quadratic_closure_FOT4(A):

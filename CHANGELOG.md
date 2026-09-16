@@ -40,6 +40,8 @@ follows [SemVer](https://semver.org/spec/v2.0.0.html).
 - The `fiberoripy` command pointed at a non-existent examples directory and emitted
   `SyntaxWarning` on Python 3.12+.
 - README: closure `SIC` renamed to `SIQ` (the accepted name), stale repository links.
+- `compute_closure_FOT2`, `compute_closure_FOT4` and `sample_circle` returned
+  `None` for an unrecognised argument instead of raising.
 - The published API reference omitted the `closures`, `fit` and `tensorplot`
   modules entirely; all three are now documented.
 

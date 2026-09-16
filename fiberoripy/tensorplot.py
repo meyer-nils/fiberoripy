@@ -26,6 +26,7 @@ def sample_circle(plane="xy", N=100):
         return np.array([np.cos(phi), np.ones_like(phi), np.sin(phi)])
     elif plane == "yz":
         return np.array([np.ones_like(phi), np.cos(phi), np.sin(phi)])
+    raise ValueError(f"Unknown plane: {plane}. Use 'xy', 'xz' or 'yz'.")
 
 
 def plot_orbit2(ax, plotargs, *tensors):
