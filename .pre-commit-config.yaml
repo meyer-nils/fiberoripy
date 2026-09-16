@@ -18,6 +18,6 @@ repos:
     -   id: ruff-format
 # nbstripout to remove outputs from Jupyter notebooks
 -   repo: https://github.com/kynan/nbstripout
-    rev: 0.8.1
+    rev: 0.9.1
     hooks:
         - id: nbstripout
