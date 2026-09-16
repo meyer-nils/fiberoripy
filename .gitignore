@@ -25,3 +25,7 @@ fetch_data.sh
 
 # macOS
 .DS_Store
+
+# Documentation build artefacts
+site/
+build/
